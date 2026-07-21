@@ -11,9 +11,11 @@
       "BP FY2025: lucro líquido atribuível aos acionistas próximo de zero (US$ 55 milhões) por itens não-recorrentes; margem líquida quase nula no ano.",
       "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
       "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
-      "Dividend yield da Petrobras carece de confirmação adicional (valor coincide numericamente com o P/E na fonte consultada); tratar com cautela.",
+      "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
       "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 20/07/2026, iguais para as colunas FY2025 e Q1 2026."
-    ]
+    ],
+    "versao_dados": "1.1",
+    "atualizado_em": "2026-07-21"
   },
   "empresas": [
     {
