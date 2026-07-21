@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard Financeiro — Óleo & Gás</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#161d2e; --panel2:#1c2438; --border:#2a3350;
+    --text:#e8ecf5; --muted:#93a0bf; --accent:#4fd1c5;
+    --xom:#D62839; --cvx:#3B82C4; --shel:#F2C230; --bp:#2E8B57; --eqnr:#9B6BD9; --tte:#E67E22; --pbr:#16A085;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  .wrap{max-width:1360px;margin:0 auto;padding:28px 20px 60px;}
+  header{margin-bottom:20px;}
+  h1{font-size:26px;margin:0 0 6px;}
+  .sub{color:var(--muted);font-size:13.5px;line-height:1.6;max-width:900px;}
+  .badge{display:inline-block;background:var(--panel2);border:1px solid var(--border);border-radius:20px;padding:3px 12px;font-size:12px;color:var(--accent);margin-right:6px;}
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 22px;align-items:center;}
+  .chip{cursor:pointer;user-select:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;font-size:13px;font-weight:600;background:var(--panel);color:var(--muted);transition:all .15s;}
+  .chip.active{color:#0f1420;border-color:transparent;}
+  .chip[data-t="XOM"].active{background:var(--xom);color:#fff;}
+  .chip[data-t="CVX"].active{background:var(--cvx);color:#fff;}
+  .chip[data-t="SHEL"].active{background:var(--shel);}
+  .chip[data-t="BP"].active{background:var(--bp);color:#fff;}
+  .chip[data-t="EQNR"].active{background:var(--eqnr);color:#fff;}
+  .chip[data-t="TTE"].active{background:var(--tte);}
+  .chip[data-t="PBR"].active{background:var(--pbr);color:#fff;}
+  .reset-btn{margin-left:4px;border:1px solid var(--border);background:transparent;color:var(--muted);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:12px;}
+  .reset-btn:hover{color:var(--text);border-color:var(--accent);}
+  .period-toggle{display:flex;gap:6px;margin-left:auto;}
+  .period-toggle button{border:1px solid var(--border);background:var(--panel);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;}
+  .period-toggle button.active{background:var(--accent);color:#0f1420;border-color:var(--accent);}
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:12px;margin-bottom:26px;}
+  .kpi-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px 16px;border-left:4px solid var(--accent);}
+  .kpi-card .tk{font-weight:700;font-size:14px;}
+  .kpi-card .nm{color:var(--muted);font-size:11.5px;margin-bottom:8px;}
+  .kpi-row{display:flex;justify-content:space-between;font-size:12.5px;padding:2px 0;color:var(--muted);}
+  .kpi-row b{color:var(--text);font-weight:600;}
+  .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(430px,1fr));gap:16px;margin-bottom:30px;}
+  .chart-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;}
+  .chart-card h3{margin:0 0 12px;font-size:14px;color:var(--text);}
+  .chart-card .h-note{font-size:11px;color:var(--muted);margin:-8px 0 12px;}
+  canvas{max-height:280px;}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
+  th:first-child,td:first-child{text-align:left;position:sticky;left:0;background:var(--panel);}
+  th{color:var(--muted);font-weight:600;cursor:pointer;background:var(--panel2);position:sticky;top:0;user-select:none;}
+  th:hover{color:var(--text);}
+  th.sorted{color:var(--accent);}
+  th:first-child{background:var(--panel2);}
+  tbody tr:hover{background:#1a2338;}
+  .table-wrap{overflow-x:auto;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:6px;margin-bottom:24px;}
+  .table-hint{font-size:11px;color:var(--muted);margin:0 0 8px 4px;}
+  section{margin-bottom:8px;}
+  .section-title{font-size:16px;margin:34px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  footer{margin-top:30px;font-size:11.5px;color:var(--muted);line-height:1.8;border-top:1px solid var(--border);padding-top:16px;}
+  footer a{color:var(--accent);}
+  .neg{color:#ff6b6b;}
+  .error-banner{grid-column:1/-1;background:#3a1d1d;border:1px solid #ff6b6b;color:#ffbdbd;padding:12px 16px;border-radius:10px;font-size:13px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="badge">Big Oil & Gas</span><span class="badge" id="badgeData">Dados</span>
+  <h1>Dashboard Financeiro — Óleo & Gás</h1>
+  <p class="sub" id="subtitleText">Comparativo de indicadores financeiros e operacionais de ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras. Valores em US$ milhões, exceto onde indicado. Petrobras convertida de BRL para USD (ver metodologia no rodapé).</p>
+</header>
+
+<div class="filters" id="filters"></div>
+
+<div class="kpi-grid" id="kpiGrid"></div>
+
+<h2 class="section-title">Comparativos — Resultado e Fluxo de Caixa</h2>
+<div class="charts-grid" id="chartsGrid1">
+  <div class="chart-card"><h3>Receita total (US$ milhões)</h3><div class="h-note">FY2025 vs. trimestre mais recente</div><canvas id="chRevenue"></canvas></div>
+  <div class="chart-card"><h3>Lucro líquido (US$ milhões)</h3><div class="h-note">FY2025 vs. trimestre mais recente</div><canvas id="chNetIncome"></canvas></div>
+  <div class="chart-card"><h3>EBITDA (US$ milhões)</h3><div class="h-note">FY2025 vs. trimestre mais recente</div><canvas id="chEbitda"></canvas></div>
+  <div class="chart-card"><h3>Free Cash Flow (US$ milhões)</h3><div class="h-note">FY2025 vs. trimestre mais recente</div><canvas id="chFcf"></canvas></div>
+</div>
+
+<h2 class="section-title">Comparativos — Balanço e Rentabilidade</h2>
+<div class="charts-grid" id="chartsGrid2">
+  <div class="chart-card"><h3>Dívida líquida (US$ milhões)</h3><div class="h-note">Negativo = posição de caixa líquido</div><canvas id="chDebt"></canvas></div>
+  <div class="chart-card"><h3>ROE vs. ROA (TTM/FY2025, %)</h3><canvas id="chRoe"></canvas></div>
+  <div class="chart-card"><h3>Produção (mil boe/d)</h3><div class="h-note">Trimestre mais recente</div><canvas id="chProd"></canvas></div>
+  <div class="chart-card"><h3>Margem líquida (%)</h3><canvas id="chMargin"></canvas></div>
+</div>
+
+<h2 class="section-title">Snapshot de Mercado</h2>
+<div class="charts-grid" id="chartsGrid3">
+  <div class="chart-card"><h3>Market Cap (US$ milhões)</h3><canvas id="chMcap"></canvas></div>
+  <div class="chart-card"><h3>P/E vs. EV/EBITDA (x)</h3><canvas id="chMultiples"></canvas></div>
+  <div class="chart-card"><h3>Dividend Yield (%)</h3><canvas id="chYield"></canvas></div>
+  <div class="chart-card"><h3>Preço da ação (US$)</h3><canvas id="chPrice"></canvas></div>
+</div>
+
+<h2 class="section-title">Tabela completa de indicadores</h2>
+<div class="period-toggle" id="periodToggle" style="margin-bottom:10px;">
+  <button data-p="fy2025" class="active">FY2025</button>
+  <button data-p="q_recente">Trimestre recente</button>
+</div>
+<p class="table-hint">Clique em uma coluna para ordenar a tabela.</p>
+<div class="table-wrap">
+<table id="dataTable">
+<thead><tr id="tableHeadRow"></tr></thead>
+<tbody id="tblBody"></tbody>
+</table>
+</div>
+
+<footer id="footerNotes"></footer>
+</div>
+
+<script>
+const DATA = __DATA_JSON__;
+
+const COLORS = {XOM:'#D62839',CVX:'#3B82C4',SHEL:'#F2C230',BP:'#2E8B57',EQNR:'#9B6BD9',TTE:'#E67E22',PBR:'#16A085'};
+let active = new Set(DATA.empresas.map(e=>e.ticker));
+let period = 'fy2025';
+let sortKey = null;
+let sortDir = 1; // 1 asc, -1 desc
+
+const COLUMNS = [
+  {label:'Empresa', get:(e,p)=> e.nome, str:true},
+  {label:'Receita', get:(e,p)=> p.receita},
+  {label:'Lucro líq.', get:(e,p)=> p.lucro_liquido},
+  {label:'EBITDA', get:(e,p)=> p.ebitda},
+  {label:'Margem (%)', get:(e,p)=> p.margem_liquida_pct},
+  {label:'FCO', get:(e,p)=> p.fluxo_caixa_operacional},
+  {label:'FCF', get:(e,p)=> p.fcf},
+  {label:'Capex', get:(e,p)=> p.capex},
+  {label:'Dív. líquida', get:(e,p)=> p.divida_liquida},
+  {label:'Dív/Patr (%)', get:(e,p)=> p.divida_patrimonio_pct},
+  {label:'ROE (%)', get:(e,p)=> p.roe_pct},
+  {label:'ROA (%)', get:(e,p)=> p.roa_pct},
+  {label:'Produção (kboe/d)', get:(e,p)=> p.producao_kboed},
+  {label:'Market Cap', get:(e,p)=> e.mercado.market_cap},
+  {label:'P/E', get:(e,p)=> e.mercado.pe},
+  {label:'EV/EBITDA', get:(e,p)=> e.mercado.ev_ebitda},
+  {label:'Div. Yield (%)', get:(e,p)=> e.mercado.dividend_yield_pct},
+  {label:'Preço', get:(e,p)=> e.mercado.preco_acao},
+];
+
+function fmt(n, dec=0){
+  if(n===null||n===undefined) return '—';
+  return n.toLocaleString('pt-BR',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+
+function visibleCompanies(){ return DATA.empresas.filter(e=>active.has(e.ticker)); }
+
+// ---- Header badge / subtitle (derived from data, single source of truth) ----
+function renderMeta(){
+  const ref = DATA.referencia;
+  const dataFmt = ref.data_consulta.split('-').reverse().join('/');
+  document.getElementById('badgeData').textContent = 'Dados em ' + dataFmt;
+  document.getElementById('subtitleText').textContent =
+    `Comparativo de ${COLUMNS.length} indicadores financeiros e operacionais de ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras, para o ano fiscal ${ref.periodo_anual.split(' (')[0]} e o trimestre mais recente divulgado (${DATA.empresas[0].q_recente.trimestre}). Valores em US$ milhões, exceto onde indicado. Petrobras convertida de BRL para USD (ver metodologia no rodapé).`;
+}
+
+// ---- Filter chips ----
+function renderFilters(){
+  const filtersEl = document.getElementById('filters');
+  filtersEl.innerHTML = '';
+  DATA.empresas.forEach(e=>{
+    const chip = document.createElement('div');
+    chip.className='chip active';
+    chip.dataset.t = e.ticker;
+    chip.textContent = e.ticker + ' · ' + e.nome;
+    chip.onclick = ()=>{
+      if(active.has(e.ticker)){ if(active.size>1){active.delete(e.ticker); chip.classList.remove('active');} }
+      else { active.add(e.ticker); chip.classList.add('active'); }
+      renderAll();
+    };
+    filtersEl.appendChild(chip);
+  });
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'reset-btn';
+  resetBtn.textContent = 'Mostrar todas';
+  resetBtn.onclick = ()=>{
+    active = new Set(DATA.empresas.map(e=>e.ticker));
+    renderAll();
+  };
+  filtersEl.appendChild(resetBtn);
+}
+
+document.querySelectorAll('#periodToggle button').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('#periodToggle button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    period = btn.dataset.p;
+    renderTable();
+  };
+});
+
+// ---- KPI cards ----
+function renderKpis(){
+  const grid = document.getElementById('kpiGrid');
+  grid.innerHTML='';
+  visibleCompanies().forEach(e=>{
+    const c = document.createElement('div');
+    c.className='kpi-card';
+    c.style.borderLeftColor = COLORS[e.ticker];
+    c.innerHTML = `
+      <div class="tk">${e.ticker}</div>
+      <div class="nm">${e.nome} · ${e.pais}</div>
+      <div class="kpi-row"><span>Market Cap</span><b>US$ ${fmt(e.mercado.market_cap/1000,1)} bi</b></div>
+      <div class="kpi-row"><span>P/E</span><b>${fmt(e.mercado.pe,2)}x</b></div>
+      <div class="kpi-row"><span>Div. Yield</span><b>${fmt(e.mercado.dividend_yield_pct,2)}%</b></div>
+      <div class="kpi-row"><span>ROE (recente)</span><b>${fmt(e.q_recente.roe_pct,2)}%</b></div>
+    `;
+    grid.appendChild(c);
+  });
+}
+
+// ---- Charts ----
+let charts = {};
+function destroyCharts(){ Object.values(charts).forEach(c=>c.destroy()); charts={}; }
+
+function barChart(id, labels, datasets, opts={}){
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: opts.type || 'bar',
+    data: { labels, datasets },
+    options: Object.assign({
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{color:'#93a0bf', font:{size:11}} } },
+      scales:{
+        x:{ ticks:{color:'#93a0bf'}, grid:{color:'#2a3350'} },
+        y:{ ticks:{color:'#93a0bf'}, grid:{color:'#2a3350'} }
+      }
+    }, opts.chartOpts||{})
+  });
+}
+
+function renderCharts(){
+  if (typeof Chart === 'undefined') {
+    throw new Error('Chart.js não carregou (biblioteca externa indisponível).');
+  }
+  destroyCharts();
+  const co = visibleCompanies();
+  const labels = co.map(e=>e.ticker);
+  const colors = co.map(e=>COLORS[e.ticker]);
+
+  barChart('chRevenue', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.receita), backgroundColor: colors.map(c=>c+'99')},
+    {label:co[0]? co[0].q_recente.trimestre : 'Trim.', data:co.map(e=>e.q_recente.receita), backgroundColor: colors}
+  ]);
+  barChart('chNetIncome', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.lucro_liquido), backgroundColor: colors.map(c=>c+'99')},
+    {label:'Trim. recente', data:co.map(e=>e.q_recente.lucro_liquido), backgroundColor: colors}
+  ]);
+  barChart('chEbitda', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.ebitda), backgroundColor: colors.map(c=>c+'99')},
+    {label:'Trim. recente', data:co.map(e=>e.q_recente.ebitda), backgroundColor: colors}
+  ]);
+  barChart('chFcf', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.fcf), backgroundColor: colors.map(c=>c+'99')},
+    {label:'Trim. recente', data:co.map(e=>e.q_recente.fcf), backgroundColor: colors}
+  ]);
+  barChart('chDebt', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.divida_liquida), backgroundColor: colors.map(c=>c+'99')},
+    {label:'Trim. recente', data:co.map(e=>e.q_recente.divida_liquida), backgroundColor: colors}
+  ]);
+  barChart('chRoe', labels, [
+    {label:'ROE %', data:co.map(e=>e.q_recente.roe_pct), backgroundColor: colors},
+    {label:'ROA %', data:co.map(e=>e.q_recente.roa_pct), backgroundColor: colors.map(c=>c+'55')}
+  ]);
+  barChart('chProd', labels, [
+    {label:'mil boe/d', data:co.map(e=>e.q_recente.producao_kboed), backgroundColor: colors}
+  ]);
+  barChart('chMargin', labels, [
+    {label:'FY2025', data:co.map(e=>e.fy2025.margem_liquida_pct), backgroundColor: colors.map(c=>c+'99')},
+    {label:'Trim. recente', data:co.map(e=>e.q_recente.margem_liquida_pct), backgroundColor: colors}
+  ]);
+  barChart('chMcap', labels, [
+    {label:'Market Cap (US$ mi)', data:co.map(e=>e.mercado.market_cap), backgroundColor: colors}
+  ]);
+  barChart('chMultiples', labels, [
+    {label:'P/E', data:co.map(e=>e.mercado.pe), backgroundColor: colors},
+    {label:'EV/EBITDA', data:co.map(e=>e.mercado.ev_ebitda), backgroundColor: colors.map(c=>c+'55')}
+  ]);
+  barChart('chYield', labels, [
+    {label:'Dividend Yield %', data:co.map(e=>e.mercado.dividend_yield_pct), backgroundColor: colors}
+  ]);
+  barChart('chPrice', labels, [
+    {label:'Preço (US$)', data:co.map(e=>e.mercado.preco_acao), backgroundColor: colors}
+  ]);
+}
+
+function showChartError(msg){
+  ['chartsGrid1','chartsGrid2','chartsGrid3'].forEach(id=>{
+    const g = document.getElementById(id);
+    if(g && !g.dataset.errorShown){
+      g.dataset.errorShown = '1';
+      const div = document.createElement('div');
+      div.className = 'error-banner';
+      div.textContent = 'Não foi possível carregar os gráficos (' + msg + '). Verifique sua conexão com a internet ou tente recarregar a página — os cartões de indicadores e a tabela abaixo continuam funcionando normalmente.';
+      g.prepend(div);
+    }
+  });
+}
+
+// ---- Table header (built once, with sort handlers) ----
+function renderTableHead(){
+  const row = document.getElementById('tableHeadRow');
+  row.innerHTML = '';
+  COLUMNS.forEach((col, idx)=>{
+    const th = document.createElement('th');
+    th.textContent = col.label;
+    th.dataset.idx = idx;
+    th.onclick = ()=>{
+      if(sortKey === idx){ sortDir = -sortDir; } else { sortKey = idx; sortDir = col.str ? 1 : -1; }
+      renderTable();
+    };
+    row.appendChild(th);
+  });
+}
+
+// ---- Table ----
+function renderTable(){
+  const tbody = document.getElementById('tblBody');
+  tbody.innerHTML='';
+
+  document.querySelectorAll('#tableHeadRow th').forEach(th=>{
+    th.classList.toggle('sorted', Number(th.dataset.idx) === sortKey);
+    const base = COLUMNS[th.dataset.idx].label;
+    th.textContent = base + (Number(th.dataset.idx) === sortKey ? (sortDir>0 ? ' ▲' : ' ▼') : '');
+  });
+
+  let rows = visibleCompanies().map(e=>({e, p: e[period]}));
+  if(sortKey !== null){
+    const col = COLUMNS[sortKey];
+    rows.sort((a,b)=>{
+      let va = col.get(a.e, a.p), vb = col.get(b.e, b.p);
+      if(col.str){ return sortDir * String(va).localeCompare(String(vb), 'pt-BR'); }
+      va = (va===null||va===undefined) ? -Infinity : va;
+      vb = (vb===null||vb===undefined) ? -Infinity : vb;
+      return sortDir * (va - vb);
+    });
+  }
+
+  rows.forEach(({e,p})=>{
+    const tr = document.createElement('tr');
+    const neg = v => (v<0 ? 'neg' : '');
+    tr.innerHTML = `
+      <td><b style="color:${COLORS[e.ticker]}">${e.ticker}</b> ${e.nome}</td>
+      <td>${fmt(p.receita)}</td>
+      <td class="${neg(p.lucro_liquido)}">${fmt(p.lucro_liquido)}</td>
+      <td>${fmt(p.ebitda)}</td>
+      <td>${fmt(p.margem_liquida_pct,2)}</td>
+      <td>${fmt(p.fluxo_caixa_operacional)}</td>
+      <td class="${neg(p.fcf)}">${fmt(p.fcf)}</td>
+      <td>${fmt(p.capex)}</td>
+      <td class="${neg(p.divida_liquida)}">${fmt(p.divida_liquida)}</td>
+      <td>${fmt(p.divida_patrimonio_pct,1)}</td>
+      <td>${fmt(p.roe_pct,2)}</td>
+      <td>${fmt(p.roa_pct,2)}</td>
+      <td>${fmt(p.producao_kboed)}</td>
+      <td>${fmt(e.mercado.market_cap)}</td>
+      <td>${fmt(e.mercado.pe,2)}</td>
+      <td>${fmt(e.mercado.ev_ebitda,2)}</td>
+      <td>${fmt(e.mercado.dividend_yield_pct,2)}</td>
+      <td>${fmt(e.mercado.preco_acao,2)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ---- Footer / sources ----
+function renderFooter(){
+  const ref = DATA.referencia;
+  let html = `<b>Metodologia:</b> consulta em ${ref.data_consulta}. Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${ref.periodo_trimestral}. Fonte principal: ${ref.fonte_principal}.`;
+  if (ref.atualizado_em) html += ` Última revisão dos dados: ${ref.atualizado_em}.`;
+  html += `<br><br><b>Notas:</b><ul>`;
+  ref.notas.forEach(n=> html += `<li>${n}</li>`);
+  html += '</ul><b>Fontes por empresa:</b><ul>';
+  DATA.empresas.forEach(e=>{
+    html += `<li>${e.ticker} (${e.nome}): ` + e.fontes.map(u=>`<a href="${u}" target="_blank">${u}</a>`).join(' · ') + '</li>';
+  });
+  html += '</ul>';
+  document.getElementById('footerNotes').innerHTML = html;
+}
+
+function renderAll(){
+  renderKpis();
+  try {
+    renderCharts();
+  } catch(err){
+    showChartError(err.message || String(err));
+  }
+  renderTable();
+}
+
+renderMeta();
+renderFilters();
+renderTableHead();
+renderAll();
+renderFooter();
+</script>
+</body>
+</html>
