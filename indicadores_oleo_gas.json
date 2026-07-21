@@ -1,0 +1,69 @@
+{
+  "referencia": {
+    "data_consulta": "2026-07-20",
+    "moeda": "USD (milhões, exceto onde indicado)",
+    "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
+    "periodo_trimestral": "Q1 2026 (trimestre encerrado em 31/03/2026) — nenhuma das 7 empresas havia divulgado Q2 2026 até a data de consulta",
+    "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
+    "notas": [
+      "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
+      "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total.",
+      "BP FY2025: lucro líquido atribuível aos acionistas próximo de zero (US$ 55 milhões) por itens não-recorrentes; margem líquida quase nula no ano.",
+      "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
+      "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
+      "Dividend yield da Petrobras carece de confirmação adicional (valor coincide numericamente com o P/E na fonte consultada); tratar com cautela.",
+      "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 20/07/2026, iguais para as colunas FY2025 e Q1 2026."
+    ]
+  },
+  "empresas": [
+    {
+      "ticker": "XOM", "nome": "ExxonMobil", "pais": "EUA",
+      "fy2025": {"receita": 323910, "lucro_liquido": 29760, "ebitda": 59530, "margem_liquida_pct": 9.19, "fluxo_caixa_operacional": 51970, "fcf": 23610, "capex": -28360, "divida_liquida": 32860, "divida_patrimonio_pct": 16.3, "roe_pct": 11.1, "roa_pct": 6.6, "producao_kboed": 4740},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 83160, "lucro_liquido": 4470, "ebitda": 12060, "margem_liquida_pct": 5.38, "fluxo_caixa_operacional": 8710, "fcf": 2240, "capex": -6470, "divida_liquida": 39230, "divida_patrimonio_pct": 18.3, "roe_pct": 9.87, "roa_pct": 4.22, "producao_kboed": 4590},
+      "mercado": {"market_cap": 614870, "pe": 24.98, "ev_ebitda": 11.68, "dividend_yield_pct": 2.78, "preco_acao": 148.36},
+      "fontes": ["https://stockanalysis.com/stocks/xom/financials/", "https://stockanalysis.com/stocks/xom/financials/balance-sheet/", "https://stockanalysis.com/stocks/xom/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/xom/statistics/", "https://stockanalysis.com/stocks/xom/financials/metrics/"]
+    },
+    {
+      "ticker": "CVX", "nome": "Chevron", "pais": "EUA",
+      "fy2025": {"receita": 184430, "lucro_liquido": 12490, "ebitda": 36490, "margem_liquida_pct": 6.77, "fluxo_caixa_operacional": 33940, "fcf": 16590, "capex": -17350, "divida_liquida": 34460, "divida_patrimonio_pct": 21.2, "roe_pct": 7.1, "roa_pct": 4.2, "producao_kboed": 3720},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 47560, "lucro_liquido": 2290, "ebitda": 9050, "margem_liquida_pct": 4.82, "fluxo_caixa_operacional": 2510, "fcf": -1550, "capex": -4060, "divida_liquida": 40100, "divida_patrimonio_pct": 24, "roe_pct": 6.64, "roa_pct": 3.46, "producao_kboed": 3860},
+      "mercado": {"market_cap": 375140, "pe": 32.59, "ev_ebitda": 10.95, "dividend_yield_pct": 3.75, "preco_acao": 189.71},
+      "fontes": ["https://stockanalysis.com/stocks/cvx/financials/", "https://stockanalysis.com/stocks/cvx/financials/balance-sheet/", "https://stockanalysis.com/stocks/cvx/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/cvx/statistics/", "https://stockanalysis.com/stocks/cvx/financials/metrics/"]
+    },
+    {
+      "ticker": "SHEL", "nome": "Shell", "pais": "Reino Unido",
+      "fy2025": {"receita": 266886, "lucro_liquido": 17837, "ebitda": 52881, "margem_liquida_pct": 6.79, "fluxo_caixa_operacional": 42863, "fcf": 23916, "capex": -18948, "divida_liquida": 45687, "divida_patrimonio_pct": 20.7, "roe_pct": 10.1, "roa_pct": 4.7, "producao_kboed": 2800},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 69691, "lucro_liquido": 5694, "ebitda": 16103, "margem_liquida_pct": 8.26, "fluxo_caixa_operacional": 6062, "fcf": 2305, "capex": -3757, "divida_liquida": 52606, "divida_patrimonio_pct": 23.2, "roe_pct": 10.70, "roa_pct": 4.99, "producao_kboed": 2752},
+      "mercado": {"market_cap": 240470, "pe": 12.82, "ev_ebitda": 6.00, "dividend_yield_pct": 3.43, "preco_acao": 86.20},
+      "fontes": ["https://stockanalysis.com/stocks/shel/financials/", "https://stockanalysis.com/stocks/shel/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/shel/statistics/", "https://www.shell.com/investors/results-and-reporting/quarterly-results/"]
+    },
+    {
+      "ticker": "BP", "nome": "BP", "pais": "Reino Unido",
+      "fy2025": {"receita": 189335, "lucro_liquido": 55, "ebitda": 28237, "margem_liquida_pct": 0.68, "fluxo_caixa_operacional": 24493, "fcf": 11272, "capex": -13221, "divida_liquida": 22200, "divida_patrimonio_pct": 98, "roe_pct": 0.1, "roa_pct": 0.02, "producao_kboed": 2310},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 52255, "lucro_liquido": 3842, "ebitda": 11884, "margem_liquida_pct": 8.06, "fluxo_caixa_operacional": 2860, "fcf": -382, "capex": -3242, "divida_liquida": 25300, "divida_patrimonio_pct": 96, "roe_pct": 5.84, "roa_pct": 3.96, "producao_kboed": 2344},
+      "mercado": {"market_cap": 108220, "pe": 33.72, "ev_ebitda": 4.90, "dividend_yield_pct": 4.71, "preco_acao": 42.00},
+      "fontes": ["https://stockanalysis.com/stocks/bp/financials/", "https://stockanalysis.com/stocks/bp/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/bp/statistics/", "https://www.bp.com/en/global/corporate/investors/results-reports-and-presentations.html"]
+    },
+    {
+      "ticker": "EQNR", "nome": "Equinor", "pais": "Noruega",
+      "fy2025": {"receita": 106462, "lucro_liquido": 5043, "ebitda": 37826, "margem_liquida_pct": 4.75, "fluxo_caixa_operacional": 19971, "fcf": 5977, "capex": -13994, "divida_liquida": -11888, "divida_patrimonio_pct": 77, "roe_pct": 12.2, "roa_pct": 3.8, "producao_kboed": null},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 27843, "lucro_liquido": 3106, "ebitda": 11313, "margem_liquida_pct": 11.15, "fluxo_caixa_operacional": 5213, "fcf": 2097, "capex": -3116, "divida_liquida": -4209, "divida_patrimonio_pct": 73, "roe_pct": 12.36, "roa_pct": 11.96, "producao_kboed": 2313},
+      "mercado": {"market_cap": 91780, "pe": 16.62, "ev_ebitda": 2.88, "dividend_yield_pct": 3.35, "preco_acao": 37.35},
+      "fontes": ["https://stockanalysis.com/stocks/eqnr/financials/", "https://stockanalysis.com/stocks/eqnr/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/eqnr/statistics/", "https://www.globenewswire.com/news-release/2026/05/06/3288464"]
+    },
+    {
+      "ticker": "TTE", "nome": "TotalEnergies", "pais": "França",
+      "fy2025": {"receita": 182344, "lucro_liquido": 13127, "ebitda": 34806, "margem_liquida_pct": 7.33, "fluxo_caixa_operacional": 27343, "fcf": 10390, "capex": -16953, "divida_liquida": -31499, "divida_patrimonio_pct": 52, "roe_pct": 11.3, "roa_pct": 4.55, "producao_kboed": 2530},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 49516, "lucro_liquido": 5810, "ebitda": 14304, "margem_liquida_pct": 11.98, "fluxo_caixa_operacional": 3361, "fcf": -1260, "capex": -4621, "divida_liquida": -34142, "divida_patrimonio_pct": 51, "roe_pct": 12.51, "roa_pct": 4.89, "producao_kboed": 2553},
+      "mercado": {"market_cap": 180400, "pe": 11.96, "ev_ebitda": 5.92, "dividend_yield_pct": 4.88, "preco_acao": 80.80},
+      "fontes": ["https://stockanalysis.com/stocks/tte/financials/", "https://stockanalysis.com/stocks/tte/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/tte/statistics/", "https://www.businesswire.com/news/home/20260428950662"]
+    },
+    {
+      "ticker": "PBR", "nome": "Petrobras", "pais": "Brasil",
+      "fy2025": {"receita": 89200, "lucro_liquido": 19740, "ebitda": 37310, "margem_liquida_pct": 22.13, "fluxo_caixa_operacional": 35910, "fcf": 16420, "capex": -19490, "divida_liquida": 59760, "divida_patrimonio_pct": 91.96, "roe_pct": 28.1, "roa_pct": 9.4, "producao_kboed": 2990},
+      "q_recente": {"trimestre": "Q1 2026", "receita": 23540, "lucro_liquido": 6220, "ebitda": 9430, "margem_liquida_pct": 26.41, "fluxo_caixa_operacional": 8370, "fcf": 3850, "capex": -4520, "divida_liquida": 61680, "divida_patrimonio_pct": 83, "roe_pct": 25.60, "roa_pct": 8.23, "producao_kboed": 3230},
+      "mercado": {"market_cap": 110180, "pe": 5.34, "ev_ebitda": 4.45, "dividend_yield_pct": 5.34, "preco_acao": 18.19},
+      "fontes": ["https://stockanalysis.com/stocks/pbr/financials/", "https://stockanalysis.com/stocks/pbr/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/pbr/statistics/", "https://stockanalysis.com/stocks/pbr/financials/metrics/"]
+    }
+  ]
+}
