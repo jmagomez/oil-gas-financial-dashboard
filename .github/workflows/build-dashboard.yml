@@ -1,0 +1,46 @@
+name: Build dashboard (regenera HTML + CSV)
+
+# Sem fonte de dados programatica (o JSON e curado a mao a cada balanco),
+# a automacao possivel aqui e garantir que dashboard_oleo_gas.html e
+# indicadores_oleo_gas.csv fiquem SEMPRE sincronizados com o JSON,
+# eliminando os passos manuais 2-4 do README (rodar build + subir arquivos).
+# Dispara quando o JSON de dados muda; roda build_dashboard.py e comita
+# o HTML/CSV regenerados de volta.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - indicadores_oleo_gas.json
+      - dashboard_template.html
+      - build_dashboard.py
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-dashboard
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Gera HTML + CSV a partir do JSON
+        run: python3 build_dashboard.py
+
+      - name: Comita artefatos regenerados (se mudaram)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dashboard_oleo_gas.html indicadores_oleo_gas.csv
+          git diff --cached --quiet || git commit -m "build: regenera HTML/CSV a partir do JSON"
+          git push
