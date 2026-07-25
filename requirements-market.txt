@@ -1,0 +1,8 @@
+# Dependencia da rotina de atualizacao de dados de mercado (update_market_data.py).
+# Nao e necessaria para gerar o dashboard a partir do JSON.
+#
+# O yfinance cuida do handshake de cookie/crumb que o Yahoo passou a exigir;
+# por isso ele, e nao um urllib cru. Faixa aberta no patch para receber
+# correcoes quando o Yahoo mexer no endpoint, travada no minor para nao
+# importar mudanca de API sem revisao.
+yfinance>=0.2.50,<0.3
