@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
 """
 Gera dashboard_oleo_gas.html a partir de:
-  - dashboard_template.html  (esqueleto estático + placeholder __DATA_JSON__)
-  - indicadores_oleo_gas.json (dados)
+  - dashboard_template.html   (esqueleto estático + placeholder __DATA_JSON__)
+  - indicadores_oleo_gas.json (dados primários — fonte única de verdade)
 
 Uso:
     python3 build_dashboard.py
 
-Também regenera indicadores_oleo_gas.csv a partir do mesmo JSON, para manter
-as duas representações (planilha e dashboard) sempre sincronizadas com uma
-única fonte de verdade.
+O script:
+  1. carrega o JSON primário;
+  2. calcula uma camada de INDICADORES DERIVADOS (margem EBITDA, ND/EBITDA,
+     conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d,
+     FCF yield, cobertura de dividendos pelo FCF, run-rate trimestral e scores
+     normalizados de perfil) — cálculo feito UMA única vez, aqui, para que
+     dashboard e CSV nunca divirjam;
+  3. valida sanidade dos números;
+  4. injeta o payload enriquecido no template e grava o HTML;
+  5. regenera o CSV, agora incluindo as colunas derivadas.
 
-Isso substitui o processo manual anterior (editar o HTML com um placeholder
-e injetar o JSON via sed/python ad-hoc a cada atualização).
+Nenhum indicador derivado é escrito de volta no JSON primário: ele continua
+contendo apenas dados de fonte.
 """
 import csv
 import json
@@ -25,15 +32,193 @@ TEMPLATE_PATH = BASE / "dashboard_template.html"
 HTML_OUT_PATH = BASE / "dashboard_oleo_gas.html"
 CSV_OUT_PATH = BASE / "indicadores_oleo_gas.csv"
 
+# Dias por período, usados nos indicadores "por boe".
+DIAS_PERIODO = {"fy2025": 365, "q_recente": 90}
+# Fator de anualização das métricas de fluxo.
+FATOR_ANUAL = {"fy2025": 1, "q_recente": 4}
+
 CSV_HEADER = [
     "ticker", "nome", "pais", "periodo",
     "receita_musd", "lucro_liquido_musd", "ebitda_musd", "margem_liquida_pct",
     "fco_musd", "fcf_musd", "capex_musd", "divida_liquida_musd",
     "divida_patrimonio_pct", "roe_pct", "roa_pct", "producao_kboed",
     "market_cap_musd", "pe", "ev_ebitda", "dividend_yield_pct", "preco_acao_usd",
+    # --- derivados ---
+    "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
+    "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_por_boed_usd",
+    "fcf_yield_pct", "cobertura_dividendo_x", "payout_fcf_pct",
 ]
 
 
+# --------------------------------------------------------------------------- #
+# Helpers numéricos tolerantes a None / zero
+# --------------------------------------------------------------------------- #
+def div(a, b):
+    """Divisão segura: None se algum operando faltar ou o denominador for zero."""
+    if a is None or b is None or b == 0:
+        return None
+    return a / b
+
+
+def pct(a, b):
+    r = div(a, b)
+    return None if r is None else r * 100.0
+
+
+def arred(v, casas=2):
+    return None if v is None else round(v, casas)
+
+
+# --------------------------------------------------------------------------- #
+# Camada de indicadores derivados
+# --------------------------------------------------------------------------- #
+def derivar_periodo(empresa, period_key):
+    """Indicadores derivados de um período (fy2025 ou q_recente)."""
+    p = empresa[period_key]
+    m = empresa["mercado"]
+    dias = DIAS_PERIODO[period_key]
+    fator = FATOR_ANUAL[period_key]
+
+    receita = p.get("receita")
+    ebitda = p.get("ebitda")
+    fcf = p.get("fcf")
+    fco = p.get("fluxo_caixa_operacional")
+    capex = p.get("capex")
+    nd = p.get("divida_liquida")
+    market_cap = m.get("market_cap")
+
+    # Produção: se o período não tiver produção informada, usa a do trimestre
+    # mais recente como proxy (caso Equinor FY2025) e sinaliza.
+    prod = p.get("producao_kboed")
+    prod_proxy = False
+    if prod is None:
+        prod = empresa["q_recente"].get("producao_kboed")
+        prod_proxy = prod is not None
+
+    ebitda_anual = None if ebitda is None else ebitda * fator
+    fcf_anual = None if fcf is None else fcf * fator
+
+    # Barris de óleo equivalente no período (mil boe/d -> boe totais).
+    boe_periodo = None if prod is None else prod * 1000.0 * dias
+    # Barris/dia (para EV por boe/d).
+    boed = None if prod is None else prod * 1000.0
+
+    ev = None if (market_cap is None or nd is None) else market_cap + nd
+    dividendos = div(
+        None if market_cap is None else market_cap * (m.get("dividend_yield_pct") or 0.0),
+        100.0,
+    )
+
+    return {
+        "margem_ebitda_pct": arred(pct(ebitda, receita)),
+        "ebitda_anualizado": arred(ebitda_anual, 0),
+        "fcf_anualizado": arred(fcf_anual, 0),
+        # Alavancagem: dívida líquida sobre EBITDA anualizado.
+        "nd_ebitda_x": arred(div(nd, ebitda_anual)),
+        # Quanto do EBITDA vira caixa livre.
+        "conversao_fcf_pct": arred(pct(fcf, ebitda)),
+        # Intensidade de reinvestimento.
+        "capex_fco_pct": arred(pct(None if capex is None else abs(capex), fco)),
+        # Valores em US$ milhões -> US$ por barril equivalente.
+        "receita_por_boe_usd": arred(div(None if receita is None else receita * 1e6, boe_periodo)),
+        "ebitda_por_boe_usd": arred(div(None if ebitda is None else ebitda * 1e6, boe_periodo)),
+        "producao_proxy": prod_proxy,
+        "ev": arred(ev, 0),
+        # US$ de EV por barril/dia de produção — "quanto o mercado paga pela capacidade".
+        "ev_por_boed_usd": arred(div(None if ev is None else ev * 1e6, boed), 0),
+        # Retorno de caixa implícito sobre o valor de mercado.
+        "fcf_yield_pct": arred(pct(fcf_anual, market_cap)),
+        "dividendos_estimados": arred(dividendos, 0),
+        # Quantas vezes o FCF cobre o dividendo estimado (>1 = dividendo pago com caixa próprio).
+        "cobertura_dividendo_x": arred(div(fcf_anual, dividendos)),
+        "payout_fcf_pct": arred(pct(dividendos, fcf_anual)),
+    }
+
+
+def derivar_empresa(empresa):
+    """Indicadores derivados no nível da empresa (comparação entre períodos)."""
+    fy, q = empresa["fy2025"], empresa["q_recente"]
+
+    def run_rate(campo):
+        """Trimestre anualizado vs. ano fiscal, em %."""
+        anual = fy.get(campo)
+        trimestral = q.get(campo)
+        if anual in (None, 0) or trimestral is None:
+            return None
+        return arred((trimestral * 4 / anual - 1) * 100.0)
+
+    return {
+        "run_rate_receita_pct": run_rate("receita"),
+        "run_rate_ebitda_pct": run_rate("ebitda"),
+        "run_rate_lucro_pct": run_rate("lucro_liquido"),
+        "run_rate_fcf_pct": run_rate("fcf"),
+        "delta_divida_liquida": (
+            None
+            if (q.get("divida_liquida") is None or fy.get("divida_liquida") is None)
+            else arred(q["divida_liquida"] - fy["divida_liquida"], 0)
+        ),
+        "delta_margem_liquida_pp": (
+            None
+            if (q.get("margem_liquida_pct") is None or fy.get("margem_liquida_pct") is None)
+            else arred(q["margem_liquida_pct"] - fy["margem_liquida_pct"])
+        ),
+    }
+
+
+# Eixos do radar de perfil. maior_melhor=False inverte a normalização.
+EIXOS_PERFIL = [
+    ("Rentabilidade", lambda e: e["q_recente"]["derivados"]["margem_ebitda_pct"], True),
+    ("Geração de caixa", lambda e: e["fy2025"]["derivados"]["conversao_fcf_pct"], True),
+    ("Solidez", lambda e: e["fy2025"]["derivados"]["nd_ebitda_x"], False),
+    ("Valuation", lambda e: e["mercado"]["ev_ebitda"], False),
+    ("Retorno ao acionista", lambda e: e["mercado"]["dividend_yield_pct"], True),
+    ("Escala", lambda e: e["q_recente"]["producao_kboed"], True),
+]
+
+
+def calcular_perfil(empresas):
+    """Normaliza cada eixo em 0–100 (min-max) para o radar comparativo."""
+    for nome, getter, maior_melhor in EIXOS_PERFIL:
+        valores = [(e, getter(e)) for e in empresas]
+        validos = [v for _, v in valores if v is not None]
+        if not validos:
+            for e, _ in valores:
+                e.setdefault("perfil", {})[nome] = None
+            continue
+        lo, hi = min(validos), max(validos)
+        span = hi - lo
+        for e, v in valores:
+            if v is None:
+                score = None
+            elif span == 0:
+                score = 50.0
+            else:
+                score = (v - lo) / span * 100.0
+                if not maior_melhor:
+                    score = 100.0 - score
+            e.setdefault("perfil", {})[nome] = arred(score, 1)
+
+
+def enriquecer(data):
+    """Adiciona a camada derivada ao payload em memória."""
+    for e in data["empresas"]:
+        for period_key in ("fy2025", "q_recente"):
+            e[period_key]["derivados"] = derivar_periodo(e, period_key)
+        e["derivados"] = derivar_empresa(e)
+        e.setdefault("historico", [])
+    calcular_perfil(data["empresas"])
+    data["meta_build"] = {
+        "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
+        "dias_periodo": DIAS_PERIODO,
+        "fator_anualizacao": FATOR_ANUAL,
+        "tem_historico": any(e.get("historico") for e in data["empresas"]),
+    }
+    return data
+
+
+# --------------------------------------------------------------------------- #
+# Validação
+# --------------------------------------------------------------------------- #
 def validate(data):
     """Checagens básicas de sanidade antes de publicar."""
     problems = []
@@ -45,14 +230,36 @@ def validate(data):
                     problems.append(f"{e['ticker']} {period_key}: lucro líquido maior que receita")
             if p["ebitda"] and p["receita"] and p["ebitda"] > p["receita"] * 1.5:
                 problems.append(f"{e['ticker']} {period_key}: EBITDA muito acima da receita (checar unidade/escala)")
+            d = p.get("derivados", {})
+            if d.get("margem_ebitda_pct") is not None and d["margem_ebitda_pct"] > 100:
+                problems.append(f"{e['ticker']} {period_key}: margem EBITDA acima de 100%")
+            if d.get("nd_ebitda_x") is not None and d["nd_ebitda_x"] > 4:
+                problems.append(
+                    f"{e['ticker']} {period_key}: ND/EBITDA de {d['nd_ebitda_x']}x — alavancagem alta para o setor"
+                )
+            if d.get("cobertura_dividendo_x") is not None and d["cobertura_dividendo_x"] < 1:
+                problems.append(
+                    f"{e['ticker']} {period_key}: FCF não cobre o dividendo estimado "
+                    f"({d['cobertura_dividendo_x']}x)"
+                )
+            if d.get("producao_proxy"):
+                problems.append(
+                    f"{e['ticker']} {period_key}: produção ausente — indicadores por boe usam proxy do trimestre"
+                )
         m = e["mercado"]
         if m["pe"] and m["pe"] < 0:
             problems.append(f"{e['ticker']}: P/E negativo (ok se prejuízo, mas confirmar)")
         if not e.get("fontes"):
             problems.append(f"{e['ticker']}: sem fontes listadas")
+        for h in e.get("historico", []):
+            if "periodo" not in h:
+                problems.append(f"{e['ticker']}: item de histórico sem campo 'periodo'")
     return problems
 
 
+# --------------------------------------------------------------------------- #
+# Saídas
+# --------------------------------------------------------------------------- #
 def build_html(data):
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
     payload = json.dumps(data, ensure_ascii=False)
@@ -68,6 +275,7 @@ def build_csv(data):
     for e in data["empresas"]:
         for period_key, label in (("fy2025", "FY2025"), ("q_recente", e["q_recente"]["trimestre"])):
             p = e[period_key]
+            d = p["derivados"]
             rows.append([
                 e["ticker"], e["nome"], e["pais"], label,
                 p["receita"], p["lucro_liquido"], p["ebitda"], p["margem_liquida_pct"],
@@ -75,16 +283,20 @@ def build_csv(data):
                 p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"], p.get("producao_kboed"),
                 e["mercado"]["market_cap"], e["mercado"]["pe"], e["mercado"]["ev_ebitda"],
                 e["mercado"]["dividend_yield_pct"], e["mercado"]["preco_acao"],
+                d["margem_ebitda_pct"], d["nd_ebitda_x"], d["conversao_fcf_pct"], d["capex_fco_pct"],
+                d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_por_boed_usd"],
+                d["fcf_yield_pct"], d["cobertura_dividendo_x"], d["payout_fcf_pct"],
             ])
     with CSV_OUT_PATH.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(CSV_HEADER)
         w.writerows(rows)
-    print(f"OK: {CSV_OUT_PATH.name} gerado ({len(rows)} linhas)")
+    print(f"OK: {CSV_OUT_PATH.name} gerado ({len(rows)} linhas, {len(CSV_HEADER)} colunas)")
 
 
 def main():
     data = json.loads(JSON_PATH.read_text(encoding="utf-8"))
+    data = enriquecer(data)
 
     problems = validate(data)
     if problems:
