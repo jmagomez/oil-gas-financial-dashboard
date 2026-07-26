@@ -1,0 +1,99 @@
+name: Atualiza dados de mercado
+
+# Cotacao, market cap, P/E, dividend yield e EV/EBITDA mudam todo pregao.
+# Os fundamentos (receita, EBITDA, capex, divida, producao) continuam curados
+# a mao a cada balanco -- esta rotina nao encosta neles.
+#
+# 22:00 UTC e depois do fechamento de Nova York o ano inteiro (o pregao fecha
+# 21:00 UTC no horario de inverno e 20:00 UTC no de verao).
+#
+# Observacao sobre agendamento no GitHub: cron de Actions pode atrasar em
+# horario de pico e e suspenso automaticamente apos 60 dias sem atividade no
+# repositorio. Se o dashboard parar de atualizar, e o primeiro lugar para olhar.
+
+on:
+  schedule:
+    - cron: "0 22 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simular: mostra o que mudaria, sem commitar"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dados-mercado
+  cancel-in-progress: false
+
+jobs:
+  atualiza:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instala dependencias
+        run: pip install -r requirements-market.txt -r requirements-dev.txt
+
+      - name: Atualiza cotacao, market cap, P/E, dividend yield e EV/EBITDA
+        run: |
+          python3 update_market_data.py \
+            --relatorio "$RUNNER_TEMP/relatorio-mercado.json" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Regenera HTML e CSV
+        run: python3 build_dashboard.py
+
+      # Roda DEPOIS do build: dois testes conferem os artefatos gerados.
+      # Se algo aqui quebrar, nada e commitado.
+      - name: Testes
+        run: python3 -m pytest tests -q
+
+      - name: Comita se algo mudou
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add indicadores_oleo_gas.json dashboard_oleo_gas.html indicadores_oleo_gas.csv
+
+          if git diff --cached --quiet; then
+            echo "Mercado sem alteracao relevante hoje. Nada a commitar."
+            exit 0
+          fi
+
+          RESUMO=$(python3 - "$RUNNER_TEMP/relatorio-mercado.json" <<'PY'
+          import json, sys
+
+          rel = json.load(open(sys.argv[1], encoding="utf-8"))
+          linhas = []
+          for m in sorted(rel["mudancas"], key=lambda x: (x["ticker"], x["campo"])):
+              var = f" ({m['var_pct']:+.2f}%)" if m["var_pct"] is not None else ""
+              linhas.append(f"{m['ticker']} {m['campo']}: {m['antes']} -> {m['depois']}{var}")
+          for r in rel["rejeicoes"]:
+              linhas.append(f"[rejeitado] {r['ticker']} {r['campo']}={r['valor']}: {r['motivo']}")
+          for f in rel["falhas"]:
+              linhas.append(f"[sem dado] {f['ticker']}: {f['motivo']}")
+          print("\n".join(linhas))
+          PY
+          )
+
+          git commit -m "dados: atualiza mercado ($(date -u +%d/%m/%Y))" -m "$RESUMO"
+          # Caso alguem tenha empurrado algo na main enquanto o job rodava.
+          git pull --rebase --autostash
+          git push
+
+      - name: Guarda o relatorio da execucao
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-mercado
+          path: ${{ runner.temp }}/relatorio-mercado.json
+          if-no-files-found: ignore
+          retention-days: 30
