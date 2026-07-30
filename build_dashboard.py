@@ -21,8 +21,10 @@ O script:
 Nenhum indicador derivado é escrito de volta no JSON primário: ele continua
 contendo apenas dados de fonte.
 """
+import calendar
 import csv
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -33,9 +35,28 @@ HTML_OUT_PATH = BASE / "dashboard_oleo_gas.html"
 CSV_OUT_PATH = BASE / "indicadores_oleo_gas.csv"
 
 # Dias por período, usados nos indicadores "por boe".
+# O trimestre é derivado do rótulo (ver `dias_do_trimestre`): Q1 tem 90 dias
+# (91 em ano bissexto), Q2 91, Q3 e Q4 92. Um valor fixo de 90 distorceria
+# receita/EBITDA por boe em ~2% assim que o período virasse Q2 ou Q3.
 DIAS_PERIODO = {"fy2025": 365, "q_recente": 90}
 # Fator de anualização das métricas de fluxo.
 FATOR_ANUAL = {"fy2025": 1, "q_recente": 4}
+
+
+def dias_do_trimestre(rotulo: str) -> int:
+    """Dias corridos do trimestre a partir de um rótulo como "Q1 2026"."""
+    m = re.search(r"Q([1-4])\s*(\d{4})", str(rotulo or ""))
+    if not m:
+        return DIAS_PERIODO["q_recente"]
+    tri, ano = int(m.group(1)), int(m.group(2))
+    meses = range(3 * tri - 2, 3 * tri + 1)
+    return sum(calendar.monthrange(ano, mes)[1] for mes in meses)
+
+
+def dias_do_ano(rotulo: str) -> int:
+    m = re.search(r"(\d{4})", str(rotulo or ""))
+    return 366 if (m and calendar.isleap(int(m.group(1)))) else 365
+
 
 CSV_HEADER = [
     "ticker", "nome", "pais", "periodo",
@@ -47,6 +68,8 @@ CSV_HEADER = [
     "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
     "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x", "payout_fcf_pct",
+    # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
+    "producao_proxy",
 ]
 
 
@@ -76,7 +99,10 @@ def derivar_periodo(empresa, period_key):
     """Indicadores derivados de um período (fy2025 ou q_recente)."""
     p = empresa[period_key]
     m = empresa["mercado"]
-    dias = DIAS_PERIODO[period_key]
+    if period_key == "q_recente":
+        dias = dias_do_trimestre(p.get("trimestre"))
+    else:
+        dias = dias_do_ano(p.get("periodo") or "2025")
     fator = FATOR_ANUAL[period_key]
 
     receita = p.get("receita")
@@ -123,6 +149,11 @@ def derivar_periodo(empresa, period_key):
         "receita_por_boe_usd": arred(div(None if receita is None else receita * 1e6, boe_periodo)),
         "ebitda_por_boe_usd": arred(div(None if ebitda is None else ebitda * 1e6, boe_periodo)),
         "producao_proxy": prod_proxy,
+        # Produção efetivamente usada nos indicadores por boe. Sem isso o CSV
+        # mostrava a coluna de produção VAZIA ao lado de um US$/boe calculado
+        # com o proxy do trimestre — quem lesse a planilha não teria como saber.
+        "producao_usada_kboed": prod,
+        "dias_periodo": dias,
         "ev": arred(ev, 0),
         # US$ de EV por barril/dia de produção — "quanto o mercado paga pela capacidade".
         "ev_por_boed_usd": arred(div(None if ev is None else ev * 1e6, boed), 0),
@@ -228,6 +259,19 @@ def validate(data):
             if p["receita"] and p["lucro_liquido"] is not None:
                 if abs(p["lucro_liquido"]) > p["receita"]:
                     problems.append(f"{e['ticker']} {period_key}: lucro líquido maior que receita")
+            # A margem líquida é um campo CURADO, vindo da fonte, e nem sempre usa
+            # a mesma definição de lucro que o campo lucro_liquido (atribuível aos
+            # acionistas vs. incluindo minoritários, IFRS vs. ajustado). Quando os
+            # dois aparecem lado a lado no dashboard, a divergência precisa ficar
+            # visível em vez de passar por erro de digitação.
+            if p["receita"] and p["lucro_liquido"] is not None and p.get("margem_liquida_pct") is not None:
+                calc = p["lucro_liquido"] / p["receita"] * 100.0
+                if abs(p["margem_liquida_pct"] - calc) > 0.15:
+                    problems.append(
+                        f"{e['ticker']} {period_key}: margem_liquida_pct informada "
+                        f"({p['margem_liquida_pct']:.2f}%) nao bate com lucro/receita "
+                        f"({calc:.3f}%) — definicoes de lucro diferentes? conferir a fonte"
+                    )
             if p["ebitda"] and p["receita"] and p["ebitda"] > p["receita"] * 1.5:
                 problems.append(f"{e['ticker']} {period_key}: EBITDA muito acima da receita (checar unidade/escala)")
             d = p.get("derivados", {})
@@ -280,12 +324,14 @@ def build_csv(data):
                 e["ticker"], e["nome"], e["pais"], label,
                 p["receita"], p["lucro_liquido"], p["ebitda"], p["margem_liquida_pct"],
                 p["fluxo_caixa_operacional"], p["fcf"], p["capex"], p["divida_liquida"],
-                p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"], p.get("producao_kboed"),
+                p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"],
+                p["derivados"]["producao_usada_kboed"],
                 e["mercado"]["market_cap"], e["mercado"]["pe"], e["mercado"]["ev_ebitda"],
                 e["mercado"]["dividend_yield_pct"], e["mercado"]["preco_acao"],
                 d["margem_ebitda_pct"], d["nd_ebitda_x"], d["conversao_fcf_pct"], d["capex_fco_pct"],
                 d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_por_boed_usd"],
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"], d["payout_fcf_pct"],
+                "sim" if d["producao_proxy"] else "nao",
             ])
     with CSV_OUT_PATH.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
