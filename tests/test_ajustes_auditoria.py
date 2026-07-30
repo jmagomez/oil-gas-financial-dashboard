@@ -54,12 +54,12 @@ def test_margem_divergente_e_reportada():
     """Caso real: BP FY2025 traz margem 0,68% com lucro/receita = 0,029%."""
     data = bd.enriquecer({"empresas": [_empresa(189335.0, 55.0, 0.68)]})
     problemas = bd.validate(data)
-    assert any("margem_liquida_pct informada" in p for p in problemas)
+    assert any("margem da fonte" in p for p in problemas)
 
 
 def test_margem_coerente_nao_gera_aviso():
     data = bd.enriquecer({"empresas": [_empresa(1000.0, 100.0, 10.0)]})
-    assert not any("margem_liquida_pct" in p for p in bd.validate(data))
+    assert not any("margem da fonte" in p for p in bd.validate(data))
 
 
 # --------------------------------------------------------------------------- #
@@ -105,3 +105,42 @@ def test_forcar_nao_desliga_a_faixa_de_plausibilidade():
     """--forcar libera o limite de variacao, nao aceita numero absurdo."""
     ok, motivo = umd.valida("preco_acao", 99_999_999.0, 100.0, forcar=True)
     assert not ok and "faixa" in motivo
+
+
+# --------------------------------------------------------------------------- #
+# Margem exibida passa a ser a recalculada (lucro atribuivel / receita)
+# --------------------------------------------------------------------------- #
+def test_margem_exibida_e_a_recalculada():
+    """Caso BP FY2025, conferido no 6-K da propria BP:
+
+        receita 189.335 | profit for the period 1.295 | nao-controladores 1.240
+        | atribuivel aos acionistas 55
+
+    1.295/189.335 = 0,68% (o que a fonte trazia);  55/189.335 = 0,03%.
+    """
+    data = bd.enriquecer({"empresas": [_empresa(189335.0, 55.0, 0.68)]})
+    p = data["empresas"][0]["fy2025"]
+    assert p["margem_liquida_pct"] == pytest.approx(0.03, abs=0.005)
+    assert p["margem_liquida_fonte_pct"] == 0.68
+
+
+def test_valor_da_fonte_e_preservado_e_a_divergencia_reportada():
+    data = bd.enriquecer({"empresas": [_empresa(189335.0, 55.0, 0.68)]})
+    problemas = bd.validate(data)
+    assert any("margem da fonte" in p and "nao-controladores" in p for p in problemas)
+
+
+def test_margem_ja_coerente_fica_intacta():
+    data = bd.enriquecer({"empresas": [_empresa(1000.0, 100.0, 10.0)]})
+    p = data["empresas"][0]["fy2025"]
+    assert p["margem_liquida_pct"] == pytest.approx(10.0)
+    assert not any("margem da fonte" in x for x in bd.validate(data))
+
+
+def test_json_primario_nao_e_alterado():
+    """A troca acontece so no payload em memoria."""
+    import json
+    antes = json.loads(bd.JSON_PATH.read_text(encoding="utf-8"))
+    bd.enriquecer(json.loads(bd.JSON_PATH.read_text(encoding="utf-8")))
+    depois = json.loads(bd.JSON_PATH.read_text(encoding="utf-8"))
+    assert antes == depois
