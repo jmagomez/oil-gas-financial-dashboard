@@ -333,8 +333,11 @@ def build_csv(data):
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"], d["payout_fcf_pct"],
                 "sim" if d["producao_proxy"] else "nao",
             ])
+    # lineterminator="\n": o padrão do módulo csv é \r\n, o que deixava o
+    # arquivo com CRLF e o diff sensível à plataforma. Com LF explícito o build
+    # é idempotente e a rotina diária só comita quando um número muda de fato.
     with CSV_OUT_PATH.open("w", newline="", encoding="utf-8") as f:
-        w = csv.writer(f)
+        w = csv.writer(f, lineterminator="\n")
         w.writerow(CSV_HEADER)
         w.writerows(rows)
     print(f"OK: {CSV_OUT_PATH.name} gerado ({len(rows)} linhas, {len(CSV_HEADER)} colunas)")
