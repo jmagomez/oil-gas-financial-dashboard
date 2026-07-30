@@ -61,6 +61,7 @@ def dias_do_ano(rotulo: str) -> int:
 CSV_HEADER = [
     "ticker", "nome", "pais", "periodo",
     "receita_musd", "lucro_liquido_musd", "ebitda_musd", "margem_liquida_pct",
+    "margem_liquida_fonte_pct",
     "fco_musd", "fcf_musd", "capex_musd", "divida_liquida_musd",
     "divida_patrimonio_pct", "roe_pct", "roa_pct", "producao_kboed",
     "market_cap_musd", "pe", "ev_ebitda", "dividend_yield_pct", "preco_acao_usd",
@@ -136,6 +137,9 @@ def derivar_periodo(empresa, period_key):
     )
 
     return {
+        # Margem líquida recalculada a partir dos campos primários. Ver
+        # `consolidar_margem` para o porquê de ela substituir a da fonte.
+        "margem_liquida_calc_pct": arred(pct(p.get("lucro_liquido"), receita)),
         "margem_ebitda_pct": arred(pct(ebitda, receita)),
         "ebitda_anualizado": arred(ebitda_anual, 0),
         "fcf_anualizado": arred(fcf_anual, 0),
@@ -196,6 +200,32 @@ def derivar_empresa(empresa):
     }
 
 
+def consolidar_margem(p):
+    """Faz a margem exibida ser `lucro_liquido / receita`, e não a da fonte.
+
+    As duas divergiam porque usam numeradores diferentes: a fonte calcula sobre o
+    lucro CONSOLIDADO (incluindo não-controladores) e o campo lucro_liquido traz a
+    parcela ATRIBUÍVEL AOS ACIONISTAS. Reconciliação confirmada no 6-K da própria
+    BP para FY2025 (US$ milhões):
+
+        Sales and other operating revenues .......  189.335
+        Profit for the period ....................    1.295   -> 1.295/189.335 = 0,68%
+        Less: Non-controlling interests ..........    1.240
+        Profit attributable to bp shareholders ...       55   ->    55/189.335 = 0,03%
+
+    O 0,68% que vinha da fonte é o lucro consolidado; os 0,03% são o que de fato
+    sobra para o acionista. Como o dashboard mostra lucro_liquido e margem lado a
+    lado, exibir os dois com numeradores diferentes era inconsistente. O valor
+    original da fonte fica preservado em `margem_liquida_fonte_pct`.
+
+    O JSON primário não é alterado: a troca acontece só no payload em memória.
+    """
+    p["margem_liquida_fonte_pct"] = p.get("margem_liquida_pct")
+    calc = p["derivados"]["margem_liquida_calc_pct"]
+    if calc is not None:
+        p["margem_liquida_pct"] = calc
+
+
 # Eixos do radar de perfil. maior_melhor=False inverte a normalização.
 EIXOS_PERFIL = [
     ("Rentabilidade", lambda e: e["q_recente"]["derivados"]["margem_ebitda_pct"], True),
@@ -235,6 +265,7 @@ def enriquecer(data):
     for e in data["empresas"]:
         for period_key in ("fy2025", "q_recente"):
             e[period_key]["derivados"] = derivar_periodo(e, period_key)
+            consolidar_margem(e[period_key])
         e["derivados"] = derivar_empresa(e)
         e.setdefault("historico", [])
     calcular_perfil(data["empresas"])
@@ -259,19 +290,19 @@ def validate(data):
             if p["receita"] and p["lucro_liquido"] is not None:
                 if abs(p["lucro_liquido"]) > p["receita"]:
                     problems.append(f"{e['ticker']} {period_key}: lucro líquido maior que receita")
-            # A margem líquida é um campo CURADO, vindo da fonte, e nem sempre usa
-            # a mesma definição de lucro que o campo lucro_liquido (atribuível aos
-            # acionistas vs. incluindo minoritários, IFRS vs. ajustado). Quando os
-            # dois aparecem lado a lado no dashboard, a divergência precisa ficar
-            # visível em vez de passar por erro de digitação.
-            if p["receita"] and p["lucro_liquido"] is not None and p.get("margem_liquida_pct") is not None:
-                calc = p["lucro_liquido"] / p["receita"] * 100.0
-                if abs(p["margem_liquida_pct"] - calc) > 0.15:
-                    problems.append(
-                        f"{e['ticker']} {period_key}: margem_liquida_pct informada "
-                        f"({p['margem_liquida_pct']:.2f}%) nao bate com lucro/receita "
-                        f"({calc:.3f}%) — definicoes de lucro diferentes? conferir a fonte"
-                    )
+            # Divergência entre a margem da fonte (lucro consolidado) e a
+            # recalculada (lucro atribuível aos acionistas). Ver `consolidar_margem`.
+            fonte = p.get("margem_liquida_fonte_pct")
+            calc = p.get("margem_liquida_pct")
+            if p["receita"] and fonte is not None and calc is not None and abs(fonte - calc) > 0.15:
+                implicito = fonte / 100.0 * p["receita"]
+                problems.append(
+                    f"{e['ticker']} {period_key}: margem da fonte ({fonte:.2f}%) implica lucro de "
+                    f"{implicito:,.0f} contra {p['lucro_liquido']:,.0f} atribuivel aos acionistas "
+                    f"(diferenca de ~{implicito - p['lucro_liquido']:,.0f}, compativel com "
+                    f"nao-controladores; o implicito e aproximado por vir da margem arredondada). "
+                    f"Exibindo a margem recalculada, {calc:.2f}%"
+                )
             if p["ebitda"] and p["receita"] and p["ebitda"] > p["receita"] * 1.5:
                 problems.append(f"{e['ticker']} {period_key}: EBITDA muito acima da receita (checar unidade/escala)")
             d = p.get("derivados", {})
@@ -323,6 +354,7 @@ def build_csv(data):
             rows.append([
                 e["ticker"], e["nome"], e["pais"], label,
                 p["receita"], p["lucro_liquido"], p["ebitda"], p["margem_liquida_pct"],
+                p.get("margem_liquida_fonte_pct"),
                 p["fluxo_caixa_operacional"], p["fcf"], p["capex"], p["divida_liquida"],
                 p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"],
                 p["derivados"]["producao_usada_kboed"],
