@@ -382,6 +382,7 @@ footer a:hover{text-decoration:underline;}
     <div>
       <h2>Resultado e geração de caixa</h2>
       <p>Comparativo entre o ano fiscal e o trimestre mais recente. Ative "anualizar" para colocar os dois na mesma base.</p>
+      <p id="avisoTrimestre" class="hidden" style="background:#fdecea;border:1px solid #f5c6cb;color:#8a1c1c;padding:8px 12px;border-radius:6px;font-size:.85rem;line-height:1.5"></p>
     </div>
   </div>
   <div class="charts-grid" id="gridResultado">
@@ -520,7 +521,18 @@ const DATA = __DATA_JSON__;
 const COLORS = {XOM:'#e04057',CVX:'#4a90d9',SHEL:'#f2c230',BP:'#3aa76d',EQNR:'#a78bfa',TTE:'#f0883e',PBR:'#2dd4bf'};
 const GRID = 'rgba(120,140,180,.13)';
 const TICK = '#6d7f9f';
-const TRIM = DATA.empresas[0].q_recente.trimestre;
+// Rotulo do trimestre. Cada empresa divulga na sua data, entao durante a
+// temporada de balancos o arquivo pode ter empresas em trimestres diferentes.
+// Antes isto era DATA.empresas[0].q_recente.trimestre -- o rotulo da PRIMEIRA
+// empresa aplicado a todas, o que anunciaria "Q2 2026" para quem ainda
+// estivesse em Q1.
+const TRIMS = DATA.meta_build.trimestres || {};
+const TRIM_MISTO = !!DATA.meta_build.trimestres_mistos;
+const TRIM = TRIM_MISTO
+  ? [...new Set(Object.values(TRIMS))].sort().reverse().join(' / ')
+  : (Object.values(TRIMS)[0] || DATA.empresas[0].q_recente.trimestre);
+// Rotulo da empresa individual, para cards e tabela.
+const trimDe = (ticker) => TRIMS[ticker] || TRIM;
 
 const STATE = {
   active: new Set(DATA.empresas.map(e => e.ticker)),
@@ -766,6 +778,21 @@ function renderMeta(){
     nav.appendChild(a);
   });
   document.getElementById('btnQ').textContent = TRIM;
+
+  // Empresas em trimestres diferentes: declarar, nunca deixar implicito.
+  const avisoTri = document.getElementById('avisoTrimestre');
+  if (avisoTri) {
+    if (TRIM_MISTO) {
+      const porTri = {};
+      for (const [tk, tr] of Object.entries(TRIMS)) (porTri[tr] = porTri[tr] || []).push(tk);
+      const partes = Object.entries(porTri).sort().map(([tr, tks]) => `${tr}: ${tks.sort().join(', ')}`);
+      avisoTri.textContent = 'Atenção: as empresas não estão todas no mesmo trimestre — ' + partes.join(' · ') +
+        '. Cada uma divulga na sua data, então a comparação entre elas mistura períodos até a última reportar.';
+      avisoTri.classList.remove('hidden');
+    } else {
+      avisoTri.classList.add('hidden');
+    }
+  }
 }
 
 function sincronizarChips(){
