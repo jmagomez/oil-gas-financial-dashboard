@@ -144,3 +144,61 @@ def test_json_primario_nao_e_alterado():
     bd.enriquecer(json.loads(bd.JSON_PATH.read_text(encoding="utf-8")))
     depois = json.loads(bd.JSON_PATH.read_text(encoding="utf-8"))
     assert antes == depois
+
+
+
+# --------------------------------------------------------------------------- #
+# Validacao do campo `historico` (preenchido a mao)
+# --------------------------------------------------------------------------- #
+def _com_historico(itens):
+    e = _empresa(1000.0, 100.0, 10.0)
+    e["historico"] = itens
+    return bd.enriquecer({"empresas": [e]})
+
+
+def test_historico_vazio_mantem_secao_escondida():
+    data = bd.enriquecer({"empresas": [_empresa(1000.0, 100.0, 10.0)]})
+    assert data["meta_build"]["tem_historico"] is False
+
+
+def test_historico_preenchido_destrava_a_secao():
+    data = _com_historico([{"periodo": "FY2024", "receita": 100.0, "ebitda": 20.0}])
+    assert data["meta_build"]["tem_historico"] is True
+
+
+def test_historico_pega_campo_com_typo():
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "lucro_liq": 5.0}]))
+    assert any("reconhecido" in p for p in problemas)
+
+
+def test_historico_pega_periodo_fora_do_formato():
+    problemas = bd.validate(_com_historico([{"periodo": "2024", "receita": 100.0}]))
+    assert any("FY####" in p for p in problemas)
+
+
+def test_historico_pega_periodo_duplicado():
+    problemas = bd.validate(_com_historico([
+        {"periodo": "FY2024", "receita": 100.0},
+        {"periodo": "FY2024", "receita": 110.0},
+    ]))
+    assert any("duplicado" in p for p in problemas)
+
+
+def test_historico_pega_capex_positivo():
+    """No resto do arquivo capex e negativo; trocar o sinal inverteria capex/FCO."""
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "capex": 50.0}]))
+    assert any("capex positivo" in p for p in problemas)
+
+
+def test_historico_pega_valor_nao_numerico():
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "receita": "cem"}]))
+    assert any("num" in p for p in problemas)
+
+
+def test_historico_bem_preenchido_nao_gera_aviso():
+    problemas = bd.validate(_com_historico([{
+        "periodo": "FY2024", "receita": 1000.0, "lucro_liquido": 90.0, "ebitda": 200.0,
+        "fluxo_caixa_operacional": 150.0, "fcf": 100.0, "capex": -50.0,
+        "divida_liquida": 300.0, "producao_kboed": 100.0,
+    }]))
+    assert not any("hist" in p.lower() for p in problemas)
