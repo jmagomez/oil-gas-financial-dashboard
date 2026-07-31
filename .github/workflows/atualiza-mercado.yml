@@ -31,6 +31,9 @@ concurrency:
 jobs:
   atualiza:
     runs-on: ubuntu-latest
+    env:
+      MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+      PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +58,12 @@ jobs:
       # Se algo aqui quebrar, nada e commitado.
       - name: Testes
         run: python3 -m pytest tests -q
+
+      - name: Gera o corpo do e-mail
+        run: |
+          python3 build_email.py \
+            --relatorio "$RUNNER_TEMP/relatorio-mercado.json" \
+            --pages-url "$PAGES_URL"
 
       - name: Comita se algo mudou
         if: ${{ !inputs.dry_run }}
@@ -88,6 +97,20 @@ jobs:
           # Caso alguem tenha empurrado algo na main enquanto o job rodava.
           git pull --rebase --autostash
           git push
+
+      - name: Envia o e-mail
+        if: ${{ !inputs.dry_run && env.MAIL_USERNAME != '' }}
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD_B3 }}
+          subject: "Oleo & Gas — dados de mercado"
+          to: jmagomez@gmail.com
+          from: "Dashboard Oleo & Gas"
+          html_body: file://email_body.html
 
       - name: Guarda o relatorio da execucao
         if: always()
