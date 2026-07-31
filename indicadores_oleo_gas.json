@@ -26,7 +26,7 @@
       "ticker": "XOM", "nome": "ExxonMobil", "pais": "EUA",
       "fy2025": {"receita": 323910, "lucro_liquido": 29760, "ebitda": 59530, "margem_liquida_pct": 9.19, "fluxo_caixa_operacional": 51970, "fcf": 23610, "capex": -28360, "divida_liquida": 32860, "divida_patrimonio_pct": 16.3, "roe_pct": 11.1, "roa_pct": 6.6, "producao_kboed": 4740},
       "q_recente": {"trimestre": "Q1 2026", "receita": 83160, "lucro_liquido": 4470, "ebitda": 12060, "margem_liquida_pct": 5.38, "fluxo_caixa_operacional": 8710, "fcf": 2240, "capex": -6470, "divida_liquida": 39230, "divida_patrimonio_pct": 18.3, "roe_pct": 9.87, "roa_pct": 4.22, "producao_kboed": 4590},
-      "mercado": {"market_cap": 634343, "pe": 26.43, "ev_ebitda": 12.44, "dividend_yield_pct": 2.57, "preco_acao": 156.97},
+      "mercado": {"market_cap": 650632, "pe": 26.43, "ev_ebitda": 12.44, "dividend_yield_pct": 2.57, "preco_acao": 156.97},
       "historico": [],
       "fontes": ["https://stockanalysis.com/stocks/xom/financials/", "https://stockanalysis.com/stocks/xom/financials/balance-sheet/", "https://stockanalysis.com/stocks/xom/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/xom/statistics/", "https://stockanalysis.com/stocks/xom/financials/metrics/"]
     },
