@@ -278,7 +278,14 @@ def enriquecer(data):
         e["derivados"] = derivar_empresa(e)
         e.setdefault("historico", [])
     calcular_perfil(data["empresas"])
+    # Trimestre POR EMPRESA. Cada uma divulga na sua data, entao durante a
+    # temporada de balancos e normal o arquivo ter empresas em trimestres
+    # diferentes. O template lia o rotulo de empresas[0] e aplicava a todas,
+    # o que anunciaria "Q2 2026" para quem ainda estivesse em Q1.
+    trimestres = {e["ticker"]: e["q_recente"].get("trimestre") for e in data["empresas"]}
     data["meta_build"] = {
+        "trimestres": trimestres,
+        "trimestres_mistos": len(set(trimestres.values())) > 1,
         "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
         "dias_periodo": DIAS_PERIODO,
         "fator_anualizacao": FATOR_ANUAL,
@@ -293,6 +300,18 @@ def enriquecer(data):
 def validate(data):
     """Checagens básicas de sanidade antes de publicar."""
     problems = []
+    # Comparar empresas em trimestres diferentes e legitimo durante a temporada
+    # de balancos, mas precisa estar declarado, nao implicito.
+    tris = data.get("meta_build", {}).get("trimestres", {})
+    if len(set(tris.values())) > 1:
+        por_tri = {}
+        for tk, tr in tris.items():
+            por_tri.setdefault(tr, []).append(tk)
+        detalhe = "; ".join(f"{tr}: {', '.join(sorted(tks))}" for tr, tks in sorted(por_tri.items()))
+        problems.append(
+            f"empresas em trimestres diferentes ({detalhe}) — a comparação entre "
+            "elas mistura períodos; o dashboard sinaliza isso ao usuário"
+        )
     for e in data["empresas"]:
         for period_key in ("fy2025", "q_recente"):
             p = e[period_key]
@@ -335,6 +354,8 @@ def validate(data):
             problems.append(f"{e['ticker']}: P/E negativo (ok se prejuízo, mas confirmar)")
         if not e.get("fontes"):
             problems.append(f"{e['ticker']}: sem fontes listadas")
+        if not e["q_recente"].get("trimestre"):
+            problems.append(f"{e['ticker']}: q_recente sem rótulo 'trimestre'")
         # `historico` e preenchido a mao. Estas checagens existem para o erro
         # aparecer no build, e nao como uma lacuna silenciosa no grafico.
         vistos = set()
