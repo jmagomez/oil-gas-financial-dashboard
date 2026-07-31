@@ -16,6 +16,9 @@ env/
 .env
 .env.*
 
+# Artefatos gerados
+email_body.html
+
 # Sistema operacional / editores
 .DS_Store
 Thumbs.db
