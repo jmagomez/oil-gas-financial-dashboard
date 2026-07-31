@@ -23,6 +23,7 @@ Principios de projeto
 Uso:
     python3 update_market_data.py                 # atualiza o JSON
     python3 update_market_data.py --dry-run       # so mostra o que mudaria
+    python3 update_market_data.py --forcar        # ignora o limite de variacao
     python3 update_market_data.py --relatorio r.json
 """
 
@@ -56,6 +57,12 @@ FAIXAS: dict[str, tuple[float, float]] = {
 # Variacao maxima aceita em relacao ao valor anterior, por atualizacao.
 # Protege contra desdobramento de acoes, troca de simbolo e erro de unidade:
 # nesses casos o numero "novo" e valido isoladamente, mas pula de patamar.
+#
+# ATENCAO ao efeito colateral: como o valor anterior nunca avanca quando a
+# rejeicao acontece, um movimento REAL acima do limite (split, crash, mudanca
+# de politica de dividendos) congela o campo para sempre -- toda execucao
+# seguinte compara com a mesma base velha e rejeita de novo. Por isso existe
+# o --forcar, e por isso o relatorio traz as rejeicoes explicitamente.
 VARIACAO_MAX: dict[str, float] = {
     "preco_acao": 0.40,
     "market_cap": 0.40,
@@ -211,8 +218,13 @@ def arredonda(campo: str, valor: float) -> float | int:
     return round(valor, DECIMAIS.get(campo, 2))
 
 
-def valida(campo: str, novo: Any, anterior: Any) -> tuple[bool, str]:
-    """Decide se `novo` pode substituir `anterior`. Devolve (aceito, motivo)."""
+def valida(campo: str, novo: Any, anterior: Any, forcar: bool = False) -> tuple[bool, str]:
+    """Decide se `novo` pode substituir `anterior`. Devolve (aceito, motivo).
+
+    Com `forcar`, a faixa de plausibilidade continua valendo mas o limite de
+    variacao e ignorado -- e a saida para destravar um campo congelado depois
+    de um movimento real grande (split, crash, corte de dividendo).
+    """
     if novo is None:
         return False, "campo ausente na resposta da fonte"
     if not isinstance(novo, (int, float)) or isinstance(novo, bool):
@@ -224,13 +236,14 @@ def valida(campo: str, novo: Any, anterior: Any) -> tuple[bool, str]:
     if not (minimo <= novo <= maximo):
         return False, f"fora da faixa plausivel [{minimo:g}, {maximo:g}]"
 
-    if isinstance(anterior, (int, float)) and anterior:
+    if not forcar and isinstance(anterior, (int, float)) and anterior:
         variacao = abs(novo - anterior) / abs(anterior)
         limite = VARIACAO_MAX[campo]
         if variacao > limite:
             return False, (
                 f"variacao de {variacao * 100:.1f}% acima do limite de "
-                f"{limite * 100:.0f}% (possivel split, troca de simbolo ou erro de unidade)"
+                f"{limite * 100:.0f}% (possivel split, troca de simbolo ou erro de unidade). "
+                "Se o movimento for real, rode com --forcar"
             )
     return True, ""
 
@@ -238,6 +251,7 @@ def valida(campo: str, novo: Any, anterior: Any) -> tuple[bool, str]:
 def aplica_cotacoes(
     dados: dict[str, Any],
     cotacoes: dict[str, dict[str, float | None]],
+    forcar: bool = False,
 ) -> tuple[dict[str, dict[str, float | int]], Relatorio]:
     """Calcula o novo bloco "mercado" de cada empresa. Nao escreve nada em disco.
 
@@ -260,7 +274,7 @@ def aplica_cotacoes(
         for campo in ORDEM_MERCADO:
             bruto = recebido.get(campo)
             anterior = atual.get(campo)
-            ok, motivo = valida(campo, bruto, anterior)
+            ok, motivo = valida(campo, bruto, anterior, forcar=forcar)
             if not ok:
                 if bruto is not None:
                     rel.rejeitou(ticker, campo, bruto, motivo, anterior)
@@ -339,6 +353,8 @@ def atualiza_datas(bruto: str, hoje: date) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--dry-run", action="store_true", help="mostra o que mudaria, sem escrever")
+    parser.add_argument("--forcar", action="store_true",
+                        help="ignora o limite de variacao (destrava campo congelado apos movimento real)")
     parser.add_argument("--relatorio", type=Path, help="grava o relatorio em JSON no caminho indicado")
     parser.add_argument("--json", type=Path, default=JSON_DADOS, help="caminho do arquivo de dados")
     args = parser.parse_args(argv)
@@ -350,7 +366,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Consultando {len(tickers)} tickers: {', '.join(tickers)}")
     cotacoes = busca_cotacoes(tickers)
 
-    finais, rel = aplica_cotacoes(dados, cotacoes)
+    finais, rel = aplica_cotacoes(dados, cotacoes, forcar=args.forcar)
     print(rel.resumo())
 
     if args.relatorio:
@@ -373,8 +389,19 @@ def main(argv: list[str] | None = None) -> int:
     # Rede de seguranca: o texto reescrito tem de continuar sendo JSON valido e
     # so pode diferir do original nos campos de mercado e nas datas.
     conferido = json.loads(novo)
+    # zip() truncaria em silencio se a reescrita comesse uma empresa.
+    if len(dados["empresas"]) != len(conferido["empresas"]):
+        raise AssertionError(
+            f"reescrita mudou o numero de empresas: {len(dados['empresas'])} -> {len(conferido['empresas'])}"
+        )
+    # "producao_kboed" nao existe no nivel da empresa (vive dentro de fy2025 /
+    # q_recente), entao a checagem antiga comparava None com None e nao valia nada.
     for antes, depois in zip(dados["empresas"], conferido["empresas"]):
-        for chave in ("fy2025", "q_recente", "producao_kboed", "historico", "fontes", "nome", "pais"):
+        if antes.get("ticker") != depois.get("ticker"):
+            raise AssertionError(
+                f"reescrita trocou a ordem dos tickers: {antes.get('ticker')} -> {depois.get('ticker')}"
+            )
+        for chave in ("fy2025", "q_recente", "historico", "fontes", "nome", "pais", "ticker"):
             if antes.get(chave) != depois.get(chave):
                 raise AssertionError(f"reescrita alterou campo nao-mercado em {antes['ticker']}: {chave}")
 
