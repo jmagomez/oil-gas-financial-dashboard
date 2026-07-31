@@ -58,6 +58,15 @@ def dias_do_ano(rotulo: str) -> int:
     return 366 if (m and calendar.isleap(int(m.group(1)))) else 365
 
 
+# Campos aceitos em cada item de `historico`. A lista existe para pegar erro de
+# digitacao no preenchimento manual: um "lucro_liq" viraria None em silencio e o
+# grafico mostraria uma lacuna sem explicacao.
+HIST_CAMPOS = {
+    "receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional",
+    "fcf", "capex", "divida_liquida", "producao_kboed",
+}
+
+
 CSV_HEADER = [
     "ticker", "nome", "pais", "periodo",
     "receita_musd", "lucro_liquido_musd", "ebitda_musd", "margem_liquida_pct",
@@ -326,9 +335,50 @@ def validate(data):
             problems.append(f"{e['ticker']}: P/E negativo (ok se prejuízo, mas confirmar)")
         if not e.get("fontes"):
             problems.append(f"{e['ticker']}: sem fontes listadas")
+        # `historico` e preenchido a mao. Estas checagens existem para o erro
+        # aparecer no build, e nao como uma lacuna silenciosa no grafico.
+        vistos = set()
         for h in e.get("historico", []):
-            if "periodo" not in h:
+            per = h.get("periodo")
+            if not per:
                 problems.append(f"{e['ticker']}: item de histórico sem campo 'periodo'")
+                continue
+            if not re.fullmatch(r"FY\d{4}", str(per)):
+                problems.append(
+                    f"{e['ticker']} histórico: período {per!r} fora do formato FY####"
+                )
+            if per in vistos:
+                problems.append(f"{e['ticker']} histórico: período {per} duplicado")
+            vistos.add(per)
+
+            desconhecidos = set(h) - HIST_CAMPOS - {"periodo"}
+            if desconhecidos:
+                problems.append(
+                    f"{e['ticker']} histórico {per}: campo(s) não reconhecido(s) "
+                    f"{sorted(desconhecidos)} — erro de digitação?"
+                )
+            for campo in HIST_CAMPOS & set(h):
+                v = h[campo]
+                if v is not None and not isinstance(v, (int, float)):
+                    problems.append(
+                        f"{e['ticker']} histórico {per}: {campo} não é numérico ({v!r})"
+                    )
+            # capex é armazenado negativo no resto do arquivo; manter a convenção
+            if isinstance(h.get("capex"), (int, float)) and h["capex"] > 0:
+                problems.append(
+                    f"{e['ticker']} histórico {per}: capex positivo ({h['capex']}) — "
+                    "no resto do arquivo capex é negativo"
+                )
+            rec, luc, eb = h.get("receita"), h.get("lucro_liquido"), h.get("ebitda")
+            if isinstance(rec, (int, float)) and rec and isinstance(luc, (int, float)):
+                if abs(luc) > rec:
+                    problems.append(f"{e['ticker']} histórico {per}: |lucro| maior que a receita")
+            if isinstance(rec, (int, float)) and rec and isinstance(eb, (int, float)):
+                if eb > rec * 1.5:
+                    problems.append(
+                        f"{e['ticker']} histórico {per}: EBITDA muito acima da receita "
+                        "(checar unidade/escala)"
+                    )
     return problems
 
 
