@@ -58,6 +58,15 @@ def dias_do_ano(rotulo: str) -> int:
     return 366 if (m and calendar.isleap(int(m.group(1)))) else 365
 
 
+# Campos aceitos em cada item de `historico`. A lista existe para pegar erro de
+# digitacao no preenchimento manual: um "lucro_liq" viraria None em silencio e o
+# grafico mostraria uma lacuna sem explicacao.
+HIST_CAMPOS = {
+    "receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional",
+    "fcf", "capex", "divida_liquida", "producao_kboed",
+}
+
+
 CSV_HEADER = [
     "ticker", "nome", "pais", "periodo",
     "receita_musd", "lucro_liquido_musd", "ebitda_musd", "margem_liquida_pct",
@@ -269,7 +278,14 @@ def enriquecer(data):
         e["derivados"] = derivar_empresa(e)
         e.setdefault("historico", [])
     calcular_perfil(data["empresas"])
+    # Trimestre POR EMPRESA. Cada uma divulga na sua data, entao durante a
+    # temporada de balancos e normal o arquivo ter empresas em trimestres
+    # diferentes. O template lia o rotulo de empresas[0] e aplicava a todas,
+    # o que anunciaria "Q2 2026" para quem ainda estivesse em Q1.
+    trimestres = {e["ticker"]: e["q_recente"].get("trimestre") for e in data["empresas"]}
     data["meta_build"] = {
+        "trimestres": trimestres,
+        "trimestres_mistos": len(set(trimestres.values())) > 1,
         "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
         "dias_periodo": DIAS_PERIODO,
         "fator_anualizacao": FATOR_ANUAL,
@@ -284,6 +300,18 @@ def enriquecer(data):
 def validate(data):
     """Checagens básicas de sanidade antes de publicar."""
     problems = []
+    # Comparar empresas em trimestres diferentes e legitimo durante a temporada
+    # de balancos, mas precisa estar declarado, nao implicito.
+    tris = data.get("meta_build", {}).get("trimestres", {})
+    if len(set(tris.values())) > 1:
+        por_tri = {}
+        for tk, tr in tris.items():
+            por_tri.setdefault(tr, []).append(tk)
+        detalhe = "; ".join(f"{tr}: {', '.join(sorted(tks))}" for tr, tks in sorted(por_tri.items()))
+        problems.append(
+            f"empresas em trimestres diferentes ({detalhe}) — a comparação entre "
+            "elas mistura períodos; o dashboard sinaliza isso ao usuário"
+        )
     for e in data["empresas"]:
         for period_key in ("fy2025", "q_recente"):
             p = e[period_key]
@@ -326,9 +354,52 @@ def validate(data):
             problems.append(f"{e['ticker']}: P/E negativo (ok se prejuízo, mas confirmar)")
         if not e.get("fontes"):
             problems.append(f"{e['ticker']}: sem fontes listadas")
+        if not e["q_recente"].get("trimestre"):
+            problems.append(f"{e['ticker']}: q_recente sem rótulo 'trimestre'")
+        # `historico` e preenchido a mao. Estas checagens existem para o erro
+        # aparecer no build, e nao como uma lacuna silenciosa no grafico.
+        vistos = set()
         for h in e.get("historico", []):
-            if "periodo" not in h:
+            per = h.get("periodo")
+            if not per:
                 problems.append(f"{e['ticker']}: item de histórico sem campo 'periodo'")
+                continue
+            if not re.fullmatch(r"FY\d{4}", str(per)):
+                problems.append(
+                    f"{e['ticker']} histórico: período {per!r} fora do formato FY####"
+                )
+            if per in vistos:
+                problems.append(f"{e['ticker']} histórico: período {per} duplicado")
+            vistos.add(per)
+
+            desconhecidos = set(h) - HIST_CAMPOS - {"periodo"}
+            if desconhecidos:
+                problems.append(
+                    f"{e['ticker']} histórico {per}: campo(s) não reconhecido(s) "
+                    f"{sorted(desconhecidos)} — erro de digitação?"
+                )
+            for campo in HIST_CAMPOS & set(h):
+                v = h[campo]
+                if v is not None and not isinstance(v, (int, float)):
+                    problems.append(
+                        f"{e['ticker']} histórico {per}: {campo} não é numérico ({v!r})"
+                    )
+            # capex é armazenado negativo no resto do arquivo; manter a convenção
+            if isinstance(h.get("capex"), (int, float)) and h["capex"] > 0:
+                problems.append(
+                    f"{e['ticker']} histórico {per}: capex positivo ({h['capex']}) — "
+                    "no resto do arquivo capex é negativo"
+                )
+            rec, luc, eb = h.get("receita"), h.get("lucro_liquido"), h.get("ebitda")
+            if isinstance(rec, (int, float)) and rec and isinstance(luc, (int, float)):
+                if abs(luc) > rec:
+                    problems.append(f"{e['ticker']} histórico {per}: |lucro| maior que a receita")
+            if isinstance(rec, (int, float)) and rec and isinstance(eb, (int, float)):
+                if eb > rec * 1.5:
+                    problems.append(
+                        f"{e['ticker']} histórico {per}: EBITDA muito acima da receita "
+                        "(checar unidade/escala)"
+                    )
     return problems
 
 

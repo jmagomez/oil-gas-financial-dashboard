@@ -144,3 +144,99 @@ def test_json_primario_nao_e_alterado():
     bd.enriquecer(json.loads(bd.JSON_PATH.read_text(encoding="utf-8")))
     depois = json.loads(bd.JSON_PATH.read_text(encoding="utf-8"))
     assert antes == depois
+
+
+
+# --------------------------------------------------------------------------- #
+# Validacao do campo `historico` (preenchido a mao)
+# --------------------------------------------------------------------------- #
+def _com_historico(itens):
+    e = _empresa(1000.0, 100.0, 10.0)
+    e["historico"] = itens
+    return bd.enriquecer({"empresas": [e]})
+
+
+def test_historico_vazio_mantem_secao_escondida():
+    data = bd.enriquecer({"empresas": [_empresa(1000.0, 100.0, 10.0)]})
+    assert data["meta_build"]["tem_historico"] is False
+
+
+def test_historico_preenchido_destrava_a_secao():
+    data = _com_historico([{"periodo": "FY2024", "receita": 100.0, "ebitda": 20.0}])
+    assert data["meta_build"]["tem_historico"] is True
+
+
+def test_historico_pega_campo_com_typo():
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "lucro_liq": 5.0}]))
+    assert any("reconhecido" in p for p in problemas)
+
+
+def test_historico_pega_periodo_fora_do_formato():
+    problemas = bd.validate(_com_historico([{"periodo": "2024", "receita": 100.0}]))
+    assert any("FY####" in p for p in problemas)
+
+
+def test_historico_pega_periodo_duplicado():
+    problemas = bd.validate(_com_historico([
+        {"periodo": "FY2024", "receita": 100.0},
+        {"periodo": "FY2024", "receita": 110.0},
+    ]))
+    assert any("duplicado" in p for p in problemas)
+
+
+def test_historico_pega_capex_positivo():
+    """No resto do arquivo capex e negativo; trocar o sinal inverteria capex/FCO."""
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "capex": 50.0}]))
+    assert any("capex positivo" in p for p in problemas)
+
+
+def test_historico_pega_valor_nao_numerico():
+    problemas = bd.validate(_com_historico([{"periodo": "FY2024", "receita": "cem"}]))
+    assert any("num" in p for p in problemas)
+
+
+def test_historico_bem_preenchido_nao_gera_aviso():
+    problemas = bd.validate(_com_historico([{
+        "periodo": "FY2024", "receita": 1000.0, "lucro_liquido": 90.0, "ebitda": 200.0,
+        "fluxo_caixa_operacional": 150.0, "fcf": 100.0, "capex": -50.0,
+        "divida_liquida": 300.0, "producao_kboed": 100.0,
+    }]))
+    assert not any("hist" in p.lower() for p in problemas)
+
+
+
+# --------------------------------------------------------------------------- #
+# Trimestre por empresa (antes o template usava o rotulo de empresas[0])
+# --------------------------------------------------------------------------- #
+def _duas(tri_a, tri_b):
+    a = _empresa(1000.0, 100.0, 10.0); a["ticker"] = "AAA"
+    b = _empresa(1000.0, 100.0, 10.0); b["ticker"] = "BBB"
+    a["q_recente"]["trimestre"] = tri_a
+    b["q_recente"]["trimestre"] = tri_b
+    return bd.enriquecer({"empresas": [a, b]})
+
+
+def test_trimestres_iguais_nao_marcam_mistura():
+    data = _duas("Q2 2026", "Q2 2026")
+    assert data["meta_build"]["trimestres_mistos"] is False
+    assert not any("trimestres diferentes" in p for p in bd.validate(data))
+
+
+def test_trimestres_diferentes_sao_marcados_e_reportados():
+    """Caso real: BP divulga em 04/08 e Petrobras em 06/08, depois das outras cinco."""
+    data = _duas("Q2 2026", "Q1 2026")
+    assert data["meta_build"]["trimestres_mistos"] is True
+    avisos = [p for p in bd.validate(data) if "trimestres diferentes" in p]
+    assert avisos and "AAA" in avisos[0] and "BBB" in avisos[0]
+
+
+def test_meta_build_expoe_o_trimestre_de_cada_empresa():
+    data = _duas("Q2 2026", "Q1 2026")
+    assert data["meta_build"]["trimestres"] == {"AAA": "Q2 2026", "BBB": "Q1 2026"}
+
+
+def test_q_recente_sem_rotulo_e_reportado():
+    e = _empresa(1000.0, 100.0, 10.0)
+    del e["q_recente"]["trimestre"]
+    problemas = bd.validate(bd.enriquecer({"empresas": [e]}))
+    assert any("sem r" in p and "trimestre" in p for p in problemas)
