@@ -1,0 +1,88 @@
+name: Atualiza fundamentos
+
+# Fundamentos (receita, EBITDA, capex, divida, producao) mudam so a cada
+# balanco -- nao faz sentido rodar diariamente como os dados de mercado.
+# Roda mensalmente na janela em que as sete empresas ja divulgaram, e fica
+# disponivel sob demanda para quando um balanco sair fora do calendario.
+#
+# O primeiro run deve ser feito com dry_run = true: a rotina mostra o que
+# mudaria sem commitar nada.
+
+on:
+  schedule:
+    # 07:00 UTC no dia 5 de cada mes -- depois do grosso das divulgacoes.
+    - cron: "0 7 5 * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Simular: mostra o que mudaria, sem commitar"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fundamentos
+  cancel-in-progress: false
+
+jobs:
+  atualiza:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instala dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-market.txt
+
+      - name: Atualiza fundamentos
+        id: fundamentos
+        run: |
+          # bash -e sozinho nao propaga falha atraves do pipe para o tee:
+          # sem pipefail, um erro na rotina sairia como sucesso no step.
+          set -o pipefail
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python update_fundamentals.py --dry-run | tee saida.txt
+          else
+            python update_fundamentals.py | tee saida.txt
+          fi
+
+      - name: Regenera dashboard e CSV
+        if: inputs.dry_run != true
+        run: python build_dashboard.py
+
+      - name: Roda os testes antes de commitar
+        if: inputs.dry_run != true
+        run: |
+          pip install -r requirements-dev.txt
+          python -m pytest tests/ -q
+
+      - name: Commita as mudancas
+        if: inputs.dry_run != true
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "Nada mudou -- nenhum commit."
+            exit 0
+          fi
+          git add indicadores_oleo_gas.json indicadores_oleo_gas.csv dashboard_oleo_gas.html
+          git commit -F - <<'MSG'
+          dados: atualiza fundamentos
+          MSG
+          git push
+
+      - name: Publica o resumo do run
+        if: always()
+        run: |
+          echo "### Atualizacao de fundamentos" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat saida.txt >> $GITHUB_STEP_SUMMARY || echo "(sem saida)" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
