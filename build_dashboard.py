@@ -341,6 +341,7 @@ def build_html(data):
     if "__DATA_JSON__" not in template:
         sys.exit("ERRO: placeholder __DATA_JSON__ não encontrado no template.")
     html = template.replace("__DATA_JSON__", payload)
+    html = _injeta_camada_acessibilidade(html)
     HTML_OUT_PATH.write_text(html, encoding="utf-8")
     print(f"OK: {HTML_OUT_PATH.name} gerado ({len(html):,} bytes)")
 
@@ -373,6 +374,41 @@ def build_csv(data):
         w.writerow(CSV_HEADER)
         w.writerows(rows)
     print(f"OK: {CSV_OUT_PATH.name} gerado ({len(rows)} linhas, {len(CSV_HEADER)} colunas)")
+
+
+A11Y_CSS_PATH = BASE / "assets_a11y.css"
+A11Y_JS_PATH = BASE / "assets_a11y.js"
+
+
+def _injeta_camada_acessibilidade(html: str) -> str:
+    """Embute a camada de acessibilidade no HTML gerado.
+
+    Os graficos sao <canvas>, invisiveis para leitor de tela. Esta camada da a
+    cada grafico rotulo e uma tabela equivalente, torna os cabecalhos de tabela
+    operaveis por teclado e respeita prefers-reduced-motion. Fica em arquivos
+    proprios para o template continuar sendo so o esqueleto visual.
+    """
+    faltando = [p.name for p in (A11Y_CSS_PATH, A11Y_JS_PATH) if not p.exists()]
+    if faltando:
+        # Nao derruba o build: o dashboard mostrar os dados e a funcao primaria,
+        # e build-dashboard.yml roda a cada push. A ausencia da camada e um
+        # defeito, mas quem falha por isso e o teste (test_acessibilidade),
+        # que e o lugar certo para barrar a regressao.
+        print(f"AVISO: camada de acessibilidade ausente ({', '.join(faltando)}) - HTML gerado sem ela.")
+        return html
+
+    css = A11Y_CSS_PATH.read_text(encoding="utf-8")
+    js = A11Y_JS_PATH.read_text(encoding="utf-8")
+
+    if "</style>" not in html or "</body>" not in html:
+        sys.exit("ERRO: nao achei </style> ou </body> para injetar a camada de acessibilidade.")
+
+    i = html.rindex("</style>")
+    html = html[:i] + "\n" + css + "\n" + html[i:]
+
+    j = html.rindex("</body>")
+    html = html[:j] + "<script>\n" + js + "\n</script>\n" + html[j:]
+    return html
 
 
 def main():
