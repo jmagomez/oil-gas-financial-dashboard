@@ -6,6 +6,7 @@ aqui alimentamos o resto do modulo com respostas fabricadas.
 
 from __future__ import annotations
 
+import difflib
 import json
 import re
 import sys
@@ -20,14 +21,17 @@ sys.path.insert(0, str(RAIZ))
 import update_market_data as umd  # noqa: E402
 
 
+SNAPSHOT = RAIZ / "tests" / "fixtures" / "indicadores_snapshot.json"
+
+
 @pytest.fixture()
 def dados():
-    return json.loads((RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    return json.loads(SNAPSHOT.read_text(encoding="utf-8"))
 
 
 @pytest.fixture()
 def bruto():
-    return (RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
+    return SNAPSHOT.read_text(encoding="utf-8")
 
 
 # ---------------------------------------------------------------------------
@@ -243,3 +247,26 @@ def test_json_atualizado_continua_passando_no_build(dados, bruto, tmp_path):
     # FCF yield usa o market cap novo: tem de ter acompanhado.
     esperado = xom["fy2025"]["fcf"] / 642_000 * 100
     assert xom["fy2025"]["derivados"]["fcf_yield_pct"] == pytest.approx(esperado, abs=0.01)
+
+
+def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
+    """O arquivo VIVO precisa manter o bloco "mercado" em uma linha por empresa.
+
+    Este e o unico teste que olha para indicadores_oleo_gas.json de verdade, e
+    de proposito: ele nao afirma nada sobre os VALORES (que mudam a cada
+    balanco), so sobre o FORMATO de que a escrita cirurgica depende. Foi esta
+    garantia que pegou uma versao de update_fundamentals.py que reserializava o
+    arquivo com indent=2 e trocava ~500 linhas de formatacao.
+    """
+    vivo = (RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
+    finais = {
+        "XOM": {"market_cap": 1, "pe": 1.0, "ev_ebitda": 1.0,
+                "dividend_yield_pct": 1.0, "preco_acao": 1.0}
+    }
+    saida = umd.reescreve_json(vivo, finais)
+    difs = [
+        l for l in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
+        if l.startswith(("-", "+")) and not l.startswith(("---", "+++"))
+    ]
+    # Uma linha removida e uma adicionada: so o bloco "mercado" do XOM.
+    assert len(difs) == 2, f"formato do arquivo vivo mudou: {len(difs)} linhas afetadas"

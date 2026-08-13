@@ -14,7 +14,7 @@ import build_dashboard as bd  # noqa: E402
 
 @pytest.fixture(scope="module")
 def dados():
-    raw = json.loads((ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    raw = json.loads((ROOT / "tests" / "fixtures" / "indicadores_snapshot.json").read_text(encoding="utf-8"))
     return bd.enriquecer(raw)
 
 
@@ -183,6 +183,11 @@ def test_csv_gerado_tem_cabecalho_e_derivados():
 
 
 def test_historico_e_opcional_e_normalizado(dados):
+    # A versao anterior assertava `tem_historico is False`, ou seja, afirmava
+    # que NENHUMA empresa tem historico -- e quebrava no instante em que a
+    # funcionalidade passasse a funcionar. O contrato real e que a flag
+    # ESPELHE os dados, com historico ou sem.
     for e in dados["empresas"]:
         assert isinstance(e["historico"], list)
-    assert dados["meta_build"]["tem_historico"] is False
+    esperado = any(e["historico"] for e in dados["empresas"])
+    assert dados["meta_build"]["tem_historico"] is esperado
