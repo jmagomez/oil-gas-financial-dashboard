@@ -58,9 +58,14 @@ def _bruto(linhas: dict | None = None, fim: date = date(2026, 6, 30), ttm: dict 
     return {"fim": fim, "linhas": base, "ttm": ttm if ttm is not None else {"lucro_liquido": 32_781}}
 
 
+# Snapshot congelado: ver tests/fixtures/LEIA-ME.md. Assertar sobre o arquivo
+# vivo faria a atualizacao dos dados quebrar a suite.
+SNAPSHOT = Path(__file__).resolve().parent / "fixtures" / "indicadores_snapshot.json"
+
+
 @pytest.fixture()
 def dados():
-    return json.loads((RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    return json.loads(SNAPSHOT.read_text(encoding="utf-8"))
 
 
 def _coletado(ticker="XOM", **kwargs):
