@@ -26,6 +26,8 @@ Principios
    dashboard nao fingir que e dado do trimestre novo.
 4. Rede isolada em `busca_fundamentos`. Todo o resto e funcao pura, testada
    offline contra numeros conferidos a mao (ver tests/test_update_fundamentals.py).
+5. Escrita cirurgica. O arquivo e curado a mao e sua formatacao e significativa;
+   ver a secao "Escrita cirurgica no JSON" mais abaixo.
 
 Uso:
     python3 update_fundamentals.py --dry-run
@@ -35,6 +37,7 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import calendar
 import json
 import re
 import sys
@@ -117,6 +120,19 @@ FAIXAS: dict[str, tuple[float, float]] = {
 }
 
 TOLERANCIA_COERENCIA = 0.02  # 2% de folga nas identidades contabeis
+
+# Ordem dos campos de um item de `historico`, para a escrita cirurgica.
+ORDEM_HISTORICO = [
+    "periodo",
+    "receita",
+    "lucro_liquido",
+    "ebitda",
+    "fluxo_caixa_operacional",
+    "fcf",
+    "capex",
+    "divida_liquida",
+    "producao_kboed",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -552,6 +568,121 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Escrita cirurgica no JSON (preserva a formatacao curada a mao)
+#
+# O arquivo mantem cada bloco ("fy2025", "q_recente", "mercado") em UMA linha,
+# e numeros com o zero a direita ("preco_acao": 196.60). Isso nao e estetica:
+# e o que faz o commit diario da rotina de mercado aparecer como uma linha por
+# empresa. Reserializar com json.dump(indent=2) expandiria tudo e trocaria ~500
+# linhas de formatacao num arquivo onde a atualizacao muda 7 blocos -- alem de
+# transformar 196.60 em 196.6 em campos que ninguem tocou.
+#
+# Mesmo idioma de update_market_data.reescreve_json, pelo mesmo motivo.
+# ---------------------------------------------------------------------------
+def serializa_bloco(bloco: dict[str, Any], ordem: list[str]) -> str:
+    """Um dict de escalares em uma linha, na ordem canonica do arquivo."""
+    partes = [f'"{c}": {json.dumps(bloco[c], ensure_ascii=False)}' for c in ordem if c in bloco]
+    # Preserva eventuais chaves extras que nao estejam na ordem canonica.
+    partes += [
+        f'"{c}": {json.dumps(v, ensure_ascii=False)}'
+        for c, v in bloco.items()
+        if c not in ordem
+    ]
+    return "{" + ", ".join(partes) + "}"
+
+
+def serializa_historico(itens: list[dict[str, Any]], recuo: str) -> str:
+    """Lista de historico: um objeto por linha, para o diff ficar legivel."""
+    if not itens:
+        return "[]"
+    linhas = [f"{recuo}  {serializa_bloco(i, ORDEM_HISTORICO)}" for i in itens]
+    return "[\n" + ",\n".join(linhas) + f"\n{recuo}]"
+
+
+_RE_TICKER = re.compile(r'"ticker":\s*"([A-Z.]+)"')
+_RE_Q_RECENTE = re.compile(r'("q_recente":\s*)\{[^{}]*\}')
+# O bloco opcional de proveniencia e escrito sempre em UMA linha, o que permite
+# reconhece-lo (e substitui-lo em execucoes seguintes) sem regex recursiva.
+_RE_HIST_PROV = re.compile(
+    r'(\n(\s*)"historico":\s*)(\[[^\[\]]*\])(,\n\s*"proveniencia":\s*\{[^\n]*\})?'
+)
+
+
+def fim_do_trimestre(rotulo: str) -> date | None:
+    """Ultimo dia do trimestre a partir de "Q2 2026"."""
+    m = re.fullmatch(r"Q([1-4])\s+(\d{4})", str(rotulo).strip())
+    if not m:
+        return None
+    tri, ano = int(m.group(1)), int(m.group(2))
+    mes = tri * 3
+    ultimo = calendar.monthrange(ano, mes)[1]
+    return date(ano, mes, ultimo)
+
+
+def atualiza_referencia(bruto: str, trimestre: str, hoje: date) -> str:
+    """Sincroniza o cabecalho com o trimestre novo.
+
+    Sem isto, o dashboard passaria a exibir dados de Q2 2026 sob um rotulo que
+    ainda diz Q1 2026 -- e a nota de referencia continuaria afirmando que
+    nenhuma empresa havia divulgado o trimestre seguinte.
+    """
+    fim = fim_do_trimestre(trimestre)
+    if fim is not None:
+        texto = f"{trimestre} (trimestre encerrado em {fim.strftime('%d/%m/%Y')})"
+        bruto = re.sub(
+            r'("periodo_trimestral":\s*")[^"]*(")',
+            lambda m: m.group(1) + texto + m.group(2),
+            bruto,
+            count=1,
+        )
+    return re.sub(
+        r'("atualizado_em":\s*")\d{4}-\d{2}-\d{2}(")',
+        rf"\g<1>{hoje.isoformat()}\g<2>",
+        bruto,
+        count=1,
+    )
+
+
+def reescreve_json(bruto: str, saida: dict[str, Any], tickers_novos: set[str], hoje: date) -> str:
+    """Aplica so os blocos que mudaram, preservando o resto byte a byte."""
+    por_ticker = {e["ticker"]: e for e in saida["empresas"]}
+    posicoes = [(m.group(1), m.end()) for m in _RE_TICKER.finditer(bruto)]
+    if not posicoes:
+        raise ValueError("nenhum ticker encontrado no JSON; formato inesperado")
+
+    texto = bruto
+    # De tras para frente: assim os offsets ja calculados nao se deslocam.
+    for ticker, fim_ticker in reversed(posicoes):
+        if ticker not in tickers_novos:
+            continue
+        empresa = por_ticker[ticker]
+
+        # `historico` vem DEPOIS de `q_recente` no arquivo, entao e substituido
+        # primeiro -- do contrario o offset de q_recente se deslocaria.
+        alvo = _RE_HIST_PROV.search(texto, fim_ticker)
+        if alvo is None:
+            raise ValueError(f'bloco "historico" nao encontrado para {ticker}')
+        recuo = alvo.group(2)
+        bloco_hist = serializa_historico(empresa.get("historico") or [], recuo)
+        prov = empresa.get("proveniencia")
+        bloco_prov = (
+            f',\n{recuo}"proveniencia": {json.dumps(prov, ensure_ascii=False)}' if prov else ""
+        )
+        texto = texto[: alvo.start()] + alvo.group(1) + bloco_hist + bloco_prov + texto[alvo.end():]
+
+        alvo = _RE_Q_RECENTE.search(texto, fim_ticker)
+        if alvo is None:
+            raise ValueError(f'bloco "q_recente" nao encontrado para {ticker}')
+        bloco_q = serializa_bloco(empresa["q_recente"], CAMPOS_TRIMESTRE)
+        texto = texto[: alvo.start()] + alvo.group(1) + bloco_q + texto[alvo.end():]
+
+    trimestres = {por_ticker[t]["q_recente"]["trimestre"] for t in tickers_novos}
+    if len(trimestres) == 1:
+        texto = atualiza_referencia(texto, trimestres.pop(), hoje)
+    return texto
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
 def main(argv: list[str] | None = None) -> int:
@@ -582,9 +713,9 @@ def main(argv: list[str] | None = None) -> int:
         print("\n--dry-run: arquivo NAO foi escrito.")
         return 0
 
-    # Fundamentos mudam o arquivo inteiro de formato, entao aqui vale
-    # reserializar -- ao contrario do update_market_data, que e cirurgico.
-    args.json.write_text(json.dumps(saida, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    bruto = args.json.read_text(encoding="utf-8")
+    novos = {n["ticker"] for n in rel.novos}
+    args.json.write_text(reescreve_json(bruto, saida, novos, date.today()), encoding="utf-8")
     print(f"\n{args.json.name} atualizado com {len(rel.novos)} trimestre(s) novo(s).")
     return 0
 
