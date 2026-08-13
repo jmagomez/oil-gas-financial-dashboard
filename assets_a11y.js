@@ -170,12 +170,101 @@
     document.body.insertBefore(a, document.body.firstChild);
   }
 
-  /* -- 7. Reaplica quando a interface se redesenha -- */
+  /* -- 7. Metricas do historico com dados esparsos ficam marcadas --------
+     O backfill preenche trimestres anteriores a partir das demonstracoes
+     financeiras, e producao nao esta la -- sai em release. O resultado eram
+     7 pontos soltos em 28 possiveis, oferecidos como se fossem serie
+     completa: visualmente identico a um grafico quebrado.
+
+     A cobertura e medida dos DADOS, nao de uma lista fixa. Quando o
+     historico de producao for preenchido, a marcacao some sozinha.        */
+  var LIMIAR_PARCIAL = 0.6;
+
+  function coberturaHistorico(campo){
+    var dados = window.DATA;
+    if(!dados || !dados.empresas) return null;
+    var tem = 0, total = 0;
+    dados.empresas.forEach(function(e){
+      (e.historico || []).forEach(function(h){
+        total++;
+        var v = h[campo];
+        if(v !== null && v !== undefined) tem++;
+      });
+    });
+    return total ? {tem: tem, total: total} : null;
+  }
+
+  function avisoDoHistorico(){
+    var canvas = document.getElementById('chHist');
+    if(!canvas) return null;
+    var card = canvas.closest ? canvas.closest('.card') : null;
+    if(!card) return null;
+    var aviso = card.querySelector('[data-aviso-cobertura]');
+    if(!aviso){
+      aviso = document.createElement('p');
+      aviso.className = 'note';
+      aviso.setAttribute('data-aviso-cobertura','');
+      aviso.style.marginTop = '10px';
+      card.appendChild(aviso);
+    }
+    return aviso;
+  }
+
+  function atualizaAvisoCobertura(){
+    var sel = document.getElementById('selHist');
+    var aviso = avisoDoHistorico();
+    if(!sel || !aviso) return;
+    var c = coberturaHistorico(sel.value);
+    if(c && c.tem > 0 && c.tem / c.total < LIMIAR_PARCIAL){
+      aviso.textContent = 'Serie parcial: ' + c.tem + ' de ' + c.total
+        + ' pontos. Producao nao vem das demonstracoes financeiras, e sim dos '
+        + 'releases; os trimestres preenchidos automaticamente ficam sem esse dado.';
+      aviso.hidden = false;
+    } else {
+      aviso.textContent = '';
+      aviso.hidden = true;
+    }
+  }
+
+  function marcarMetricasEsparsas(){
+    var sel = document.getElementById('selHist');
+    if(!sel) return;
+    Array.prototype.forEach.call(sel.options, function(opt){
+      var c = coberturaHistorico(opt.value);
+      if(!c) return;
+      // Guarda o rotulo original: a marcacao e recalculada, nunca acumulada.
+      if(opt.dataset.rotuloBase === undefined) opt.dataset.rotuloBase = opt.textContent;
+      var base = opt.dataset.rotuloBase;
+      if(c.tem === 0){
+        opt.textContent = base + ' — sem historico';
+        opt.disabled = true;
+      } else if(c.tem / c.total < LIMIAR_PARCIAL){
+        opt.textContent = base + ' — parcial: ' + c.tem + ' de ' + c.total;
+        opt.disabled = false;
+      } else {
+        opt.textContent = base;
+        opt.disabled = false;
+      }
+    });
+    if(!sel.dataset.coberturaLigada){
+      sel.dataset.coberturaLigada = '1';
+      sel.addEventListener('change', function(){
+        atualizaAvisoCobertura();
+        var c = coberturaHistorico(sel.value);
+        if(c && c.tem > 0 && c.tem / c.total < LIMIAR_PARCIAL){
+          window.anunciar('Serie parcial: ' + c.tem + ' de ' + c.total + ' pontos.');
+        }
+      });
+    }
+    atualizaAvisoCobertura();
+  }
+
+  /* -- 8. Reaplica quando a interface se redesenha -- */
   var agendado = null;
   function reaplicar(){
     clearTimeout(agendado);
     agendado = setTimeout(function(){
-      try { upgradeCabecalhos(); upgradeTabelas(); } catch(e){}
+      try { upgradeCabecalhos(); upgradeTabelas(); marcarMetricasEsparsas(); } catch(e){}
     }, 40);
   }
 
