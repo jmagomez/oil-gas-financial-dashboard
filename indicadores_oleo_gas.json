@@ -12,14 +12,14 @@
       "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
       "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
       "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
-      "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 12/08/2026, iguais para as colunas FY2025 e Q1 2026.",
+      "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 14/08/2026, iguais para as colunas FY2025 e Q1 2026.",
       "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
       "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
       "Produção da Equinor em FY2025 não estava disponível de forma consistente na fonte padronizada; os indicadores por boe do ano fiscal usam a produção do trimestre mais recente como proxy nesse caso.",
       "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%."
     ],
     "versao_dados": "1.2",
-    "atualizado_em": "2026-08-13",
+    "atualizado_em": "2026-08-14",
     "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
   },
   "empresas": [
@@ -27,7 +27,7 @@
       "ticker": "XOM", "nome": "ExxonMobil", "pais": "EUA",
       "fy2025": {"receita": 323910, "lucro_liquido": 29760, "ebitda": 59530, "margem_liquida_pct": 9.19, "fluxo_caixa_operacional": 51970, "fcf": 23610, "capex": -28360, "divida_liquida": 32860, "divida_patrimonio_pct": 16.3, "roe_pct": 11.1, "roa_pct": 6.6, "producao_kboed": 4740},
       "q_recente": {"trimestre": "Q2 2026", "receita": 114529, "lucro_liquido": 14525, "ebitda": 28340, "margem_liquida_pct": 12.68, "fluxo_caixa_operacional": 23555, "fcf": 17028, "capex": -6527, "divida_liquida": 31780, "divida_patrimonio_pct": 16.3, "roe_pct": 12.63, "roa_pct": 7.05, "producao_kboed": 4514},
-      "mercado": {"market_cap": 656878, "pe": 20.56, "ev_ebitda": 10.24, "dividend_yield_pct": 2.55, "preco_acao": 159.75},
+      "mercado": {"market_cap": 658317, "pe": 20.60, "ev_ebitda": 10.17, "dividend_yield_pct": 2.55, "preco_acao": 160.10},
       "historico": [
         {"periodo": "2025-Q2", "receita": 79477, "lucro_liquido": 7082, "ebitda": 16951, "fluxo_caixa_operacional": 11550, "fcf": 5267, "capex": -6283, "divida_liquida": 24637, "producao_kboed": 4630},
         {"periodo": "2025-Q3", "receita": 83331, "lucro_liquido": 7548, "ebitda": 17497, "fluxo_caixa_operacional": 14788, "fcf": 6061, "capex": -8727, "divida_liquida": 28222, "producao_kboed": 4769},
@@ -41,7 +41,7 @@
       "ticker": "CVX", "nome": "Chevron", "pais": "EUA",
       "fy2025": {"receita": 184430, "lucro_liquido": 12490, "ebitda": 36490, "margem_liquida_pct": 6.77, "fluxo_caixa_operacional": 33940, "fcf": 16590, "capex": -17350, "divida_liquida": 34460, "divida_patrimonio_pct": 21.2, "roe_pct": 7.1, "roa_pct": 4.2, "producao_kboed": 3720},
       "q_recente": {"trimestre": "Q2 2026", "receita": 67199, "lucro_liquido": 12072, "ebitda": 23034, "margem_liquida_pct": 17.96, "fluxo_caixa_operacional": 22633, "fcf": 18095, "capex": -4538, "divida_liquida": 28545, "divida_patrimonio_pct": 19.5, "roe_pct": 10.84, "roa_pct": 6.24, "producao_kboed": 4070},
-      "mercado": {"market_cap": 385651, "pe": 18.94, "ev_ebitda": 8.29, "dividend_yield_pct": 3.55, "preco_acao": 196.60},
+      "mercado": {"market_cap": 392321, "pe": 19.23, "ev_ebitda": 8.33, "dividend_yield_pct": 3.49, "preco_acao": 200.00},
       "historico": [
         {"periodo": "2025-Q2", "receita": 44375, "lucro_liquido": 2490, "ebitda": 8653, "fluxo_caixa_operacional": 8576, "fcf": 4864, "capex": -3712, "divida_liquida": 25401, "producao_kboed": 3396},
         {"periodo": "2025-Q3", "receita": 48169, "lucro_liquido": 3539, "ebitda": 11810, "fluxo_caixa_operacional": 9385, "fcf": 4941, "capex": -4444, "divida_liquida": 33817, "producao_kboed": 4086},
@@ -55,7 +55,7 @@
       "ticker": "SHEL", "nome": "Shell", "pais": "Reino Unido",
       "fy2025": {"receita": 266886, "lucro_liquido": 17837, "ebitda": 52881, "margem_liquida_pct": 6.79, "fluxo_caixa_operacional": 42863, "fcf": 23916, "capex": -18948, "divida_liquida": 45687, "divida_patrimonio_pct": 20.7, "roe_pct": 10.1, "roa_pct": 4.7, "producao_kboed": 2800},
       "q_recente": {"trimestre": "Q2 2026", "receita": 94664, "lucro_liquido": 10821, "ebitda": 22427, "margem_liquida_pct": 11.43, "fluxo_caixa_operacional": 21432, "fcf": 17401, "capex": -4031, "divida_liquida": 41702, "divida_patrimonio_pct": 40.4, "roe_pct": 14.37, "roa_pct": 6.83, "producao_kboed": 2455},
-      "mercado": {"market_cap": 248779, "pe": 9.96, "ev_ebitda": 5.12, "dividend_yield_pct": 1.68, "preco_acao": 90.07},
+      "mercado": {"market_cap": 249877, "pe": 10.01, "ev_ebitda": 5.09, "dividend_yield_pct": 1.67, "preco_acao": 90.47},
       "historico": [
         {"periodo": "2025-Q2", "receita": 65406, "lucro_liquido": 3601, "ebitda": 12513, "fluxo_caixa_operacional": 11937, "fcf": 6487, "capex": -5450, "divida_liquida": 42993, "producao_kboed": 2645},
         {"periodo": "2025-Q3", "receita": 68153, "lucro_liquido": 5322, "ebitda": 15031, "fluxo_caixa_operacional": 12207, "fcf": 7650, "capex": -4557, "divida_liquida": 40924, "producao_kboed": 2766},
@@ -69,7 +69,7 @@
       "ticker": "BP", "nome": "BP", "pais": "Reino Unido",
       "fy2025": {"receita": 189335, "lucro_liquido": 55, "ebitda": 28237, "margem_liquida_pct": 0.68, "fluxo_caixa_operacional": 24493, "fcf": 11272, "capex": -13221, "divida_liquida": 22200, "divida_patrimonio_pct": 98, "roe_pct": 0.1, "roa_pct": 0.02, "producao_kboed": 2310},
       "q_recente": {"trimestre": "Q2 2026", "receita": 69105, "lucro_liquido": 3911, "ebitda": 13671, "margem_liquida_pct": 5.66, "fluxo_caixa_operacional": 10858, "fcf": 7771, "capex": -3087, "divida_liquida": 35468, "divida_patrimonio_pct": 124.4, "roe_pct": 9.4, "roa_pct": 1.86, "producao_kboed": 2201},
-      "mercado": {"market_cap": 110559, "pe": 20.54, "ev_ebitda": 4.90, "dividend_yield_pct": 4.71, "preco_acao": 42.93},
+      "mercado": {"market_cap": 109529, "pe": 20.35, "ev_ebitda": 4.90, "dividend_yield_pct": 4.71, "preco_acao": 42.53},
       "historico": [
         {"periodo": "2025-Q2", "receita": 46627, "lucro_liquido": 1629, "ebitda": 8835, "fluxo_caixa_operacional": 6271, "fcf": 3035, "capex": -3236, "divida_liquida": 39670, "producao_kboed": 2300},
         {"periodo": "2025-Q3", "receita": 48420, "lucro_liquido": 1161, "ebitda": 8975, "fluxo_caixa_operacional": 7786, "fcf": 4615, "capex": -3171, "divida_liquida": 39769, "producao_kboed": 2362},
@@ -83,7 +83,7 @@
       "ticker": "EQNR", "nome": "Equinor", "pais": "Noruega",
       "fy2025": {"receita": 106462, "lucro_liquido": 5043, "ebitda": 37826, "margem_liquida_pct": 4.75, "fluxo_caixa_operacional": 19971, "fcf": 5977, "capex": -13994, "divida_liquida": -11888, "divida_patrimonio_pct": 77, "roe_pct": 12.2, "roa_pct": 3.8, "producao_kboed": null},
       "q_recente": {"trimestre": "Q2 2026", "receita": 34523, "lucro_liquido": 4848, "ebitda": 16184, "margem_liquida_pct": 14.04, "fluxo_caixa_operacional": 9470, "fcf": 6598, "capex": -2872, "divida_liquida": 8693, "divida_patrimonio_pct": 75.3, "roe_pct": 21.03, "roa_pct": 6.43, "producao_kboed": 2165},
-      "mercado": {"market_cap": 97337, "pe": 11.11, "ev_ebitda": 4.96, "dividend_yield_pct": 3.76, "preco_acao": 40.99},
+      "mercado": {"market_cap": 96814, "pe": 11.05, "ev_ebitda": 4.92, "dividend_yield_pct": 3.78, "preco_acao": 40.77},
       "historico": [
         {"periodo": "2025-Q2", "receita": 25130, "lucro_liquido": 1313, "ebitda": 9537, "fluxo_caixa_operacional": 2477, "fcf": -924, "capex": -3401, "divida_liquida": 10546, "producao_kboed": 2096},
         {"periodo": "2025-Q3", "receita": 26017, "lucro_liquido": -210, "ebitda": 8401, "fluxo_caixa_operacional": 6346, "fcf": 2926, "capex": -3420, "divida_liquida": 8564, "producao_kboed": 2130},
@@ -97,7 +97,7 @@
       "ticker": "TTE", "nome": "TotalEnergies", "pais": "França",
       "fy2025": {"receita": 182344, "lucro_liquido": 13127, "ebitda": 34806, "margem_liquida_pct": 7.33, "fluxo_caixa_operacional": 27343, "fcf": 10390, "capex": -16953, "divida_liquida": -31499, "divida_patrimonio_pct": 52, "roe_pct": 11.3, "roa_pct": 4.55, "producao_kboed": 2530},
       "q_recente": {"trimestre": "Q2 2026", "receita": 57097, "lucro_liquido": 5438, "ebitda": 12543, "margem_liquida_pct": 9.52, "fluxo_caixa_operacional": 10858, "fcf": 6626, "capex": -4232, "divida_liquida": 30991, "divida_patrimonio_pct": 48.8, "roe_pct": 13.89, "roa_pct": 5.68, "producao_kboed": 2395},
-      "mercado": {"market_cap": 194445, "pe": 10.98, "ev_ebitda": 5.79, "dividend_yield_pct": 4.62, "preco_acao": 87.70},
+      "mercado": {"market_cap": 195842, "pe": 11.06, "ev_ebitda": 5.73, "dividend_yield_pct": 4.59, "preco_acao": 88.33},
       "historico": [
         {"periodo": "2025-Q2", "receita": 44676, "lucro_liquido": 2687, "ebitda": 9028, "fluxo_caixa_operacional": 5960, "fcf": 1194, "capex": -4766, "divida_liquida": 36614, "producao_kboed": 2503},
         {"periodo": "2025-Q3", "receita": 43844, "lucro_liquido": 3683, "ebitda": 10398, "fluxo_caixa_operacional": 8349, "fcf": 4537, "capex": -3812, "divida_liquida": 35073, "producao_kboed": 2508},
@@ -111,7 +111,7 @@
       "ticker": "PBR", "nome": "Petrobras", "pais": "Brasil",
       "fy2025": {"receita": 89200, "lucro_liquido": 19740, "ebitda": 37310, "margem_liquida_pct": 22.13, "fluxo_caixa_operacional": 35910, "fcf": 16420, "capex": -19490, "divida_liquida": 59760, "divida_patrimonio_pct": 91.96, "roe_pct": 28.1, "roa_pct": 9.4, "producao_kboed": 2990},
       "q_recente": {"trimestre": "Q2 2026", "receita": 33607, "lucro_liquido": 10428, "ebitda": 19283, "margem_liquida_pct": 31.03, "fluxo_caixa_operacional": 12300, "fcf": 7734, "capex": -4566, "divida_liquida": 60420, "divida_patrimonio_pct": 76.2, "roe_pct": 27.51, "roa_pct": 10.34, "producao_kboed": 3340},
-      "mercado": {"market_cap": 114452, "pe": 4.48, "ev_ebitda": 2.17, "dividend_yield_pct": 5.34, "preco_acao": 17.76},
+      "mercado": {"market_cap": 115225, "pe": 4.52, "ev_ebitda": 1.76, "dividend_yield_pct": 5.34, "preco_acao": 17.88},
       "historico": [
         {"periodo": "2025-Q2", "receita": 21037, "lucro_liquido": 4734, "ebitda": 11093, "fluxo_caixa_operacional": 7465, "fcf": 3463, "capex": -4002, "divida_liquida": 58563, "producao_kboed": 2909},
         {"periodo": "2025-Q3", "receita": 23477, "lucro_liquido": 6027, "ebitda": 13470, "fluxo_caixa_operacional": 9856, "fcf": 4969, "capex": -4887, "divida_liquida": 59053, "producao_kboed": 3140},
