@@ -5,4 +5,4 @@
 # por isso ele, e nao um urllib cru. Faixa aberta no patch para receber
 # correcoes quando o Yahoo mexer no endpoint, travada no minor para nao
 # importar mudanca de API sem revisao.
-yfinance>=0.2.50,<0.3
+yfinance>=1.6.0,<1.7
