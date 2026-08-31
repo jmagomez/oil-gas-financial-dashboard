@@ -344,8 +344,8 @@ th[aria-sort="none"]::after{content:" \2195";opacity:.28;font-size:.85em;}
       <button data-p="fy2025" class="active">FY2025</button>
       <button data-p="q_recente" id="btnQ">Trimestre</button>
     </div>
-    <label class="switch" title="Multiplica métricas de fluxo do trimestre por 4 para comparar com o ano fiscal">
-      <input type="checkbox" id="swAnual"><span class="track"></span>Anualizar trimestre
+    <label class="switch" title="Coloca o trimestre em base de 12 meses somando os quatro últimos trimestres (TTM). Sem a janela completa, cai para trimestre × 4.">
+      <input type="checkbox" id="swAnual"><span class="track"></span>Base 12 meses (TTM)
     </label>
     <label class="switch" title="Escala logarítmica nos gráficos de valores absolutos">
       <input type="checkbox" id="swLog"><span class="track"></span>Escala log
@@ -395,7 +395,7 @@ th[aria-sort="none"]::after{content:" \2195";opacity:.28;font-size:.85em;}
   <div class="section-head">
     <div>
       <h2>Resultado e geração de caixa</h2>
-      <p>Comparativo entre o ano fiscal e o trimestre mais recente. Ative "anualizar" para colocar os dois na mesma base.</p>
+      <p>Comparativo entre o ano fiscal e o trimestre mais recente. Ative "base 12 meses" para colocar os dois na mesma base — o trimestre passa a somar os quatro últimos (TTM), não a ser multiplicado por 4.</p>
     </div>
   </div>
   <div class="charts-grid" id="gridResultado">
@@ -434,7 +434,7 @@ th[aria-sort="none"]::after{content:" \2195";opacity:.28;font-size:.85em;}
   </div>
   <div class="charts-grid" id="gridBalanco">
     <div class="card"><div class="card-head"><div><h3>Dívida líquida</h3><p class="note">US$ milhões · abaixo de zero = caixa líquido</p></div><div class="card-tools"><button class="btn icon" data-png="chDebt">PNG</button></div></div><div class="canvas-box"><canvas id="chDebt"></canvas></div></div>
-    <div class="card"><div class="card-head"><div><h3>Alavancagem — dívida líquida / EBITDA</h3><p class="note">Derivado · EBITDA anualizado do período selecionado</p></div><div class="card-tools"><button class="btn icon" data-png="chLeverage">PNG</button></div></div><div class="canvas-box"><canvas id="chLeverage"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><h3>Alavancagem — dívida líquida / EBITDA</h3><p class="note">Derivado · EBITDA dos últimos 12 meses (TTM) quando a janela existe; trimestre × 4 como reserva</p></div><div class="card-tools"><button class="btn icon" data-png="chLeverage">PNG</button></div></div><div class="canvas-box"><canvas id="chLeverage"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>ROE vs. ROA</h3><p class="note">% do período selecionado</p></div><div class="card-tools"><button class="btn icon" data-png="chRoe">PNG</button></div></div><div class="canvas-box"><canvas id="chRoe"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Margem líquida vs. margem EBITDA</h3><p class="note">% da receita</p></div><div class="card-tools"><button class="btn icon" data-png="chMargin">PNG</button></div></div><div class="canvas-box"><canvas id="chMargin"></canvas></div></div>
   </div>
@@ -566,7 +566,7 @@ function hex2rgba(hex, a){
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 function isFY(){ return STATE.period === 'fy2025'; }
-function rotuloPeriodo(){ return isFY() ? 'FY2025' : (STATE.anualizar ? TRIM + ' anualizado' : TRIM); }
+function rotuloPeriodo(){ return isFY() ? 'FY2025' : (STATE.anualizar ? TRIM + ' · 12m' : TRIM); }
 
 /* ==========================================================================
    Registro de indicadores
@@ -609,8 +609,32 @@ const METRICAS = {
   preco_acao:         {label:'Preço da ação',                 grupo:'Mercado',     tipo:'usd',   fluxo:false, dec:2, get:(e)=>e.mercado.preco_acao, melhor:'alto'},
 };
 
-// Fator de anualização aplicado a métricas de fluxo no trimestre.
-function fator(){ return (!isFY() && STATE.anualizar) ? 4 : 1; }
+/* Base de 12 meses do trimestre.
+
+   Usa o TTM real do payload — soma dos quatro últimos trimestres, calculada
+   em build_dashboard.calcular_ttm — e cai para ×4 apenas quando a janela não
+   existe. Multiplicar UM trimestre por 4 extrapola aquele trimestre para o
+   ano inteiro; num setor cujo resultado acompanha o preço da commodity isso
+   distorce muito. Medido no 2T26 (trimestre de pico): o ×4 inflava o FCF
+   yield entre 54% e 176% e subestimava a alavancagem entre 8% e 40% — sempre
+   na direção que faz a empresa parecer melhor. */
+function anualizando(){ return !isFY() && STATE.anualizar; }
+
+function ttmDe(e, chave){
+  const t = e && e.ttm;
+  const v = t ? t[chave] : undefined;
+  return (v === null || v === undefined) ? undefined : v;
+}
+
+// Rótulo honesto: diz qual base foi usada, inclusive quando o grupo está misto.
+function baseRotulo(chave){
+  const vis = empresasVisiveis();
+  if(!vis.length) return '×4';
+  const comTTM = vis.filter(e => ttmDe(e, chave) !== undefined).length;
+  if(comTTM === vis.length) return 'TTM';
+  if(comTTM === 0) return '×4';
+  return `TTM em ${comTTM}/${vis.length}`;
+}
 
 function valor(chave, empresa, periodKey){
   const m = METRICAS[chave];
@@ -618,7 +642,9 @@ function valor(chave, empresa, periodKey){
   const p = empresa[periodKey || STATE.period];
   const v = m.get(empresa, p);
   if(v === null || v === undefined) return null;
-  return m.fluxo ? v * fator() : v;
+  if(!m.fluxo || !anualizando()) return v;
+  const t = ttmDe(empresa, chave);
+  return t !== undefined ? t : v * 4;
 }
 
 function unidade(chave){
@@ -835,7 +861,7 @@ function renderKpis(){
       <div class="kpi-head"><span class="kpi-tk">${e.ticker}</span><span class="kpi-flag">${e.pais}</span></div>
       <div class="kpi-nm">${e.nome}</div>
       <div class="kpi-hero num">US$ ${fmt(e.mercado.market_cap / 1000, 1)}<small>bi de market cap</small></div>
-      <div class="kpi-delta">EBITDA do trimestre anualizado ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY2025</div>
+      <div class="kpi-delta">EBITDA do trimestre × 4 ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY2025</div>
       <div class="kpi-rows">
         <div class="kpi-row"><span>Margem EBITDA</span><b class="num">${fmt(d.margem_ebitda_pct, 1)}%</b></div>
         <div class="kpi-row"><span>ND / EBITDA</span><b class="num">${fmt(d.nd_ebitda_x, 2)}x</b></div>
@@ -879,7 +905,7 @@ function renderExplorador(){
   document.getElementById('expTitulo').textContent = m.label + ' — ' + rotuloPeriodo();
   document.getElementById('expNota').textContent =
     `${unidade(chave)} · ${m.derivado ? 'indicador derivado, calculado no build' : 'indicador primário, direto da fonte'}` +
-    (m.fluxo && !isFY() && STATE.anualizar ? ' · trimestre multiplicado por 4' : '');
+    (m.fluxo && anualizando() ? ` · base de 12 meses (${baseRotulo(chave)})` : '');
 
   if(!chartsOk) return;
   if(!vis.length){
@@ -937,11 +963,17 @@ function renderExplorador(){
    Resultado, balanço e eficiência
    ========================================================================== */
 function duplaPeriodo(vis, chave){
-  // Dataset FY vs. trimestre, respeitando anualização
-  const f = STATE.anualizar ? 4 : 1;
+  // Dataset FY vs. trimestre. O trimestre vai para base de 12 meses via TTM;
+  // ×4 só quando a empresa não tem a janela completa.
   const m = METRICAS[chave];
   const fy = vis.map(e => m.get(e, e.fy2025));
-  const q  = vis.map(e => { const v = m.get(e, e.q_recente); return v === null || v === undefined ? null : (m.fluxo ? v * f : v); });
+  const q  = vis.map(e => {
+    const v = m.get(e, e.q_recente);
+    if(v === null || v === undefined) return null;
+    if(!m.fluxo || !STATE.anualizar) return v;
+    const t = ttmDe(e, chave);
+    return t !== undefined ? t : v * 4;
+  });
   return [fy, q];
 }
 
@@ -950,7 +982,7 @@ function grafDuplo(id, chave, opts = {}){
   const labels = vis.map(e => e.ticker);
   const cores = vis.map(e => COLORS[e.ticker]);
   const [fy, q] = duplaPeriodo(vis, chave);
-  const rotuloQ = TRIM + (STATE.anualizar && METRICAS[chave].fluxo ? ' (anualizado)' : '');
+  const rotuloQ = TRIM + (STATE.anualizar && METRICAS[chave].fluxo ? ` (12m · ${baseRotulo(chave)})` : '');
   make(id, barConfig(labels, [
     {label:'FY2025', data:fy, backgroundColor:cores.map(c => hex2rgba(c, .35)), borderColor:cores.map(c => hex2rgba(c, .6)), borderWidth:1},
     {label:rotuloQ,  data:q,  backgroundColor:cores.map(c => hex2rgba(c, .9)),  borderColor:cores, borderWidth:1},
@@ -1031,12 +1063,18 @@ function renderPonte(){
     if(charts.chPonte){ charts.chPonte.destroy(); delete charts.chPonte; }
     return;
   }
-  const f = (METRICAS.receita.fluxo && !isFY() && STATE.anualizar) ? 4 : 1;
-  const receita = p.receita * f;
-  const ebitda = p.ebitda * f;
-  const fco = p.fluxo_caixa_operacional * f;
-  const capex = Math.abs(p.capex) * f;
-  const fcf = p.fcf * f;
+  // Cada linha vai para base de 12 meses pelo TTM da própria empresa; ×4 é
+  // fallback por campo, não um fator único aplicado ao bloco todo.
+  const B = (chave, v) => {
+    if(!anualizando()) return v;
+    const t = ttmDe(e, chave);
+    return t !== undefined ? t : v * 4;
+  };
+  const receita = B('receita', p.receita);
+  const ebitda = B('ebitda', p.ebitda);
+  const fco = B('fluxo_caixa_operacional', p.fluxo_caixa_operacional);
+  const capex = Math.abs(B('capex', p.capex));
+  const fcf = B('fcf', p.fcf);
 
   const custos = ebitda - receita;                 // negativo
   const ajustes = fco - ebitda;                    // impostos, juros, capital de giro
@@ -1396,7 +1434,7 @@ function baixarCsv(){
   const blob = new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `oleo-gas-${STATE.period}${STATE.anualizar && !isFY() ? '-anualizado' : ''}.csv`;
+  a.download = `oleo-gas-${STATE.period}${STATE.anualizar && !isFY() ? '-12m' : ''}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -1406,16 +1444,16 @@ function baixarCsv(){
    ========================================================================== */
 const FORMULAS = [
   ['Margem EBITDA', 'EBITDA ÷ receita'],
-  ['ND / EBITDA', 'dívida líquida ÷ EBITDA anualizado'],
+  ['ND / EBITDA', 'dívida líquida ÷ EBITDA dos últimos 12 meses (TTM); ×4 só sem a janela'],
   ['Conversão de FCF', 'FCF ÷ EBITDA'],
   ['Capex / FCO', '|capex| ÷ fluxo de caixa operacional'],
   ['Receita e EBITDA por boe', 'valor ÷ (produção × dias do período)'],
   ['Enterprise value', 'market cap + dívida líquida'],
   ['EV por boe/d', 'EV ÷ produção diária'],
-  ['FCF yield', 'FCF anualizado ÷ market cap'],
+  ['FCF yield', 'FCF dos últimos 12 meses (TTM) ÷ market cap'],
   ['Dividendos estimados', 'market cap × dividend yield'],
-  ['Cobertura do dividendo', 'FCF anualizado ÷ dividendos estimados'],
-  ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1'],
+  ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos estimados'],
+  ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1 — aqui o ×4 é proposital: mede o ritmo do trimestre isolado'],
   ['Scores do radar', 'normalização min-max 0–100 entre as sete empresas'],
 ];
 
