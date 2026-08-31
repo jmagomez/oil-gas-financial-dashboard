@@ -96,8 +96,50 @@ def arred(v, casas=2):
 # --------------------------------------------------------------------------- #
 # Camada de indicadores derivados
 # --------------------------------------------------------------------------- #
-def derivar_periodo(empresa, period_key):
-    """Indicadores derivados de um período (fy2025 ou q_recente)."""
+# Campos de FLUXO: somam ao longo dos trimestres. Estoque (divida, patrimonio)
+# nao entra -- somar saldo de balanco nao significa nada.
+CAMPOS_FLUXO_TTM = [
+    "receita", "lucro_liquido", "ebitda",
+    "fluxo_caixa_operacional", "fcf", "capex",
+]
+
+
+def calcular_ttm(empresa):
+    """Soma dos ultimos 4 trimestres. None se a janela nao estiver completa.
+
+    Substitui a anualizacao x4 nos indicadores que dividem um fluxo por um
+    estoque ou por market cap. Multiplicar UM trimestre por 4 extrapola o
+    trimestre para o ano inteiro; num setor onde o resultado acompanha o preco
+    da commodity, isso distorce muito. Medido nos dados do 2T26 (trimestre de
+    pico): FCF yield x4 superestimava entre 54% e 176%, e ND/EBITDA x4
+    subestimava a alavancagem entre 8% e 40%.
+
+    Nao inventa: se faltar um trimestre da janela, devolve None e quem consome
+    volta para o fallback explicito.
+    """
+    hist = empresa.get("historico") or []
+    janela = hist[-3:] + [empresa["q_recente"]]
+    if len(janela) < 4:
+        return None
+    out = {}
+    for campo in CAMPOS_FLUXO_TTM:
+        vals = [x.get(campo) for x in janela]
+        out[campo] = None if any(v is None for v in vals) else sum(vals)
+    # Producao e uma taxa (por dia), nao um fluxo acumulavel: media, nao soma.
+    prods = [x.get("producao_kboed") for x in janela]
+    out["producao_kboed"] = None if any(p is None for p in prods) else sum(prods) / 4
+    out["janela"] = [x.get("periodo") or x.get("trimestre") for x in janela]
+    return out
+
+
+def derivar_periodo(empresa, period_key, ttm=None):
+    """Indicadores derivados de um período (fy2025 ou q_recente).
+
+    No trimestre, os indicadores que dividem fluxo por estoque ou por market cap
+    (ND/EBITDA, FCF yield, cobertura de dividendo, payout) usam o TTM quando ele
+    existe -- ver `calcular_ttm`. O ano fiscal ja e um periodo de 12 meses e nao
+    precisa de ajuste.
+    """
     p = empresa[period_key]
     m = empresa["mercado"]
     if period_key == "q_recente":
@@ -122,8 +164,19 @@ def derivar_periodo(empresa, period_key):
         prod = empresa["q_recente"].get("producao_kboed")
         prod_proxy = prod is not None
 
-    ebitda_anual = None if ebitda is None else ebitda * fator
-    fcf_anual = None if fcf is None else fcf * fator
+    # Base de 12 meses. TTM quando disponivel; x4 so como fallback explicito,
+    # e o campo `base_12m` registra qual foi usada para o leitor saber.
+    usa_ttm = period_key == "q_recente" and ttm is not None
+    if usa_ttm and ttm.get("ebitda") is not None:
+        ebitda_anual, base_ebitda = ttm["ebitda"], "ttm"
+    else:
+        ebitda_anual = None if ebitda is None else ebitda * fator
+        base_ebitda = "x4" if period_key == "q_recente" else "fy"
+    if usa_ttm and ttm.get("fcf") is not None:
+        fcf_anual, base_fcf = ttm["fcf"], "ttm"
+    else:
+        fcf_anual = None if fcf is None else fcf * fator
+        base_fcf = "x4" if period_key == "q_recente" else "fy"
 
     # Barris de óleo equivalente no período (mil boe/d -> boe totais).
     boe_periodo = None if prod is None else prod * 1000.0 * dias
@@ -143,6 +196,10 @@ def derivar_periodo(empresa, period_key):
         "margem_ebitda_pct": arred(pct(ebitda, receita)),
         "ebitda_anualizado": arred(ebitda_anual, 0),
         "fcf_anualizado": arred(fcf_anual, 0),
+        # Qual base de 12 meses alimentou os ratios: "ttm", "x4" ou "fy".
+        "base_12m_ebitda": base_ebitda,
+        "base_12m_fcf": base_fcf,
+        "janela_ttm": (ttm or {}).get("janela") if usa_ttm else None,
         # Alavancagem: dívida líquida sobre EBITDA anualizado.
         "nd_ebitda_x": arred(div(nd, ebitda_anual)),
         # Quanto do EBITDA vira caixa livre.
@@ -263,8 +320,10 @@ def calcular_perfil(empresas):
 def enriquecer(data):
     """Adiciona a camada derivada ao payload em memória."""
     for e in data["empresas"]:
+        ttm = calcular_ttm(e)
+        e["ttm"] = ttm
         for period_key in ("fy2025", "q_recente"):
-            e[period_key]["derivados"] = derivar_periodo(e, period_key)
+            e[period_key]["derivados"] = derivar_periodo(e, period_key, ttm)
             consolidar_margem(e[period_key])
         e["derivados"] = derivar_empresa(e)
         e.setdefault("historico", [])
@@ -274,6 +333,7 @@ def enriquecer(data):
         "dias_periodo": DIAS_PERIODO,
         "fator_anualizacao": FATOR_ANUAL,
         "tem_historico": any(e.get("historico") for e in data["empresas"]),
+        "empresas_com_ttm": sum(1 for e in data["empresas"] if e.get("ttm")),
     }
     return data
 
