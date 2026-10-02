@@ -108,3 +108,30 @@ def test_painel_publicado_esta_sincronizado_com_o_template():
     assert "__DATA__" not in html
     tpl = (ROOT / "poc" / "painel_template.html").read_text(encoding="utf-8")
     assert tpl.split("__DATA__")[0] in html
+
+
+def test_mensagens_do_log_preservam_abreviacoes():
+    # regressão: a conversão de decimais para pt-BR trocava "p.p." por "p,p,"
+    dados, empresas, base = _base()
+    log = bp.aplica_regras(dados, empresas, base)
+    assert not any("p,p" in x["mensagem"] for x in log.itens)
+    assert any("p.p." in x["mensagem"] for x in log.itens)
+
+
+def test_r5_exige_magnitude_compativel_com_o_brent():
+    # EBITDA da Petrobras +104% no 2T26 com Brent +25%: mesma direção, mas 4x a variação -> fica pendente
+    dados, empresas, base = _base()
+    log = bp.aplica_regras(dados, empresas, base)
+    it = [x for x in log.itens if x["empresa"] == "PBR" and x["periodo"] == "2026-Q2" and x["campo"] == "ebitda"
+          and x["mensagem"].startswith("variação")]
+    assert it and not it[0]["justificado"]
+    # receita +43% com Brent +25% (1,7x) continua justificada
+    rec = [x for x in log.itens if x["empresa"] == "PBR" and x["periodo"] == "2026-Q2" and x["campo"] == "receita"]
+    assert rec and rec[0]["justificado"]
+
+
+def test_r4_sinaliza_salto_material_de_fcf():
+    dados, empresas, base = _base()
+    log = bp.aplica_regras(dados, empresas, base)
+    assert any(x["empresa"] == "XOM" and x["periodo"] == "2026-Q2" and x["campo"] == "fcf" and not x["justificado"]
+               for x in log.itens)
