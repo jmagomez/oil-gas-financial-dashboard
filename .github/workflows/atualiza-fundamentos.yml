@@ -58,6 +58,14 @@ jobs:
         if: inputs.dry_run != true
         run: python build_dashboard.py
 
+      # Commits feitos com GITHUB_TOKEN nao disparam o build-dashboard.yml;
+      # por isso a PoC e o projeto Power BI sao regenerados aqui tambem.
+      - name: Regenera PoC (QA + painel) e projeto Power BI
+        if: inputs.dry_run != true
+        run: |
+          python poc/build_poc.py
+          python powerbi/gera_pbip.py
+
       - name: Roda os testes antes de commitar
         if: inputs.dry_run != true
         run: |
@@ -73,7 +81,7 @@ jobs:
             echo "Nada mudou -- nenhum commit."
             exit 0
           fi
-          git add indicadores_oleo_gas.json indicadores_oleo_gas.csv dashboard_oleo_gas.html
+          git add indicadores_oleo_gas.json indicadores_oleo_gas.csv dashboard_oleo_gas.html poc/ powerbi/projeto/
           git commit -F - <<'MSG'
           dados: atualiza fundamentos
           MSG
