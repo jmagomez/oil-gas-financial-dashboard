@@ -115,6 +115,8 @@ INSUMOS = {
 }
 OBRIGATORIOS = ["receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional", "fcf", "capex",
                 "divida_liquida", "producao_kboed"]
+ELASTICIDADE_MAX = 3.0  # R5: variação justificada pelo Brent até 3× a variação do Brent
+LIMITE_FCF = 0.5        # R4: |ΔFCF| acima de 50% do EBITDA do trimestre anterior
 LIMITES_VAR = {"receita": 0.30, "ebitda": 0.40, "lucro_liquido": 0.60}
 SEV_ORD = {"verde": 0, "amarelo": 1, "vermelho": 2}
 
@@ -213,10 +215,17 @@ def aplica_regras(dados, empresas, base):
                     continue
                 var = b / a - 1
                 if abs(var) > lim:
-                    explicado = var * brent_var > 0 and abs(brent_var) >= 0.08
+                    # R5 exige direção E magnitude compatíveis com o Brent: variação até ELASTICIDADE_MAX × a do Brent.
+                    # (antes bastava a direção, o que "justificava" EBITDA +104% com Brent +25%)
+                    explicado = (var * brent_var > 0 and abs(brent_var) >= 0.08
+                                 and abs(var) <= ELASTICIDADE_MAX * abs(brent_var))
                     msg = f"variação {var:+.0%} t/t (limite ±{lim:.0%})"
                     if explicado:
-                        msg += f" — mesma direção do Brent ({brent_var:+.0%}) (R5)"
+                        msg += f" — compatível com o Brent ({brent_var:+.0%}) (R5)"
+                    elif var * brent_var > 0 and abs(brent_var) >= 0.08:
+                        razao = f"{abs(var / brent_var):.1f}".replace(".", ",")
+                        msg += (f" — mesma direção do Brent ({brent_var:+.0%}), mas {razao}× a variação dele"
+                                f" (acima de {ELASTICIDADE_MAX:.0f}×): ler o release")
                     elif p == "2025-Q2":
                         msg += " — possível quebra de definição entre o release (1T25) e o agregador"
                     log.add(t, p, c, "R4 Desvio histórico", "amarelo", msg, justificado=explicado)
@@ -226,8 +235,16 @@ def aplica_regras(dados, empresas, base):
                 if abs(dm) > 15:
                     explicado = dm * brent_var > 0 and abs(brent_var) >= 0.08
                     log.add(t, p, "ebitda", "R4 Desvio histórico", "amarelo",
-                            f"margem EBITDA {dm:+.1f} p.p. t/t".replace(".", ",") + (f" — Brent {brent_var:+.0%} (R5)" if explicado else
+                            f"margem EBITDA {dm:+.1f}".replace(".", ",") + " p.p. t/t" + (f" — Brent {brent_var:+.0%} (R5)" if explicado else
                             " sem contrapartida no Brent: checar itens não recorrentes"), justificado=explicado)
+            # FCF: oscila com capital de giro e itens pontuais; variação material vs. o EBITDA do trimestre
+            # anterior pede leitura e não é justificada pelo Brent.
+            a, b = prev.get("fcf"), r.get("fcf")
+            eb_q = abs(prev.get("ebitda") or 0)
+            if a is not None and b is not None and eb_q and abs(b - a) > LIMITE_FCF * eb_q:
+                log.add(t, p, "fcf", "R4 Desvio histórico", "amarelo",
+                        f"FCF {a:,.0f} → {b:,.0f}: variação acima de {LIMITE_FCF:.0%} do EBITDA do trimestre anterior"
+                        " (checar capital de giro e itens pontuais)")
             # Dívida líquida: materialidade medida contra o EBITDA anualizado.
             a, b = prev.get("divida_liquida"), r.get("divida_liquida")
             eb = abs(prev.get("ebitda") or 0) * 4 or 1
@@ -354,8 +371,11 @@ def dimensoes(empresas):
     fontes = json.loads((POC / "fontes.json").read_text(encoding="utf-8"))
     for t in ORDEM_EMPRESAS:
         ef = empresas[t].get("efetivo") or {}
+        url = ef.get("fonte", "")
+        host = re.sub(r"^www\.", "", re.sub(r"^https?://", "", url).split("/")[0])
+        # "fonte" descreve o documento (não repete a URL, que fica em url_primaria)
         fontes.append(dict(id=f"H-{t}", empresa=PERFIL[t][0], tipo="Total de efetivo (31/12)",
-                           fonte=ef.get("fonte", ""), url_primaria=ef.get("fonte", ""),
+                           fonte=f"{host} · {ef.get('observacao', '')}".strip(" ·"), url_primaria=url,
                            alternativa_direta=ef.get("observacao", ""), coletado_em="2026-10-02",
                            frequencia="Anual", primaria=bool(ef.get("fonte_primaria"))))
     return dim_emp, dim_per, dim_ind, fontes
