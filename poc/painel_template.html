@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Benchmarking Trimestral — Petrobras vs. Pares</title>
+<style>
+:root{--bg:#f4f6f8;--surface:#ffffff;--surface-2:#f7f9fb;--line:#e1e6eb;--ink:#13202b;--ink-2:#46566a;--muted:#6b7a8c;--accent:#0b4f6c;
+--PBR:#0f8f63;--XOM:#2a78d6;--SHEL:#b07800;--EQNR:#4a3aa7;--CVX:#eb6834;--BP:#c2457a;--TTE:#6b7c8c;
+--ok:#0f7a3d;--warn:#a86a00;--crit:#c0392b;--ok-bg:#e6f4ec;--warn-bg:#fdf3df;--crit-bg:#fbe9e7;--hm:#0b4f6c;--shadow:0 1px 2px rgba(16,32,48,.06),0 4px 14px rgba(16,32,48,.05)}
+[data-theme="dark"]{--bg:#0d1319;--surface:#141b23;--surface-2:#18212b;--line:#26323f;--ink:#eef3f7;--ink-2:#c3ccd6;--muted:#8d9aab;--accent:#7ec8e3;
+--PBR:#199e70;--XOM:#3987e5;--SHEL:#c98500;--EQNR:#9085e9;--CVX:#d95926;--BP:#d55181;--TTE:#8d9aab;
+--ok:#3fbf7f;--warn:#e0a63a;--crit:#ef6b5e;--ok-bg:#12291d;--warn-bg:#2d2412;--crit-bg:#331a18;--hm:#7ec8e3;--shadow:none}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:20px 24px 40px}
+header .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:26px;line-height:1.2;margin:6px 0 4px}h2{font-size:15px;margin:0 0 4px}.sub{color:var(--ink-2);max-width:980px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}.tag{font-size:11.5px;border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:3px 10px;color:var(--ink-2)}
+.bar{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(6px);padding:10px 0;margin:14px 0 6px;border-bottom:1px solid var(--line)}
+.ctl{display:flex;align-items:center;gap:6px}.ctl>span{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+select{max-width:230px}
+select,button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 9px;cursor:pointer}
+button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.chip{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:12.5px;border-radius:99px;padding:4px 10px}
+.chip[aria-pressed="false"]{opacity:.45}.sw{width:10px;height:10px;border-radius:50%;display:inline-block}
+.spacer{flex:1}
+.grid{display:grid;gap:14px}.g6{grid-template-columns:repeat(6,minmax(0,1fr))}.g2{grid-template-columns:1.1fr 1fr}.g2e{grid-template-columns:1fr 1fr}
+@media (max-width:1100px){.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.g2,.g2e{grid-template-columns:1fr}}
+@media (max-width:640px){.g6{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:16px}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);min-width:0}
+.sec{margin-top:22px}.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}.sec-h .n{font-size:12px;color:var(--accent);font-weight:700}
+.note{color:var(--muted);font-size:12px;margin-top:6px}
+.kpi .l{font-size:11.5px;color:var(--ink-2);font-weight:600;display:flex;justify-content:space-between;gap:6px}
+.kpi .v{font-size:26px;font-weight:700;margin:4px 0 0;font-variant-numeric:tabular-nums}.kpi .u{font-size:12px;color:var(--muted);font-weight:500;margin-left:3px}
+.kpi .d{font-size:12px;color:var(--ink-2);display:flex;gap:6px;align-items:center;flex-wrap:wrap}.rank{font-size:11px;font-weight:700;border-radius:6px;padding:1px 6px;background:var(--surface-2);border:1px solid var(--line)}
+.kpi svg{display:block;margin-top:6px}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;border-radius:6px;padding:0 6px;white-space:nowrap}
+.st.verde{color:var(--ok);background:var(--ok-bg)}.st.amarelo{color:var(--warn);background:var(--warn-bg)}.st.vermelho{color:var(--crit);background:var(--crit-bg)}
+.insight{border-color:color-mix(in srgb,var(--PBR) 35%,var(--line));background:color-mix(in srgb,var(--PBR) 6%,var(--surface))}
+.insight ul{margin:6px 0 0;padding-left:18px}.insight li{margin:3px 0}
+table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em}td:first-child,th:first-child{text-align:left}
+.tl td,.tl th{text-align:left}.num{font-variant-numeric:tabular-nums}
+.hm td.c{font-weight:600}.scroll{max-height:380px;overflow:auto}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.seg button{border:0;border-radius:0;padding:4px 10px}.seg button[aria-pressed="true"]{background:var(--accent);color:var(--surface)}
+svg text{fill:var(--muted);font-size:11px;font-family:inherit}svg .ink{fill:var(--ink)}svg .grid line{stroke:var(--line)}
+#tip{position:fixed;pointer-events:none;z-index:50;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15);padding:8px 10px;font-size:12px;display:none;max-width:280px}
+#tip b{font-weight:700}#tip .r{display:flex;justify-content:space-between;gap:12px}
+details summary{cursor:pointer;font-weight:600}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink-2);margin-top:6px}
+.foot{color:var(--muted);font-size:11.5px;margin-top:22px}
+a{color:var(--accent)}
+@media print{.bar{position:static}#tip{display:none!important}.card{break-inside:avoid}}
+</style></head><body><div class="wrap">
+<header>
+ <div class="eyebrow">Desempenho Empresarial · PoC de benchmarking trimestral</div>
+ <h1>Petrobras vs. pares: desempenho financeiro trimestral</h1>
+ <div class="sub">Fontes exclusivamente públicas. Indicadores recalculados com a mesma fórmula para todas as empresas, em US$. Cada valor traz um selo de qualidade: <span class="st verde">✓ validado</span> <span class="st amarelo">▲ ler com ressalva</span> <span class="st vermelho">✕ em análise (fora de rankings e medianas)</span></div>
+ <div class="meta" id="meta"></div>
+</header>
+<div class="bar" role="toolbar" aria-label="Filtros">
+ <label class="ctl"><span>Período</span><select id="selP"></select></label>
+ <label class="ctl"><span>Indicador</span><select id="selI"></select></label>
+ <div class="ctl"><span>Empresas</span><div id="chips" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
+ <div class="ctl"><span>Universo</span><div class="seg" id="segU"><button data-u="poc" aria-pressed="true">PoC · 4</button><button data-u="all" aria-pressed="false">Escala · 7</button></div></div>
+ <div class="spacer"></div>
+ <button id="btnCsv" title="Baixar a visão atual em CSV">⬇ CSV</button>
+ <button id="btnTema" title="Alternar tema claro/escuro">◐ Tema</button>
+</div>
+
+<section class="sec"><div class="sec-h"><span class="n">01</span><h2>Visão executiva do trimestre: Petrobras</h2></div>
+ <div class="grid g6" id="kpis"></div>
+ <div class="card insight" style="margin-top:14px" id="insight"></div>
+</section>
+
+<section class="sec grid g2">
+ <div class="card"><div class="sec-h"><span class="n">02</span><h2 id="tBar">Comparação entre empresas</h2></div><div id="bars"></div><div class="note" id="barNote"></div></div>
+ <div class="card"><div class="sec-h"><span class="n">03</span><h2 id="tLine">Evolução histórica</h2></div><div id="lines"></div><div class="legend" id="lineLegend"></div>
+  <div style="margin-top:10px"><div class="note" style="margin:0 0 2px">Contexto: Brent médio trimestral (US$/bbl, FRED/IMF)</div><div id="brent"></div></div></div>
+</section>
+
+<section class="sec card"><div class="sec-h"><span class="n">04</span><h2 id="tMat">Leitura dos indicadores: matriz do trimestre</h2></div>
+ <div style="overflow:auto"><div id="matrix"></div></div>
+ <div class="note">Intensidade da célula = posição no grupo (mais escura = melhor no indicador). Total de efetivo é contexto, sem ordem de mérito. ▲/✕ indicam o selo de qualidade; passe o mouse para ver o motivo.</div>
+</section>
+
+<section class="sec grid g2e">
+ <div class="card"><div class="sec-h"><span class="n">05</span><h2>Qualidade e rastreabilidade</h2></div>
+  <div id="qaTiles" class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px"></div>
+  <div id="qaRules" style="margin-top:12px"></div>
+  <div style="display:flex;gap:8px;align-items:center;margin:10px 0 6px"><span class="note" style="margin:0">Filtrar:</span>
+   <div class="seg" id="segQ"><button data-q="todos" aria-pressed="true">Todos</button><button data-q="pendente" aria-pressed="false">Pendentes</button><button data-q="justificado" aria-pressed="false">Justificados</button></div></div>
+  <div class="scroll"><table class="tl" id="qa"></table></div>
+ </div>
+ <div class="card"><div class="sec-h"><span class="n">06</span><h2>Evidência dos controles e catálogo de fontes</h2></div>
+  <div id="evid" style="overflow-x:auto"></div>
+  <div class="scroll" style="margin-top:12px"><table class="tl" id="src"></table></div>
+ </div>
+</section>
+
+<section class="sec card"><details><summary>Metodologia, premissas e limitações</summary><div id="metodo" class="note" style="font-size:12.5px;color:var(--ink-2)"></div></details></section>
+<div class="foot" id="foot"></div>
+</div>
+<div id="tip" role="tooltip"></div>
+<script>
+const D=__DATA__;
+const POC=D.meta.poc, ALL=D.dim_empresa.map(e=>e.empresa), PER=D.meta.periodos;
+const NOME=Object.fromEntries(D.dim_empresa.map(e=>[e.empresa,e.nome]));
+const LBL=Object.fromEntries(D.dim_periodo.map(p=>[p.periodo,p.rotulo]));
+const BRENT=Object.fromEntries(D.dim_periodo.map(p=>[p.periodo,p.brent_medio]));
+const IND=Object.fromEntries(D.dim_indicador.map(i=>[i.indicador,i]));
+const CORE=D.dim_indicador.filter(i=>i.grupo==='core').map(i=>i.indicador);
+const IDX=new Map(D.fato.map(f=>[f.empresa+'|'+f.periodo+'|'+f.indicador,f]));
+const get=(e,p,i)=>IDX.get(e+'|'+p+'|'+i);
+const ok=f=>f&&f.valor!=null&&f.status!=='vermelho';
+const col=e=>`var(--${e})`;
+let S={p:PER[PER.length-1],i:'margem_ebitda',u:'poc',on:new Set(POC),q:'todos'};
+const uni=()=>S.u==='poc'?POC:ALL;
+const fmt=(v,i,sign)=>{if(v==null)return '—';const c=IND[i]?IND[i].casas:1;const s=v.toLocaleString('pt-BR',{minimumFractionDigits:c,maximumFractionDigits:c});return sign&&v>0?'+'+s:s};
+const unit=i=>IND[i].unidade==='%'?'%':IND[i].unidade==='x'?'x':'';
+const STL={verde:'✓ validado',amarelo:'▲ ressalva',vermelho:'✕ em análise'};
+const stBadge=(f,short)=>f?`<span class="st ${f.status}" title="${esc(f.obs||STL[f.status])}">${short?STL[f.status][0]:STL[f.status]}</span>`:'';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const median=a=>{a=[...a].sort((x,y)=>x-y);const n=a.length;return n?(n%2?a[(n-1)/2]:(a[n/2-1]+a[n/2])/2):null};
+const tip=document.getElementById('tip');
+function showTip(ev,html){tip.innerHTML=html;tip.style.display='block';const r=tip.getBoundingClientRect();let x=ev.clientX+14,y=ev.clientY+14;if(x+r.width>innerWidth-8)x=ev.clientX-r.width-14;if(y+r.height>innerHeight-8)y=ev.clientY-r.height-14;tip.style.left=x+'px';tip.style.top=y+'px'}
+const hideTip=()=>tip.style.display='none';
+function rank(i,p,e){const d=IND[i].direcao;if(!d)return null;const v=uni().map(x=>({x,f:get(x,p,i)})).filter(o=>ok(o.f));v.sort((a,b)=>d*(b.f.valor-a.f.valor));const r=v.findIndex(o=>o.x===e)+1;return r?[r,v.length]:null}
+
+function init(){
+ selP.innerHTML=PER.map(p=>`<option value="${p}">${LBL[p]}</option>`).join('');selP.value=S.p;
+ selI.innerHTML=D.dim_indicador.map(i=>`<option value="${i.indicador}">${i.nome}${i.grupo==='complementar'?' (compl.)':''}</option>`).join('');selI.value=S.i;
+ selP.onchange=e=>{S.p=e.target.value;draw()};selI.onchange=e=>{S.i=e.target.value;draw()};
+ segU.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.u=b.dataset.u;S.on=new Set(uni());segU.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));draw()});
+ segQ.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.q=b.dataset.q;segQ.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));qa()});
+ btnTema.onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('tema',h.dataset.theme)}catch(e){}draw()};
+ try{const t=localStorage.getItem('tema');if(t)document.documentElement.dataset.theme=t}catch(e){}
+ btnCsv.onclick=csv;
+ meta.innerHTML=[`Dados v${D.meta.versao_dados} · atualizados em ${D.meta.gerado_em.split('-').reverse().join('/')}`,`${PER.length} trimestres (${LBL[PER[0]]}–${LBL[PER[PER.length-1]]})`,`${CORE.length} indicadores + 1 complementar`,`${D.fato.length} registros rastreados`].map(t=>`<span class="tag">${t}</span>`).join('');
+ draw();
+}
+function chips(){chipsEl().innerHTML=uni().map(e=>`<button class="chip" data-e="${e}" aria-pressed="${S.on.has(e)}"><span class="sw" style="background:${col(e)}"></span>${e}</button>`).join('');
+ chipsEl().querySelectorAll('button').forEach(c=>c.onclick=()=>{const e=c.dataset.e;if(S.on.has(e)&&S.on.size>1)S.on.delete(e);else S.on.add(e);draw()})}
+const chipsEl=()=>document.getElementById('chips');
+
+function spark(i,w=150,h=34){const v=PER.map(p=>get('PBR',p,i)).map(f=>ok(f)?f.valor:null);const vv=v.filter(x=>x!=null);if(vv.length<2)return '';
+ let mn=Math.min(...vv),mx=Math.max(...vv);if(mx===mn){mx+=1;mn-=1}const X=k=>3+k*(w-6)/(PER.length-1),Y=x=>h-4-(x-mn)/(mx-mn)*(h-8);
+ let d='',pen=false;v.forEach((x,k)=>{if(x==null){pen=false;return}d+=(pen?'L':'M')+X(k).toFixed(1)+' '+Y(x).toFixed(1);pen=true});
+ const k=PER.indexOf(S.p);const cur=v[k]!=null?`<circle cx="${X(k)}" cy="${Y(v[k])}" r="3.5" fill="${col('PBR')}" stroke="var(--surface)" stroke-width="2"/>`:'';
+ return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" aria-hidden="true"><path d="${d}" fill="none" stroke="${col('PBR')}" stroke-width="2" stroke-linejoin="round"/>${cur}</svg>`}
+function kpis(){const ip=PER.indexOf(S.p);kpisEl().innerHTML=CORE.map(i=>{const f=get('PBR',S.p,i);const pv=ip>0?get('PBR',PER[ip-1],i):null;let d='';
+ if(f&&pv&&f.valor!=null&&pv.valor!=null){const dv=f.valor-pv.valor;const dir=IND[i].direcao;const cls=!dir||Math.abs(dv)<1e-9?'':((dir>0?dv>0:dv<0)?'style="color:var(--ok)"':'style="color:var(--crit)"');d=`<span ${cls}>${dv>0?'▲':dv<0?'▼':'='} ${fmt(Math.abs(dv),i)}${unit(i)==='%'?' p.p.':unit(i)}</span><span>vs ${LBL[PER[ip-1]]}</span>`}else d='<span>início da série</span>';
+ const r=rank(i,S.p,'PBR');if(r)d+=`<span class="rank" title="posição entre ${r[1]} empresas com valor validado">${r[0]}º de ${r[1]}</span>`;
+ let extra='';if(i==='efetivo'){const pe=get('PBR',S.p,'ebitda_por_empregado');if(pe)extra=`<div class="note" style="margin-top:2px">EBITDA TTM/empregado: US$ ${fmt(pe.valor,'ebitda_por_empregado')} mil</div>`}
+ return `<div class="card kpi"><div class="l"><span>${IND[i].nome}</span>${stBadge(f,true)}</div><div class="v">${f?fmt(f.valor,i):'—'}<span class="u">${IND[i].unidade}</span></div><div class="d">${d}</div>${extra}${spark(i)}</div>`}).join('')}
+const kpisEl=()=>document.getElementById('kpis');
+function insight(){const p=S.p,peers=uni().filter(e=>e!=='PBR');const g=i=>get('PBR',p,i);const med=i=>median(peers.map(e=>get(e,p,i)).filter(ok).map(f=>f.valor));
+ const lines=[];const me=g('margem_ebitda'),ml=g('margem_liquida'),nd=g('nd_ebitda'),fc=g('fcf'),bo=g('ebitda_boe');
+ if(ok(me))lines.push(`<b>Rentabilidade:</b> margem EBITDA de <b>${fmt(me.valor,'margem_ebitda')}%</b> contra mediana de ${fmt(med('margem_ebitda'),'margem_ebitda')}% dos pares; margem líquida ${fmt(ml.valor,'margem_liquida')}% vs. ${fmt(med('margem_liquida'),'margem_liquida')}%.`);
+ if(ok(nd)){const mx=Math.max(...peers.map(e=>get(e,p,'nd_ebitda')).filter(ok).map(f=>f.valor));lines.push(`<b>Alavancagem:</b> ${fmt(nd.valor,'nd_ebitda')}x de dívida líquida/EBITDA vs. mediana de ${fmt(med('nd_ebitda'),'nd_ebitda')}x${nd.valor>=mx?' — a mais alta do grupo (peso dos arrendamentos de FPSOs na dívida)':''}${nd.obs?` <span class="note">(${esc(nd.obs)})</span>`:''}.`)}
+ if(ok(fc))lines.push(`<b>Caixa:</b> FCF de US$ ${fmt(fc.valor,'fcf')} bi vs. mediana de US$ ${fmt(med('fcf'),'fcf')} bi.`);
+ if(ok(bo))lines.push(`<b>Por barril:</b> EBITDA de US$ ${fmt(bo.valor,'ebitda_boe')}/boe vs. mediana de US$ ${fmt(med('ebitda_boe'),'ebitda_boe')} (integradas incluem downstream).`);
+ const ip=PER.indexOf(p);if(ip>0){const bv=BRENT[p]/BRENT[PER[ip-1]]-1;lines.push(`<b>Contexto:</b> Brent médio de US$ ${BRENT[p].toFixed(1)}/bbl (${bv>=0?'+':''}${(bv*100).toFixed(0)}% t/t).`)}
+ insightEl().innerHTML=`<h2 style="margin:0">Leitura automática · ${LBL[p]}</h2><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`}
+const insightEl=()=>document.getElementById('insight');
+
+function bars(){const i=S.i,p=S.p;tBar.textContent=`Comparação entre empresas · ${IND[i].nome} · ${LBL[p]}`;
+ const v=[...S.on].map(e=>({e,f:get(e,p,i)})).filter(o=>o.f&&o.f.valor!=null);v.sort((a,b)=>b.f.valor-a.f.valor);
+ const W=620,rowH=36,H=rowH*v.length+28,x0=110,xr=W-80;const vals=v.map(o=>o.f.valor);const mn=Math.min(0,...vals),mx=Math.max(0,...vals)||1;
+ const X=x=>x0+(x-mn)/(mx-mn)*(xr-x0);const peers=v.filter(o=>o.e!=='PBR'&&ok(o.f)).map(o=>o.f.valor);const md=median(peers);
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Barras de ${IND[i].nome}">`;
+ s+=`<line x1="${X(0)}" x2="${X(0)}" y1="4" y2="${H-22}" stroke="var(--line)"/>`;
+ v.forEach((o,k)=>{const y=8+k*rowH,a=X(Math.min(0,o.f.valor)),b=X(Math.max(0,o.f.valor));const red=o.f.status==='vermelho';const w=Math.max(2,b-a);
+  s+=`<g class="hit" data-k="${k}"><rect x="0" y="${y-4}" width="${W}" height="${rowH}" fill="transparent"/>
+  <text x="0" y="${y+17}" class="ink" style="font-size:12.5px;font-weight:${o.e==='PBR'?700:500}">${NOME[o.e]}</text>
+  <rect x="${a}" y="${y+3}" width="${w}" height="20" rx="4" fill="${col(o.e)}" ${red?'fill-opacity=".18" stroke="var(--crit)" stroke-dasharray="4 3"':''}/>
+  <text x="${o.f.valor>=0?b+6:a-6}" y="${y+17}" text-anchor="${o.f.valor>=0?'start':'end'}" class="ink" style="font-size:12px;font-variant-numeric:tabular-nums">${fmt(o.f.valor,i)}${unit(i)} ${o.f.status!=='verde'?(o.f.status==='vermelho'?'✕':'▲'):''}</text></g>`});
+ if(md!=null){const xm=X(md);s+=`<line x1="${xm}" x2="${xm}" y1="2" y2="${H-22}" stroke="var(--ink-2)" stroke-dasharray="3 3"/><text x="${xm}" y="${H-8}" text-anchor="middle">mediana dos pares ${fmt(md,i)}${unit(i)}</text>`}
+ barsEl().innerHTML=s+'</svg>';
+ barsEl().querySelectorAll('.hit').forEach(g=>{const o=v[+g.dataset.k];g.onmousemove=ev=>showTip(ev,`<b>${NOME[o.e]}</b> · ${LBL[p]}<div class="r"><span>${IND[i].nome}</span><b>${fmt(o.f.valor,i)} ${IND[i].unidade}</b></div><div class="r"><span>Qualidade</span>${stBadge(o.f)}</div>${o.f.obs?`<div class="note">${esc(o.f.obs)}</div>`:''}<div class="note">Fonte: ${o.f.fonte}</div>`);g.onmouseleave=hideTip});
+ barNote.textContent=IND[i].formula+(v.some(o=>o.f.status==='vermelho')?' · Barra tracejada = valor em análise, fora de rankings e medianas.':'')}
+const barsEl=()=>document.getElementById('bars');
+
+function lines(){const i=S.i;tLine.textContent=`Evolução histórica · ${IND[i].nome}`;const es=[...S.on];const W=620,H=250,l=52,r=74,t=10,b=26;
+ const vals=es.flatMap(e=>PER.map(p=>get(e,p,i)).filter(ok).map(f=>f.valor));if(!vals.length){linesEl().innerHTML='';return}
+ let mn=Math.min(...vals),mx=Math.max(...vals);if(IND[i].unidade!=='x'&&mn>0)mn=0;if(IND[i].unidade==='x'&&mn>0)mn=0;
+ const raw=(mx-mn)/4||1,mag=Math.pow(10,Math.floor(Math.log10(raw))),stp=[1,2,2.5,5,10].map(m=>m*mag).find(m=>m>=raw);mn=Math.floor(mn/stp)*stp;mx=Math.ceil(mx/stp)*stp;const nT=Math.round((mx-mn)/stp);
+ const X=k=>l+k*(W-l-r)/(PER.length-1),Y=v=>t+(H-t-b)*(1-(v-mn)/(mx-mn));
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Linhas de ${IND[i].nome}"><g class="grid">`;
+ for(let g=0;g<=nT;g++){const v=mn+stp*g;s+=`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${l-6}" y="${Y(v)+4}" text-anchor="end">${fmt(v,i)}</text>`}
+ s+='</g>';const kp=PER.indexOf(S.p);s+=`<rect x="${X(kp)-14}" y="${t}" width="28" height="${H-t-b}" fill="var(--accent)" opacity=".07"/>`;
+ PER.forEach((p,k)=>s+=`<text x="${X(k)}" y="${H-8}" text-anchor="middle" ${k===kp?'class="ink" style="font-weight:700"':''}>${LBL[p]}</text>`);
+ const labels=[];
+ es.forEach(e=>{const pts=PER.map((p,k)=>{const f=get(e,p,i);return ok(f)?[X(k),Y(f.valor),f]:null});let d='',pen=false;pts.forEach(q=>{if(q){d+=(pen?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1);pen=true}else pen=false});
+  s+=`<path d="${d}" fill="none" stroke="${col(e)}" stroke-width="${e==='PBR'?3:2}" stroke-linejoin="round"/>`;
+  pts.forEach(q=>{if(q)s+=q[2].status==='amarelo'?`<circle cx="${q[0]}" cy="${q[1]}" r="${e==='PBR'?4.5:3.5}" fill="var(--surface)" stroke="${col(e)}" stroke-width="2"/>`:`<circle cx="${q[0]}" cy="${q[1]}" r="${e==='PBR'?4.5:3.5}" fill="${col(e)}" stroke="var(--surface)" stroke-width="2"/>`});
+  PER.forEach((p,k)=>{const f=get(e,p,i);if(f&&f.status==='vermelho'&&f.valor!=null)s+=`<text x="${X(k)}" y="${t+12}" text-anchor="middle" style="fill:var(--crit);font-weight:700">✕ ${e}</text>`});
+  const last=pts.filter(Boolean).pop();if(last)labels.push({e,y:last[1],x:last[0]})});
+ labels.sort((a,b)=>a.y-b.y);for(let k=1;k<labels.length;k++)if(labels[k].y-labels[k-1].y<13)labels[k].y=labels[k-1].y+13;
+ labels.forEach(o=>s+=`<text x="${o.x+9}" y="${o.y+4}" style="fill:var(--ink);font-weight:700;font-size:11.5px">${o.e}</text>`);
+ s+=`<line id="xh" x1="0" x2="0" y1="${t}" y2="${H-b}" stroke="var(--ink-2)" stroke-dasharray="2 3" style="display:none"/><rect id="hitL" x="${l}" y="${t}" width="${W-l-r}" height="${H-t-b}" fill="transparent"/>`;
+ linesEl().innerHTML=s+'</svg>';
+ const svg=linesEl().querySelector('svg'),xh=svg.querySelector('#xh');
+ svg.querySelector('#hitL').onmousemove=ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const lp=pt.matrixTransform(svg.getScreenCTM().inverse());
+  const k=Math.max(0,Math.min(PER.length-1,Math.round((lp.x-l)/((W-l-r)/(PER.length-1)))));xh.setAttribute('x1',X(k));xh.setAttribute('x2',X(k));xh.style.display='';
+  const rows=es.map(e=>({e,f:get(e,PER[k],i)})).filter(o=>o.f&&o.f.valor!=null).sort((a,b)=>b.f.valor-a.f.valor);
+  showTip(ev,`<b>${LBL[PER[k]]}</b> · Brent US$ ${BRENT[PER[k]].toFixed(1)}`+rows.map(o=>`<div class="r"><span><span class="sw" style="background:${col(o.e)}"></span> ${NOME[o.e]}</span><b>${fmt(o.f.valor,i)}${unit(i)} ${o.f.status!=='verde'?(o.f.status==='vermelho'?'✕':'▲'):''}</b></div>`).join(''))};
+ svg.querySelector('#hitL').onmouseleave=()=>{xh.style.display='none';hideTip()};
+ lineLegend.innerHTML=es.map(e=>`<span><span class="sw" style="background:${col(e)}"></span> ${NOME[e]}</span>`).join('')+'<span>○ marcador vazado = valor com ressalva ▲ · ✕ = valor em análise (omitido da linha)</span>';
+ // Brent em gráfico próprio (sem eixo duplo)
+ const bh=84,bw=W;const bmx=Math.max(...PER.map(p=>BRENT[p]))*1.1;let bs=`<svg viewBox="0 0 ${bw} ${bh}" width="100%" role="img" aria-label="Brent médio">`;
+ PER.forEach((p,k)=>{const x=X(k),hh=(BRENT[p]/bmx)*(bh-22);bs+=`<rect x="${x-14}" y="${bh-18-hh}" width="28" height="${hh}" rx="3" fill="var(--muted)" opacity="${k===kp?.9:.45}"/><text x="${x}" y="${bh-20-hh}" text-anchor="middle" class="ink" style="font-size:10.5px">${BRENT[p].toFixed(0)}</text><text x="${x}" y="${bh-4}" text-anchor="middle">${LBL[p]}</text>`});
+ brentEl().innerHTML=bs+'</svg>'}
+const linesEl=()=>document.getElementById('lines'),brentEl=()=>document.getElementById('brent');
+
+function matrix(){const p=S.p,es=uni();tMat.textContent=`Leitura dos indicadores: matriz · ${LBL[p]}`;
+ let h=`<table class="hm"><thead><tr><th>Indicador</th>${es.map(e=>`<th style="text-align:right"><span class="sw" style="background:${col(e)}"></span> ${e}</th>`).join('')}<th>Mediana pares</th></tr></thead><tbody>`;
+ D.dim_indicador.forEach(ind=>{const i=ind.indicador;const fs=es.map(e=>get(e,p,i));const valid=es.map((e,k)=>({e,f:fs[k]})).filter(o=>ok(o.f));
+  const sorted=[...valid].sort((a,b)=>ind.direcao*(b.f.valor-a.f.valor));const n=sorted.length;
+  const md=median(valid.filter(o=>o.e!=='PBR').map(o=>o.f.valor));
+  h+=`<tr><td><b>${ind.nome}</b> <span class="note">${ind.unidade}${ind.grupo==='complementar'?' · compl.':''}</span></td>`+fs.map((f,k)=>{if(!f||f.valor==null)return '<td class="note">n/d</td>';
+   let bg='';if(ind.direcao&&ok(f)&&n>1){const r=sorted.findIndex(o=>o.e===es[k]);const a=(0.30*(1-r/(n-1))+0.03).toFixed(2);bg=`background:color-mix(in srgb,var(--hm) ${Math.round(a*100)}%,transparent)`}
+   return `<td class="c num" style="${bg}" title="${esc(f.obs||STL[f.status])}">${fmt(f.valor,i)} ${f.status!=='verde'?`<span class="st ${f.status}">${f.status==='vermelho'?'✕':'▲'}</span>`:''}</td>`}).join('')+`<td class="num note">${fmt(md,i)}</td></tr>`});
+ matrixEl().innerHTML=h+'</tbody></table>'}
+const matrixEl=()=>document.getElementById('matrix');
+
+function qa(){const es=uni();const L=D.qa.filter(x=>es.includes(x.empresa));const F=D.fato.filter(f=>es.includes(f.empresa));
+ const pv=F.filter(f=>f.status==='verde').length,pa=F.filter(f=>f.status==='amarelo').length,pr=F.filter(f=>f.status==='vermelho').length;
+ qaTiles.innerHTML=[[`${Math.round(100*pv/F.length)}%`,`dos ${F.length} valores validados sem ressalva`,'ok'],[pa,'valores com ressalva (▲)','warn'],[pr,'valores em análise (✕)','crit']].map(t=>`<div class="card" style="padding:10px 12px;box-shadow:none"><div style="font-size:22px;font-weight:700;color:var(--${t[2]})">${t[0]}</div><div class="note" style="margin:0">${t[1]}</div></div>`).join('');
+ const regras={};L.forEach(x=>{const k=x.regra;regras[k]=regras[k]||{p:0,j:0};x.justificado?regras[k].j++:regras[k].p++});const mx=Math.max(1,...Object.values(regras).map(r=>r.p+r.j));
+ qaRules.innerHTML='<div class="note" style="margin:0 0 4px">Alertas por regra (cheio = pendente de leitura · claro = justificado pelo contexto)</div>'+Object.entries(regras).sort().map(([k,r])=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:3px 0"><span style="width:150px">${k}</span><span style="display:flex;gap:2px;flex:1"><span style="height:12px;border-radius:3px;background:var(--warn);width:${r.p/mx*100}%"></span><span style="height:12px;border-radius:3px;background:var(--warn);opacity:.35;width:${r.j/mx*100}%"></span></span><span class="num" style="width:56px;text-align:right">${r.p} · ${r.j}</span></div>`).join('');
+ const rows=L.filter(x=>S.q==='todos'||(S.q==='pendente'?!x.justificado:x.justificado)).sort((a,b)=>(a.severidade<b.severidade?1:-1)||(a.justificado-b.justificado));
+ qaEl().innerHTML='<thead><tr><th>Empresa</th><th>Período</th><th>Campo</th><th>Regra</th><th>Mensagem</th></tr></thead><tbody>'+rows.map(x=>`<tr><td><b>${x.empresa}</b></td><td>${LBL[x.periodo]||x.periodo}</td><td>${x.campo}</td><td><span class="st ${x.severidade}">${x.severidade==='vermelho'?'✕':'▲'} ${x.regra}</span>${x.justificado?' <span class="note">justificado</span>':''}</td><td>${esc(x.mensagem)}</td></tr>`).join('')+'</tbody>';
+ const ev=D.evidencia;evid.innerHTML=ev?`<div class="note" style="margin:0 0 6px;color:var(--ink-2)">Auditoria da versão ${ev.versao_auditada}: os controles marcaram <b>${ev.vermelhos.length} valores em vermelho</b>, todos corrigidos na versão ${ev.versao_corrigida} com nota no JSON.</div><table class="tl"><thead><tr><th>Empresa</th><th>Período</th><th>Achado</th><th>Correção</th></tr></thead><tbody>${ev.vermelhos.map(x=>`<tr><td><b>${x.empresa}</b></td><td>${LBL[x.periodo]||x.periodo}</td><td><span class="st vermelho">✕ ${x.regra}</span><br>${esc(x.mensagem)}</td><td>${esc(x.correcao)}</td></tr>`).join('')}</tbody></table>`:'';
+ srcEl().innerHTML='<thead><tr><th>ID</th><th>Dado</th><th>Fonte utilizada</th><th>Primária / rota direta</th><th>Coleta</th></tr></thead><tbody>'+D.fontes.filter(s=>!s.id.includes('-')||es.some(e=>s.id.endsWith(e))||!ALL.some(e=>s.id.endsWith(e))).map(s=>`<tr><td><b>${s.id}</b></td><td>${esc(s.empresa)} · ${esc(s.tipo)}</td><td>${esc(s.fonte)}${s.primaria?' <span class="st verde">primária</span>':' <span class="st amarelo">secundária</span>'}</td><td>${String(s.url_primaria).startsWith('http')?`<a href="${esc(s.url_primaria)}" target="_blank" rel="noopener">link</a> · `:''}${esc(s.alternativa_direta)}</td><td class="num">${s.coletado_em}</td></tr>`).join('')+'</tbody>'}
+const qaEl=()=>document.getElementById('qa'),srcEl=()=>document.getElementById('src');
+
+function metodo(){document.getElementById('metodo').innerHTML=`<p><b>Indicadores.</b> ${D.dim_indicador.map(i=>`<b>${i.nome}</b> (${i.unidade}): ${i.formula}`).join(' · ')}.</p>
+<p><b>Selo de qualidade.</b> O selo de cada valor herda o pior status dos insumos (ex.: a margem EBITDA herda o do EBITDA e o da receita). Alerta explicado pelo contexto — variação na mesma direção do Brent, com Brent variando 8% ou mais — fica registrado como <i>justificado</i> e não rebaixa o valor. Vermelho significa erro provável de dado: o valor sai de rankings, medianas e linhas.</p>
+<p><b>Regras.</b> R1 completude · R2 coerência contábil (FCF = FCO + capex; EBITDA ≤ receita) · R3 plausibilidade · R4 desvio histórico (receita ±30%, EBITDA ±40%, lucro ±60%, margem EBITDA ±15 p.p.; dívida líquida por materialidade frente ao EBITDA anualizado e troca de sinal) · R5 contexto de mercado · R6 revisão de dado já publicado · R7 proveniência · R8 reconciliação entre fontes (FY × 4T na mesma data-base; soma dos trimestres × FY).</p>
+<p><b>Limitações.</b> 2T25–2T26 vêm de agregador (Yahoo Finance), não do RI; o 1T25 foi coletado dos releases oficiais com EBITDA padronizado, e a TotalEnergies usa o EBITDA ajustado como proxy. Dívida líquida/EBITDA usa ×4 do trimestre até o 3T25, por falta de janela de 12 meses. O efetivo é anual; nos trimestres seguintes repete-se o último valor divulgado, e os perímetros diferem entre empresas. EBITDA por boe mistura downstream nas integradas. Petrobras convertida pela taxa média do trimestre.</p>`;
+ foot.innerHTML=`Gerado por <code>poc/build_poc.py</code> a partir de <code>indicadores_oleo_gas.json</code> (repositório oil-gas-financial-dashboard). Conteúdo informativo; não é recomendação de investimento.`}
+
+function csv(){const es=[...S.on];const rows=[['empresa','periodo','indicador','valor','unidade','status','obs','fonte']];D.fato.filter(f=>es.includes(f.empresa)).forEach(f=>rows.push([f.empresa,f.periodo,f.indicador,f.valor,f.unidade,f.status,f.obs,f.fonte]));
+ const blob=new Blob(['﻿'+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='benchmarking_visao_atual.csv';a.click()}
+
+function draw(){chips();kpis();insight();bars();lines();matrix();qa();metodo()}
+init();
+</script></body></html>
