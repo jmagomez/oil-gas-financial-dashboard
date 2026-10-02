@@ -5,7 +5,9 @@
     python3 powerbi/gera_pbip.py --embutido      # dados embutidos no modelo (abre offline)
     python3 powerbi/gera_pbip.py --saida DIR
 
-Abrir: Power BI Desktop → Arquivo → Abrir → Benchmarking_Petrobras_Pares.pbip → Atualizar.
+Abrir: Power BI Desktop → Arquivo → Abrir → Benchmarking_Petrobras_Pares.pbip → Atualizar → Salvar.
+O cache de dados (.pbi/cache.abf) só é gravado pelo Desktop ao salvar: sem ele, os visuais abrem em branco.
+Para distribuir, use também Arquivo → Salvar como → .pbix (abre com os dados carregados).
 O relatório replica o painel HTML (visão executiva, comparação, evolução, matriz,
 qualidade e fontes) sobre o mesmo modelo estrela de poc/ (fato_indicador + dimensões).
 """
@@ -96,8 +98,10 @@ def medidas():
          'RETURN IF ( COUNTROWS ( fato_indicador ) = 0, BLANK (), IF ( r > 0, "✕ em análise", IF ( a > 0, "▲ ressalva", "✓ validado" ) ) )',
          None, "Base"),
         ("Valor Petrobras", 'CALCULATE ( [Valor Validado], dim_empresa[empresa] = "PBR" )', "#,0.##", "Petrobras"),
+        # MEDIANX conta valor em branco como zero: empresa fora do universo filtrado (ou com valor em análise)
+        # tem de ser excluída explicitamente, senão a mediana cai (achado no teste de 02/10/2026).
         ("Mediana Pares",
-         'VAR pares = FILTER ( ALLSELECTED ( dim_empresa[empresa] ), dim_empresa[empresa] <> "PBR" )\n'
+         'VAR pares = FILTER ( ALLSELECTED ( dim_empresa[empresa] ), dim_empresa[empresa] <> "PBR" && NOT ISBLANK ( [Valor Validado] ) )\n'
          'RETURN MEDIANX ( pares, [Valor Validado] )', "#,0.##", "Base"),
         ("Δ Petrobras vs. Mediana", "[Valor Petrobras] - [Mediana Pares]", "+#,0.00;-#,0.00;0", "Petrobras"),
         ("Δ t/t Petrobras",
@@ -119,9 +123,11 @@ def medidas():
         ("Alertas pendentes", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = FALSE () ) + 0", "#,0", "Qualidade"),
         ("Alertas justificados", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = TRUE () ) + 0", "#,0", "Qualidade"),
     ]
+    m.append(("Cor Destaque", 'IF ( SELECTEDVALUE ( dim_empresa[empresa] ) = "PBR", "#0F8F63", "#9AA9B6" )', None, "Formatação"))
     for nome, cod, fmt in IND_MEDIDAS:
         m.append((nome, f'CALCULATE ( [Valor Validado], dim_indicador[indicador] = "{cod}" )', fmt, "Indicadores"))
         m.append((f"PBR · {nome}", f'CALCULATE ( [Valor Petrobras], dim_indicador[indicador] = "{cod}" )', fmt, "Petrobras"))
+        m.append((f"Mediana · {nome}", f'CALCULATE ( [Mediana Pares], dim_indicador[indicador] = "{cod}" )', fmt, "Mediana dos pares"))
     out = []
     for nome, expr, fmt, pasta in m:
         d = {"name": nome, "expression": expr.split("\n") if "\n" in expr else expr, "displayFolder": pasta,
@@ -284,14 +290,40 @@ class Pagina:
             self.interacoes.append({"source": origem, "target": a, "type": "NoFilter"})
 
 
+def cor_fixa(hexa):
+    return {"dataPoint": [{"properties": {"fill": {"solid": {"color": lit(hexa)}}}}]}
+
+
+def cor_por_medida(medida):
+    # formatação condicional por valor de campo: Petrobras em verde, pares em cinza
+    return {"dataPoint": [{"properties": {"fill": {"solid": {"color": {"expr": med(medida)}}}},
+                           "selector": {"data": [{"dataViewWildcard": {"matchingOption": 1}}]}}]}
+
+
+def junta(*objs):
+    out = {}
+    for o in objs:
+        for k, v in o.items():
+            out.setdefault(k, []).extend(v)
+    return out
+
+
 SEM_TOTAIS = {"subTotals": [{"properties": {"rowSubtotals": lit(False), "columnSubtotals": lit(False)}}]}
 TABELA_SEM_TOTAL = {"total": [{"properties": {"totals": lit(False)}}]}
 CARTAO_NUM_INTEIRO = {"labels": [{"properties": {"labelDisplayUnits": lit(1)}}]}
+ROTULOS = {"labels": [{"properties": {"show": lit(True)}}]}
+GRADE = {k: [{"properties": {"fontSize": lit(11)}}] for k in ("values", "columnHeaders", "rowHeaders")}
+GRADE_TAB = {k: [{"properties": {"fontSize": lit(10)}}] for k in ("values", "columnHeaders")}
+CARTAO_DUPLO = {"dataLabels": [{"properties": {"fontSize": lit(14)}}], "categoryLabels": [{"properties": {"fontSize": lit(8)}}],
+                "card": [{"properties": {"barShow": lit(False)}}]}
 
 
 def ultimo_periodo():
     linhas = list(csv.DictReader(open(POC / "dim_periodo.csv", encoding="utf-8")))
     return max(linhas, key=lambda r: int(r["ordem"]))["rotulo"]
+
+
+UNI_POC = "PoC (PBR + 3 pares)"  # mesmo recorte padrão do painel HTML
 
 
 def paginas():
@@ -306,20 +338,19 @@ def paginas():
     p.texto("st", "Fontes públicas · indicadores recalculados com a mesma fórmula · valores em análise (✕) ficam fora de medianas e rankings",
             20, 52, 900, 26, tamanho=10, negrito=False, cor="#46566A")
     sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 850, 12, 200, 60, "Universo")
+    p.slicer("su", U, 850, 12, 200, 60, "Universo", padrao=UNI_POC)
     cards = []
     for k, (nome, _, _) in enumerate(IND_MEDIDAS[:6]):
-        cards.append(p.add(f"c{k}", "card", 20 + k * 208, 86, 200, 100, {"Values": [med(f"PBR · {nome}")]}, nome, CARTAO_NUM_INTEIRO))
-    p.add("b1", "clusteredBarChart", 20, 196, 410, 250, {"Category": [E], "Y": [med("Margem EBITDA (%)")]}, "Margem EBITDA (%) por empresa",
-               ordem=(med("Margem EBITDA (%)"), "Descending"))
-    p.add("b2", "clusteredBarChart", 440, 196, 410, 250, {"Category": [E], "Y": [med("DL/EBITDA (x)")]}, "Dívida líquida / EBITDA TTM (x)",
-               ordem=(med("DL/EBITDA (x)"), "Descending"))
-    p.add("b3", "clusteredBarChart", 860, 196, 400, 250, {"Category": [E], "Y": [med("FCF (US$ bi)")]}, "Fluxo de caixa livre (US$ bi)",
-               ordem=(med("FCF (US$ bi)"), "Descending"))
-    l1 = p.add("l1", "lineChart", 20, 456, 830, 250, {"Category": [P], "Series": [E], "Y": [med("Margem EBITDA (%)")]},
-               "Evolução da margem EBITDA (%) — 1T25 a 2T26")
-    l2 = p.add("l2", "clusteredColumnChart", 860, 456, 400, 250, {"Category": [P], "Y": [med("Brent Médio (US$/bbl)")]},
-               "Contexto: Brent médio (US$/bbl)")
+        cards.append(p.add(f"c{k}", "multiRowCard", 20 + k * 208, 82, 200, 136,
+                           {"Values": [(med(f"PBR · {nome}"), "Petrobras"), (med(f"Mediana · {nome}"), "Mediana dos pares")]}, nome, CARTAO_DUPLO))
+    for cod, (nome, _, _), x, w in [("b1", IND_MEDIDAS[0], 20, 410), ("b2", IND_MEDIDAS[3], 440, 410), ("b3", IND_MEDIDAS[2], 860, 400)]:
+        p.add(cod, "clusteredBarChart", x, 224, w, 226, {"Category": [(E, "Empresa")], "Y": [med(nome)]},
+              {"b1": "Margem EBITDA (%) por empresa", "b2": "Dívida líquida / EBITDA TTM (x)", "b3": "Fluxo de caixa livre (US$ bi)"}[cod],
+              junta(cor_por_medida("Cor Destaque"), ROTULOS), ordem=(med(nome), "Descending"))
+    l1 = p.add("l1", "lineChart", 20, 458, 830, 252, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [med("Margem EBITDA (%)")]},
+               "Evolução da margem EBITDA (%) — série completa")
+    l2 = p.add("l2", "clusteredColumnChart", 860, 458, 400, 252, {"Category": [(P, "Trimestre")], "Y": [med("Brent Médio (US$/bbl)")]},
+               "Contexto: Brent médio (US$/bbl)", junta(cor_fixa("#6B7C8C"), ROTULOS))
     p.sem_filtro(sp, l1, l2)
     ps.append(p)
 
@@ -328,14 +359,14 @@ def paginas():
     p.texto("t", "Comparação entre empresas e evolução histórica", 20, 12, 700, 44)
     p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True, padrao="Margem EBITDA")
     sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 1080, 12, 180, 60, "Universo")
-    p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [E], "Y": [(med("Valor Validado"), "Valor")]},
-              "Valor por empresa no período", ordem=(med("Valor Validado"), "Descending"))
-    ln = p.add("l", "lineChart", 650, 86, 610, 300, {"Category": [P], "Series": [E], "Y": [(med("Valor Validado"), "Valor")]},
-              "Evolução 1T25–2T26")
-    m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [col("dim_empresa", "nome")], "Columns": [P],
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo", padrao=UNI_POC)
+    p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")]},
+              "Valor por empresa no período", junta(cor_por_medida("Cor Destaque"), ROTULOS), ordem=(med("Valor Validado"), "Descending"))
+    ln = p.add("l", "lineChart", 650, 86, 610, 300, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")]},
+              "Evolução trimestral")
+    m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [(col("dim_empresa", "nome"), "Empresa")], "Columns": [(P, "Trimestre")],
                                                        "Values": [(med("Valor Validado"), "Valor")]},
-              "Série trimestral (valor validado)", SEM_TOTAIS)
+              "Série trimestral (valor validado)", junta(SEM_TOTAIS, GRADE))
     p.sem_filtro(sp, ln, m)
     ps.append(p)
 
@@ -343,38 +374,45 @@ def paginas():
     p = Pagina("matriz", "Matriz de leitura")
     p.texto("t", "Leitura dos indicadores — matriz do trimestre", 20, 12, 800, 44)
     p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 1080, 12, 180, 60, "Universo")
-    p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [IN], "Columns": [E], "Values": [(med("Valor Validado"), "Valor")]},
-          "Indicador × empresa (valores validados)", SEM_TOTAIS)
-    p.add("d", "tableEx", 20, 426, 820, 280, {"Values": [IN, col("dim_indicador", "unidade"), col("dim_indicador", "formula")]},
-          "Definições")
-    p.add("pp", "tableEx", 850, 426, 410, 280, {"Values": [IN, (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
-                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares", TABELA_SEM_TOTAL)
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo", padrao=UNI_POC)
+    p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [(IN, "Indicador")], "Columns": [(E, "Empresa")], "Values": [(med("Valor Validado"), "Valor")]},
+          "Indicador × empresa (valores validados)", junta(SEM_TOTAIS, GRADE))
+    p.add("d", "tableEx", 20, 426, 820, 280, {"Values": [(IN, "Indicador"), (col("dim_indicador", "unidade"), "Unidade"),
+                                                         (col("dim_indicador", "formula"), "Fórmula")]}, "Definições", GRADE_TAB)
+    p.add("pp", "tableEx", 850, 426, 410, 280, {"Values": [(IN, "Indicador"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
+                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares", junta(TABELA_SEM_TOTAL, GRADE_TAB))
     ps.append(p)
 
     # 4 — Qualidade
     p = Pagina("qualidade", "Qualidade e rastreabilidade")
     p.texto("t", "Qualidade e rastreabilidade dos dados", 20, 12, 800, 44)
+    p.slicer("su", U, 850, 12, 200, 60, "Universo", padrao=UNI_POC)
     p.slicer("se", E, 1060, 12, 200, 60, "Empresa")
     for k, (n, t) in enumerate([("% Validado", "Valores validados sem ressalva"), ("Valores com ressalva", "Valores com ressalva (▲)"),
                                 ("Valores em análise", "Valores em análise (✕)"), ("Alertas pendentes", "Alertas pendentes de leitura")]):
         p.add(f"c{k}", "card", 20 + k * 312, 86, 300, 100, {"Values": [med(n)]}, t)
-    p.add("r", "clusteredBarChart", 20, 196, 500, 510, {"Category": [col("qa_log", "regra")], "Y": [med("Alertas pendentes"), med("Alertas justificados")]},
-          "Alertas por regra")
-    p.add("q", "tableEx", 530, 196, 730, 510, {"Values": [col("qa_log", "empresa"), col("qa_log", "periodo"), col("qa_log", "campo"),
-                                                           col("qa_log", "regra"), col("qa_log", "justificado"), col("qa_log", "mensagem")]},
-          "Log de alertas")
+    p.add("r", "clusteredBarChart", 20, 196, 500, 510, {"Category": [(col("qa_log", "regra"), "Regra")],
+                                                         "Y": [(med("Alertas pendentes"), "Pendentes"), (med("Alertas justificados"), "Justificados")]},
+          "Alertas por regra", junta({"dataPoint": [{"properties": {"fill": {"solid": {"color": lit("#A86A00")}}},
+                                                     "selector": {"metadata": "fato_indicador.Alertas pendentes"}},
+                                                    {"properties": {"fill": {"solid": {"color": lit("#D9C6A0")}}},
+                                                     "selector": {"metadata": "fato_indicador.Alertas justificados"}}]}, ROTULOS))
+    p.add("q", "tableEx", 530, 196, 730, 510, {"Values": [(col("qa_log", "empresa"), "Empresa"), (col("qa_log", "trimestre"), "Período"),
+                                                           (col("qa_log", "campo"), "Campo"), (col("qa_log", "regra"), "Regra"),
+                                                           (col("qa_log", "situacao"), "Situação"), (col("qa_log", "mensagem"), "Mensagem")]},
+          "Log de alertas", GRADE_TAB, ordem=(col("qa_log", "situacao"), "Descending"))
     ps.append(p)
 
     # 5 — Fontes
     p = Pagina("fontes", "Fontes e metodologia")
     p.texto("t", "Catálogo de fontes", 20, 12, 800, 44)
-    p.add("f", "tableEx", 20, 70, 1240, 420, {"Values": [col("dim_fonte", c) for c in ["id", "empresa", "tipo", "fonte", "url_primaria",
-                                                                                      "alternativa_direta", "coletado_em", "primaria"]]},
-          "Fontes utilizadas e rota primária")
+    p.add("f", "tableEx", 20, 70, 1240, 500, {"Values": [(col("dim_fonte", c), n) for c, n in [
+        ("id", "ID"), ("empresa", "Empresa"), ("tipo", "Dado"), ("fonte", "Fonte utilizada"), ("classe", "Tipo de fonte"),
+        ("coletado_em", "Coleta"), ("alternativa_direta", "Rota primária / observação"), ("url_primaria", "Link")]]},
+          "Fontes utilizadas e rota primária", GRADE_TAB)
     p.texto("m", "Selo de qualidade: ✓ validado · ▲ ressalva (dado carregado, proxy ou desvio a ler) · ✕ em análise (fora de medianas e rankings). "
                  "Regras R1–R8: completude, coerência contábil, plausibilidade, desvio histórico, contexto (Brent), revisão, proveniência e "
-                 "reconciliação entre fontes. Detalhes no guia e em poc/build_poc.py.", 20, 500, 1240, 120, tamanho=11, negrito=False, cor="#46566A")
+                 "reconciliação entre fontes. Detalhes no guia e em poc/build_poc.py.", 20, 584, 1240, 100, tamanho=11, negrito=False, cor="#46566A")
     ps.append(p)
     return ps
 
@@ -386,6 +424,20 @@ def tema():
             "textClasses": {"title": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#13202B"},
                             "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#46566A"},
                             "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 24, "color": "#13202B"}}}
+
+
+def deriva(mdl, tabela, coluna, expr_m):
+    """Acrescenta uma coluna calculada no Power Query da tabela (mesmo critério do painel HTML)."""
+    tb = next(t for t in mdl["model"]["tables"] if t["name"] == tabela)
+    tb["columns"].append({"name": coluna, "dataType": "string", "sourceColumn": coluna,
+                          "lineageTag": gid("col", tabela, coluna), "summarizeBy": "none"})
+    exp = tb["partitions"][0]["source"]["expression"]
+    ultimo = exp[-1].strip()
+    i = next(k for k, linha in enumerate(exp) if linha.strip().startswith(ultimo + " ="))
+    exp[i] = exp[i].rstrip(",") + ","
+    passo = f"Col_{coluna}"
+    exp.insert(i + 1, f'    {passo} = Table.AddColumn ( {ultimo}, "{coluna}", each {expr_m}, type text )')
+    exp[-1] = f"    {passo}"
 
 
 def escreve(dest: Path, embutido: bool):
@@ -401,15 +453,13 @@ def escreve(dest: Path, embutido: bool):
                          "metadata": {"type": "SemanticModel", "displayName": NOME}, "config": {"version": "2.0", "logicalId": gid("sm")}})
     j(sm / "definition.pbism", {"$schema": f"{SCH}/item/semanticModel/definitionProperties/1.0.0/schema.json", "version": "1.0", "settings": {}})
     mdl = modelo(embutido)
-    # coluna "universo" em dim_empresa (texto amigável para o slicer)
-    de = next(t for t in mdl["model"]["tables"] if t["name"] == "dim_empresa")
-    de["columns"].append({"name": "universo", "dataType": "string", "sourceColumn": "universo", "lineageTag": gid("col", "dim_empresa", "universo"),
-                          "summarizeBy": "none"})
-    exp = de["partitions"][0]["source"]["expression"]
-    i = next(k for k, linha in enumerate(exp) if linha.strip().startswith("Tipado"))
-    exp[i] = exp[i].rstrip(",") + ","
-    exp.insert(i + 1, '    Universo = Table.AddColumn ( Tipado, "universo", each if [na_poc] then "PoC (PBR + 3 pares)" else "Escala (+3)", type text )')
-    exp[-1] = "    Universo"
+    # colunas derivadas em Power Query (texto amigável para slicers e tabelas)
+    deriva(mdl, "dim_empresa", "universo", 'if [na_poc] then "PoC (PBR + 3 pares)" else "Escala (+3)"')
+    deriva(mdl, "qa_log", "situacao", 'if [justificado] then "justificado pelo contexto" else "pendente de leitura"')
+    deriva(mdl, "qa_log", "trimestre",
+           'if Text.Contains ( [periodo], "-Q" ) then Text.End ( [periodo], 1 ) & "T" & Text.Middle ( [periodo], 2, 2 ) else [periodo]')
+    deriva(mdl, "dim_fonte", "classe",
+           'if [primaria] then "primária" else if Text.Contains ( Text.Lower ( [tipo] ), "agregador" ) then "agregador" else "secundária"')
     j(sm / "model.bim", mdl)
     j(rep / ".platform", {"$schema": f"{SCH}/gitIntegration/platformProperties/2.0.0/schema.json",
                           "metadata": {"type": "Report", "displayName": NOME}, "config": {"version": "2.0", "logicalId": gid("rep")}})
