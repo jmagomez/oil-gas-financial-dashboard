@@ -88,17 +88,17 @@ IND_MEDIDAS = [  # medida por indicador: (nome, codigo, formato)
 
 def medidas():
     m = [
-        ("Valor", "AVERAGE ( fato_indicador[valor] )", "#,0.00", "Base"),
-        ("Valor Validado", 'CALCULATE ( AVERAGE ( fato_indicador[valor] ), KEEPFILTERS ( fato_indicador[status] <> "vermelho" ) )', "#,0.00", "Base"),
-        ("Status",
+        ("Valor Médio", "AVERAGE ( fato_indicador[valor] )", "#,0.##", "Base"),
+        ("Valor Validado", 'CALCULATE ( AVERAGE ( fato_indicador[valor] ), KEEPFILTERS ( fato_indicador[status] <> "vermelho" ) )', "#,0.##", "Base"),
+        ("Selo QA",
          'VAR r = CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "vermelho" )\n'
          'VAR a = CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "amarelo" )\n'
          'RETURN IF ( COUNTROWS ( fato_indicador ) = 0, BLANK (), IF ( r > 0, "✕ em análise", IF ( a > 0, "▲ ressalva", "✓ validado" ) ) )',
          None, "Base"),
-        ("Valor Petrobras", 'CALCULATE ( [Valor Validado], dim_empresa[empresa] = "PBR" )', "#,0.00", "Petrobras"),
+        ("Valor Petrobras", 'CALCULATE ( [Valor Validado], dim_empresa[empresa] = "PBR" )', "#,0.##", "Petrobras"),
         ("Mediana Pares",
          'VAR pares = FILTER ( ALLSELECTED ( dim_empresa[empresa] ), dim_empresa[empresa] <> "PBR" )\n'
-         'RETURN MEDIANX ( pares, [Valor Validado] )', "#,0.00", "Base"),
+         'RETURN MEDIANX ( pares, [Valor Validado] )', "#,0.##", "Base"),
         ("Δ Petrobras vs. Mediana", "[Valor Petrobras] - [Mediana Pares]", "+#,0.00;-#,0.00;0", "Petrobras"),
         ("Δ t/t Petrobras",
          "VAR o = SELECTEDVALUE ( dim_periodo[ordem] )\n"
@@ -180,6 +180,12 @@ def modelo(embutido):
         if t == "fato_indicador":
             tab["measures"] = medidas()
         tabelas.append(tab)
+    # Power BI recusa (sem mensagem de erro) modelos em que uma medida tem o mesmo nome
+    # de uma coluna (comparação sem diferenciar maiúsculas) — falha observada no teste em 02/10/2026.
+    nomes_col = {c["name"].lower() for tb in tabelas for c in tb["columns"]}
+    colisao = [md["name"] for tb in tabelas for md in tb.get("measures", []) if md["name"].lower() in nomes_col]
+    if colisao:
+        raise SystemExit(f"Medidas com nome igual a coluna: {colisao}")
     rel = [("fato_indicador", "empresa", "dim_empresa", "empresa"), ("fato_indicador", "periodo", "dim_periodo", "periodo"),
            ("fato_indicador", "indicador", "dim_indicador", "indicador"), ("fato_indicador", "fonte", "dim_fonte", "id"),
            ("qa_log", "empresa", "dim_empresa", "empresa")]
@@ -258,10 +264,19 @@ class Pagina:
                                                            "fontSize": f"{tamanho}pt", "color": cor}}]}]
         return self.add(nome, "textbox", x, y, w, h, objetos={"general": [{"properties": {"paragraphs": par}}]})
 
-    def slicer(self, nome, campo, x, y, w, h, titulo, dropdown=True, unico=False):
-        obj = {"data": [{"properties": {"mode": lit("Dropdown" if dropdown else "Basic")}}]}
+    def slicer(self, nome, campo, x, y, w, h, titulo, dropdown=True, unico=False, padrao=None):
+        # cabeçalho do slicer oculto: o título do contêiner já nomeia o campo e o cabeçalho cortava a lista suspensa
+        obj = {"data": [{"properties": {"mode": lit("Dropdown" if dropdown else "Basic")}}],
+               "header": [{"properties": {"show": lit(False)}}]}
         if unico:
             obj["selection"] = [{"properties": {"strictSingleSelect": lit(True)}}]
+        if padrao is not None:
+            # seleção inicial explícita: sem ela o Power BI escolhe o 1º item (1T25) em slicers de seleção única
+            ent, prop = campo["Column"]["Expression"]["SourceRef"]["Entity"], campo["Column"]["Property"]
+            flt = {"Version": 2, "From": [{"Name": "s", "Entity": ent, "Type": 0}],
+                   "Where": [{"Condition": {"In": {"Expressions": [{"Column": {"Expression": {"SourceRef": {"Source": "s"}}, "Property": prop}}],
+                                                   "Values": [[lit(padrao)["expr"]]]}}}]}
+            obj["general"] = [{"properties": {"filter": {"filter": flt}}}]
         return self.add(nome, "slicer", x, y, w, h, {"Values": [campo]}, titulo, obj)
 
     def sem_filtro(self, origem, *alvos):
@@ -269,7 +284,18 @@ class Pagina:
             self.interacoes.append({"source": origem, "target": a, "type": "NoFilter"})
 
 
+SEM_TOTAIS = {"subTotals": [{"properties": {"rowSubtotals": lit(False), "columnSubtotals": lit(False)}}]}
+TABELA_SEM_TOTAL = {"total": [{"properties": {"totals": lit(False)}}]}
+CARTAO_NUM_INTEIRO = {"labels": [{"properties": {"labelDisplayUnits": lit(1)}}]}
+
+
+def ultimo_periodo():
+    linhas = list(csv.DictReader(open(POC / "dim_periodo.csv", encoding="utf-8")))
+    return max(linhas, key=lambda r: int(r["ordem"]))["rotulo"]
+
+
 def paginas():
+    ULT = ultimo_periodo()
     E, P, IN = col("dim_empresa", "empresa"), col("dim_periodo", "rotulo"), col("dim_indicador", "nome")
     U = col("dim_empresa", "universo")
     ps = []
@@ -279,11 +305,11 @@ def paginas():
     p.texto("t", "Petrobras vs. pares — visão executiva do trimestre", 20, 12, 820, 44)
     p.texto("st", "Fontes públicas · indicadores recalculados com a mesma fórmula · valores em análise (✕) ficam fora de medianas e rankings",
             20, 52, 900, 26, tamanho=10, negrito=False, cor="#46566A")
-    sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True)
+    sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True, padrao=ULT)
     p.slicer("su", U, 850, 12, 200, 60, "Universo")
     cards = []
     for k, (nome, _, _) in enumerate(IND_MEDIDAS[:6]):
-        cards.append(p.add(f"c{k}", "card", 20 + k * 208, 86, 200, 100, {"Values": [med(f"PBR · {nome}")]}, nome))
+        cards.append(p.add(f"c{k}", "card", 20 + k * 208, 86, 200, 100, {"Values": [med(f"PBR · {nome}")]}, nome, CARTAO_NUM_INTEIRO))
     p.add("b1", "clusteredBarChart", 20, 196, 410, 250, {"Category": [E], "Y": [med("Margem EBITDA (%)")]}, "Margem EBITDA (%) por empresa",
                ordem=(med("Margem EBITDA (%)"), "Descending"))
     p.add("b2", "clusteredBarChart", 440, 196, 410, 250, {"Category": [E], "Y": [med("DL/EBITDA (x)")]}, "Dívida líquida / EBITDA TTM (x)",
@@ -300,8 +326,8 @@ def paginas():
     # 2 — Comparação e evolução
     p = Pagina("comparacao", "Comparação e evolução")
     p.texto("t", "Comparação entre empresas e evolução histórica", 20, 12, 700, 44)
-    p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True)
-    sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True)
+    p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True, padrao="Margem EBITDA")
+    sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True, padrao=ULT)
     p.slicer("su", U, 1080, 12, 180, 60, "Universo")
     p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [E], "Y": [(med("Valor Validado"), "Valor")]},
               "Valor por empresa no período", ordem=(med("Valor Validado"), "Descending"))
@@ -309,21 +335,21 @@ def paginas():
               "Evolução 1T25–2T26")
     m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [col("dim_empresa", "nome")], "Columns": [P],
                                                        "Values": [(med("Valor Validado"), "Valor")]},
-              "Série trimestral (valor validado)")
+              "Série trimestral (valor validado)", SEM_TOTAIS)
     p.sem_filtro(sp, ln, m)
     ps.append(p)
 
     # 3 — Matriz de leitura
     p = Pagina("matriz", "Matriz de leitura")
     p.texto("t", "Leitura dos indicadores — matriz do trimestre", 20, 12, 800, 44)
-    p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True)
+    p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True, padrao=ULT)
     p.slicer("su", U, 1080, 12, 180, 60, "Universo")
     p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [IN], "Columns": [E], "Values": [(med("Valor Validado"), "Valor")]},
-          "Indicador × empresa (valores validados)")
+          "Indicador × empresa (valores validados)", SEM_TOTAIS)
     p.add("d", "tableEx", 20, 426, 820, 280, {"Values": [IN, col("dim_indicador", "unidade"), col("dim_indicador", "formula")]},
           "Definições")
     p.add("pp", "tableEx", 850, 426, 410, 280, {"Values": [IN, (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
-                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares")
+                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares", TABELA_SEM_TOTAL)
     ps.append(p)
 
     # 4 — Qualidade
