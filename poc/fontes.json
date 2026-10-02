@@ -1,0 +1,112 @@
+[
+ {
+  "id": "F-PBR",
+  "empresa": "Petrobras",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — PBR (coleta 13/08/2026)",
+  "url_primaria": "https://www.investidorpetrobras.com.br/resultados-e-comunicados/central-de-resultados/",
+  "alternativa_direta": "CVM Dados Abertos — ITR/DFP (dados.cvm.gov.br)",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-XOM",
+  "empresa": "ExxonMobil",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — XOM (coleta 13/08/2026)",
+  "url_primaria": "https://investor.exxonmobil.com/",
+  "alternativa_direta": "SEC EDGAR XBRL companyfacts (10-Q/10-K)",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-SHEL",
+  "empresa": "Shell",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — SHEL (coleta 13/08/2026)",
+  "url_primaria": "https://www.shell.com/investors/results-and-reporting/quarterly-results.html",
+  "alternativa_direta": "Quarterly Databook (Excel) + 6-K",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-EQNR",
+  "empresa": "Equinor",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — EQNR (coleta 13/08/2026)",
+  "url_primaria": "https://www.equinor.com/investors/quarterly-results",
+  "alternativa_direta": "Financial statements and review + 6-K",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-CVX",
+  "empresa": "Chevron",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — CVX (coleta 13/08/2026)",
+  "url_primaria": "https://www.chevron.com/investors",
+  "alternativa_direta": "SEC EDGAR XBRL companyfacts (10-Q/10-K)",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-BP",
+  "empresa": "BP",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — BP (coleta 13/08/2026)",
+  "url_primaria": "https://www.bp.com/en/global/corporate/investors/results-reporting-and-presentations.html",
+  "alternativa_direta": "Stock exchange announcement + 6-K",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-TTE",
+  "empresa": "TotalEnergies",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
+  "fonte": "Yahoo Finance via yfinance — TTE (coleta 13/08/2026)",
+  "url_primaria": "https://totalenergies.com/investors/results",
+  "alternativa_direta": "Press release de resultados + 6-K",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": false
+ },
+ {
+  "id": "F-REL-1T25",
+  "empresa": "Todas",
+  "tipo": "Demonstrações do 1T25",
+  "fonte": "Releases e demonstrações oficiais de cada empresa (URLs em proveniencia.historico_2025_q1 no JSON)",
+  "url_primaria": "ver JSON",
+  "alternativa_direta": "—",
+  "coletado_em": "2026-10-02",
+  "frequencia": "Trimestral",
+  "primaria": true
+ },
+ {
+  "id": "F-OP",
+  "empresa": "Todas",
+  "tipo": "Produção (kboe/d)",
+  "fonte": "Releases de produção/resultado de cada RI",
+  "url_primaria": "sites de RI",
+  "alternativa_direta": "—",
+  "coletado_em": "2026-08-13",
+  "frequencia": "Trimestral",
+  "primaria": true
+ },
+ {
+  "id": "M-BRENT",
+  "empresa": "—",
+  "tipo": "Brent médio trimestral (contexto)",
+  "fonte": "FRED/IMF — POILBREUSDQ",
+  "url_primaria": "https://fred.stlouisfed.org/series/POILBREUSDQ",
+  "alternativa_direta": "—",
+  "coletado_em": "2026-10-02",
+  "frequencia": "Trimestral",
+  "primaria": true
+ }
+]
