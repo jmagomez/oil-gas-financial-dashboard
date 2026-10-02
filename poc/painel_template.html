@@ -161,7 +161,7 @@ function insight(){const p=S.p,peers=uni().filter(e=>e!=='PBR');const g=i=>get('
  if(ok(fc)){const pr=peers.filter(e=>{const f=get(e,p,'fcf');return f&&f.status!=='verde'}).length;lines.push(`<b>Caixa:</b> FCF de US$ ${fmt(fc.valor,'fcf')} bi vs. mediana de US$ ${fmt(med('fcf'),'fcf')} bi${pr?` <span class="note">(${pr} ${pr>1?'pares':'par'} com FCF ressalvado neste trimestre: salto a confirmar no release)</span>`:''}.`)}
  if(ok(bo))lines.push(`<b>Por barril:</b> EBITDA de US$ ${fmt(bo.valor,'ebitda_boe')}/boe vs. mediana de US$ ${fmt(med('ebitda_boe'),'ebitda_boe')} <span class="note">(EBITDA consolidado, com refino e trading, dividido só pela produção upstream: compara mal empresas com downstream de pesos diferentes)</span>.`);
  const pend=D.qa.filter(x=>x.empresa==='PBR'&&x.periodo===p&&!x.justificado);if(pend.length)lines.push(`<b>Pendências da Petrobras:</b> ${pend.length} ${pend.length>1?'alertas':'alerta'} de qualidade sem justificativa neste trimestre (${[...new Set(pend.map(x=>x.campo.replace('_',' ')))].join(', ')}): ler o release antes de concluir.`);
- const ip=PER.indexOf(p);if(ip>0){const bv=BRENT[p]/BRENT[PER[ip-1]]-1;lines.push(`<b>Contexto:</b> Brent médio de US$ ${BRENT[p].toFixed(1).replace('.',',')}/bbl (${bv>=0?'+':''}${(bv*100).toFixed(0)}% t/t).`)}
+ const ip=PER.indexOf(p);if(ip>0){const bv=BRENT[p]/BRENT[PER[ip-1]]-1;lines.push(`<b>Contexto:</b> Brent médio de US$ ${BRENT[p].toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}/bbl (${bv>=0?'+':''}${(bv*100).toFixed(0)}% t/t).`)}
  insightEl().innerHTML=`<h2 style="margin:0">Leitura automática · ${LBL[p]}</h2><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`}
 const insightEl=()=>document.getElementById('insight');
 
@@ -205,7 +205,7 @@ function lines(){const i=S.i;tLine.textContent=`Evolução histórica · ${IND[i
  svg.querySelector('#hitL').onmousemove=ev=>{const pt=svg.createSVGPoint();pt.x=ev.clientX;pt.y=ev.clientY;const lp=pt.matrixTransform(svg.getScreenCTM().inverse());
   const k=Math.max(0,Math.min(PER.length-1,Math.round((lp.x-l)/((W-l-r)/(PER.length-1)))));xh.setAttribute('x1',X(k));xh.setAttribute('x2',X(k));xh.style.display='';
   const rows=es.map(e=>({e,f:get(e,PER[k],i)})).filter(o=>o.f&&o.f.valor!=null).sort((a,b)=>b.f.valor-a.f.valor);
-  showTip(ev,`<b>${LBL[PER[k]]}</b> · Brent US$ ${BRENT[PER[k]].toFixed(1).replace('.',',')}`+rows.map(o=>`<div class="r"><span><span class="sw" style="background:${col(o.e)}"></span> ${NOME[o.e]}</span><b>${fmt(o.f.valor,i)}${unit(i)} ${o.f.status!=='verde'?(o.f.status==='vermelho'?'✕':'▲'):''}</b></div>`).join(''))};
+  showTip(ev,`<b>${LBL[PER[k]]}</b> · Brent US$ ${BRENT[PER[k]].toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}`+rows.map(o=>`<div class="r"><span><span class="sw" style="background:${col(o.e)}"></span> ${NOME[o.e]}</span><b>${fmt(o.f.valor,i)}${unit(i)} ${o.f.status!=='verde'?(o.f.status==='vermelho'?'✕':'▲'):''}</b></div>`).join(''))};
  svg.querySelector('#hitL').onmouseleave=()=>{xh.style.display='none';hideTip()};
  lineLegend.innerHTML=es.map(e=>`<span><span class="sw" style="background:${col(e)}"></span> ${NOME[e]}</span>`).join('')+'<span>○ marcador vazado = valor com ressalva ▲ · ✕ = valor em análise (omitido da linha)</span>';
  // Brent em gráfico próprio (sem eixo duplo)
