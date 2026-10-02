@@ -1,0 +1,13 @@
+{
+ "fonte": "FRED/IMF — POILBREUSDQ (média trimestral, US$/bbl)",
+ "coletado_em": "2026-10-02",
+ "brent_medio_usd_bbl": {
+  "2024-Q4": 74.0,
+  "2025-Q1": 75.04,
+  "2025-Q2": 66.96,
+  "2025-Q3": 68.14,
+  "2025-Q4": 63.16,
+  "2026-Q1": 77.8,
+  "2026-Q2": 97.05
+ }
+}
