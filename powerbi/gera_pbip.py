@@ -1,0 +1,435 @@
+#!/usr/bin/env python3
+"""Gera o projeto Power BI (PBIP: relatório PBIR + modelo semântico model.bim) da PoC.
+
+    python3 powerbi/gera_pbip.py                 # fonte = CSVs do GitHub (parâmetro UrlBase)
+    python3 powerbi/gera_pbip.py --embutido      # dados embutidos no modelo (abre offline)
+    python3 powerbi/gera_pbip.py --saida DIR
+
+Abrir: Power BI Desktop → Arquivo → Abrir → Benchmarking_Petrobras_Pares.pbip → Atualizar.
+O relatório replica o painel HTML (visão executiva, comparação, evolução, matriz,
+qualidade e fontes) sobre o mesmo modelo estrela de poc/ (fato_indicador + dimensões).
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+import csv
+import json
+import shutil
+import uuid
+import zlib
+from pathlib import Path
+
+RAIZ = Path(__file__).resolve().parent.parent
+POC = RAIZ / "poc"
+NOME = "Benchmarking_Petrobras_Pares"
+URL_BASE = "https://raw.githubusercontent.com/jmagomez/oil-gas-financial-dashboard/main/poc/"
+SCH = "https://developer.microsoft.com/json-schemas/fabric"
+NS = uuid.UUID("6f1c2a52-6a8e-4d0e-9a51-7b7f0c3a9e10")
+CORES = ["#0F8F63", "#2A78D6", "#B07800", "#4A3AA7", "#EB6834", "#C2457A", "#6B7C8C"]
+
+
+def gid(*partes):
+    return str(uuid.uuid5(NS, "|".join(partes)))
+
+
+def nid(*partes):
+    return gid(*partes).replace("-", "")[:20]
+
+
+# --------------------------------------------------------------------------- #
+# Modelo semântico (TMSL / model.bim)
+# --------------------------------------------------------------------------- #
+TABELAS = {
+    # tabela: (arquivo csv, [(coluna, tipo TMSL, tipo M, oculta, formato)])
+    "fato_indicador": ("fato_indicador.csv", [
+        ("empresa", "string", "type text", False, None), ("periodo", "string", "type text", True, None),
+        ("rotulo", "string", "type text", True, None), ("indicador", "string", "type text", True, None),
+        ("valor", "double", "type number", False, "#,0.00"), ("unidade", "string", "type text", False, None),
+        ("status", "string", "type text", False, None), ("obs", "string", "type text", False, None),
+        ("fonte", "string", "type text", False, None), ("hash", "string", "type text", True, None)]),
+    "dim_empresa": ("dim_empresa.csv", [
+        ("empresa", "string", "type text", False, None), ("nome", "string", "type text", False, None),
+        ("pais", "string", "type text", False, None), ("padrao_contabil", "string", "type text", False, None),
+        ("perfil", "string", "type text", False, None), ("na_poc", "boolean", "type logical", True, None),
+        ("ordem", "int64", "Int64.Type", True, "0")]),
+    "dim_periodo": ("dim_periodo.csv", [
+        ("periodo", "string", "type text", False, None), ("rotulo", "string", "type text", False, None),
+        ("ordem", "int64", "Int64.Type", True, "0"), ("data_fim", "dateTime", "type date", False, "dd/mm/yyyy"),
+        ("dias", "int64", "Int64.Type", False, "0"), ("brent_medio", "double", "type number", False, "#,0.00")]),
+    "dim_indicador": ("dim_indicador.csv", [
+        ("indicador", "string", "type text", True, None), ("nome", "string", "type text", False, None),
+        ("unidade", "string", "type text", False, None), ("direcao", "int64", "Int64.Type", False, "0"),
+        ("casas", "int64", "Int64.Type", True, "0"), ("formula", "string", "type text", False, None),
+        ("grupo", "string", "type text", False, None), ("ordem", "int64", "Int64.Type", True, "0")]),
+    "dim_fonte": ("dim_fonte.csv", [
+        ("id", "string", "type text", False, None), ("empresa", "string", "type text", False, None),
+        ("tipo", "string", "type text", False, None), ("fonte", "string", "type text", False, None),
+        ("url_primaria", "string", "type text", False, None), ("alternativa_direta", "string", "type text", False, None),
+        ("coletado_em", "string", "type text", False, None), ("frequencia", "string", "type text", False, None),
+        ("primaria", "boolean", "type logical", False, None)]),
+    "qa_log": ("qa_log.csv", [
+        ("empresa", "string", "type text", False, None), ("periodo", "string", "type text", False, None),
+        ("campo", "string", "type text", False, None), ("regra", "string", "type text", False, None),
+        ("severidade", "string", "type text", False, None), ("justificado", "boolean", "type logical", False, None),
+        ("mensagem", "string", "type text", False, None)]),
+}
+ORDENA_POR = {("dim_empresa", "empresa"): "ordem", ("dim_empresa", "nome"): "ordem",
+              ("dim_periodo", "rotulo"): "ordem", ("dim_periodo", "periodo"): "ordem",
+              ("dim_indicador", "nome"): "ordem"}
+
+IND_MEDIDAS = [  # medida por indicador: (nome, codigo, formato)
+    ("Margem EBITDA (%)", "margem_ebitda", "#,0.0"), ("Margem líquida (%)", "margem_liquida", "#,0.0"),
+    ("FCF (US$ bi)", "fcf", "#,0.0"), ("DL/EBITDA (x)", "nd_ebitda", "#,0.00"),
+    ("EBITDA por boe (US$)", "ebitda_boe", "#,0.0"), ("Efetivo", "efetivo", "#,0"),
+    ("EBITDA TTM por empregado (US$ mil)", "ebitda_por_empregado", "#,0"),
+]
+
+
+def medidas():
+    m = [
+        ("Valor", "AVERAGE ( fato_indicador[valor] )", "#,0.00", "Base"),
+        ("Valor Validado", 'CALCULATE ( AVERAGE ( fato_indicador[valor] ), KEEPFILTERS ( fato_indicador[status] <> "vermelho" ) )', "#,0.00", "Base"),
+        ("Status",
+         'VAR r = CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "vermelho" )\n'
+         'VAR a = CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "amarelo" )\n'
+         'RETURN IF ( COUNTROWS ( fato_indicador ) = 0, BLANK (), IF ( r > 0, "✕ em análise", IF ( a > 0, "▲ ressalva", "✓ validado" ) ) )',
+         None, "Base"),
+        ("Valor Petrobras", 'CALCULATE ( [Valor Validado], dim_empresa[empresa] = "PBR" )', "#,0.00", "Petrobras"),
+        ("Mediana Pares",
+         'VAR pares = FILTER ( ALLSELECTED ( dim_empresa[empresa] ), dim_empresa[empresa] <> "PBR" )\n'
+         'RETURN MEDIANX ( pares, [Valor Validado] )', "#,0.00", "Base"),
+        ("Δ Petrobras vs. Mediana", "[Valor Petrobras] - [Mediana Pares]", "+#,0.00;-#,0.00;0", "Petrobras"),
+        ("Δ t/t Petrobras",
+         "VAR o = SELECTEDVALUE ( dim_periodo[ordem] )\n"
+         "VAR atual = [Valor Petrobras]\n"
+         "VAR ant = CALCULATE ( [Valor Petrobras], REMOVEFILTERS ( dim_periodo ), dim_periodo[ordem] = o - 1 )\n"
+         "RETURN IF ( NOT ISBLANK ( atual ) && NOT ISBLANK ( ant ), atual - ant )", "+#,0.00;-#,0.00;0", "Petrobras"),
+        ("Posição Petrobras",
+         "VAR d = SELECTEDVALUE ( dim_indicador[direcao] )\n"
+         "VAR v = [Valor Petrobras]\n"
+         "VAR grupo = FILTER ( ALLSELECTED ( dim_empresa[empresa] ), NOT ISBLANK ( [Valor Validado] ) )\n"
+         "RETURN IF ( d <> 0 && NOT ISBLANK ( v ), RANKX ( grupo, [Valor Validado] * d, v * d, DESC, DENSE ) )", "0", "Petrobras"),
+        ("Brent Médio (US$/bbl)", "AVERAGE ( dim_periodo[brent_medio] )", "#,0.0", "Contexto"),
+        ("% Validado",
+         'DIVIDE ( CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "verde" ), COUNTROWS ( fato_indicador ) )', "0%", "Qualidade"),
+        ("Valores com ressalva", 'CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "amarelo" ) + 0', "#,0", "Qualidade"),
+        ("Valores em análise", 'CALCULATE ( COUNTROWS ( fato_indicador ), fato_indicador[status] = "vermelho" ) + 0', "#,0", "Qualidade"),
+        ("Alertas", "COUNTROWS ( qa_log ) + 0", "#,0", "Qualidade"),
+        ("Alertas pendentes", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = FALSE () ) + 0", "#,0", "Qualidade"),
+        ("Alertas justificados", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = TRUE () ) + 0", "#,0", "Qualidade"),
+    ]
+    for nome, cod, fmt in IND_MEDIDAS:
+        m.append((nome, f'CALCULATE ( [Valor Validado], dim_indicador[indicador] = "{cod}" )', fmt, "Indicadores"))
+        m.append((f"PBR · {nome}", f'CALCULATE ( [Valor Petrobras], dim_indicador[indicador] = "{cod}" )', fmt, "Petrobras"))
+    out = []
+    for nome, expr, fmt, pasta in m:
+        d = {"name": nome, "expression": expr.split("\n") if "\n" in expr else expr, "displayFolder": pasta,
+             "lineageTag": gid("medida", nome)}
+        if fmt:
+            d["formatString"] = fmt
+        out.append(d)
+    return out
+
+
+def m_embutido(tabela, arquivo, cols):
+    linhas = list(csv.DictReader(open(POC / arquivo, encoding="utf-8")))
+    bruto = json.dumps(linhas, ensure_ascii=False).encode("utf-8")
+    comp = zlib.compressobj(9, zlib.DEFLATED, -15)
+    b64 = base64.b64encode(comp.compress(bruto) + comp.flush()).decode()
+    tipos = ", ".join(f'{{"{c}", {m}}}' for c, _, m, _, _ in cols)
+    return ["let",
+            f'    Bin = Binary.Decompress ( Binary.FromText ( "{b64}", BinaryEncoding.Base64 ), Compression.Deflate ),',
+            "    Linhas = Json.Document ( Bin, 65001 ),",
+            "    Tabela = Table.FromRecords ( Linhas ),",
+            '    Vazios = Table.ReplaceValue ( Tabela, "", null, Replacer.ReplaceValue, Table.ColumnNames ( Tabela ) ),',
+            f'    Tipado = Table.TransformColumnTypes ( Vazios, {{{tipos}}}, "en-US" )',
+            "in",
+            "    Tipado"]
+
+
+def m_web(tabela, arquivo, cols):
+    tipos = ", ".join(f'{{"{c}", {m}}}' for c, _, m, _, _ in cols)
+    return ["let",
+            f'    Fonte = Csv.Document ( Web.Contents ( UrlBase & "{arquivo}" ), [ Delimiter = ",", Encoding = 65001, QuoteStyle = QuoteStyle.Csv ] ),',
+            "    Cabecalho = Table.PromoteHeaders ( Fonte, [ PromoteAllScalars = true ] ),",
+            '    Vazios = Table.ReplaceValue ( Cabecalho, "", null, Replacer.ReplaceValue, Table.ColumnNames ( Cabecalho ) ),',
+            f'    Tipado = Table.TransformColumnTypes ( Vazios, {{{tipos}}}, "en-US" )',
+            "in",
+            "    Tipado"]
+
+
+def modelo(embutido):
+    tabelas = []
+    for t, (arq, cols) in TABELAS.items():
+        colunas = []
+        for c, tipo, _, oculta, fmt in cols:
+            d = {"name": c, "dataType": tipo, "sourceColumn": c, "lineageTag": gid("col", t, c),
+                 "summarizeBy": "none", "annotations": [{"name": "SummarizationSetBy", "value": "Automatic"}]}
+            if oculta:
+                d["isHidden"] = True
+            if fmt:
+                d["formatString"] = fmt
+            if (t, c) in ORDENA_POR:
+                d["sortByColumn"] = ORDENA_POR[(t, c)]
+            colunas.append(d)
+        expr = m_embutido(t, arq, cols) if embutido else m_web(t, arq, cols)
+        tab = {"name": t, "lineageTag": gid("tab", t), "columns": colunas,
+               "partitions": [{"name": t, "mode": "import", "source": {"type": "m", "expression": expr}}],
+               "annotations": [{"name": "PBI_ResultType", "value": "Table"}]}
+        if t == "fato_indicador":
+            tab["measures"] = medidas()
+        tabelas.append(tab)
+    rel = [("fato_indicador", "empresa", "dim_empresa", "empresa"), ("fato_indicador", "periodo", "dim_periodo", "periodo"),
+           ("fato_indicador", "indicador", "dim_indicador", "indicador"), ("fato_indicador", "fonte", "dim_fonte", "id"),
+           ("qa_log", "empresa", "dim_empresa", "empresa")]
+    model = {
+        "culture": "pt-BR",
+        "dataAccessOptions": {"legacyRedirects": True, "returnErrorValuesAsNull": True},
+        "defaultPowerBIDataSourceVersion": "powerBI_V3",
+        "sourceQueryCulture": "pt-BR",
+        "tables": tabelas,
+        "relationships": [{"name": gid("rel", *r), "fromTable": r[0], "fromColumn": r[1], "toTable": r[2], "toColumn": r[3]} for r in rel],
+        "annotations": [{"name": "__PBI_TimeIntelligenceEnabled", "value": "0"},
+                        {"name": "PBI_QueryOrder", "value": json.dumps((["UrlBase"] if not embutido else []) + list(TABELAS))}],
+    }
+    if not embutido:
+        model["expressions"] = [{
+            "name": "UrlBase", "kind": "m", "lineageTag": gid("expr", "UrlBase"),
+            "expression": f'"{URL_BASE}" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]',
+            "annotations": [{"name": "PBI_ResultType", "value": "Text"}]}]
+    return {"compatibilityLevel": 1567, "model": model}
+
+
+# --------------------------------------------------------------------------- #
+# Relatório (PBIR)
+# --------------------------------------------------------------------------- #
+def lit(v):
+    if isinstance(v, bool):
+        return {"expr": {"Literal": {"Value": "true" if v else "false"}}}
+    if isinstance(v, (int, float)):
+        return {"expr": {"Literal": {"Value": f"{v}D"}}}
+    return {"expr": {"Literal": {"Value": "'" + str(v).replace("'", "''") + "'"}}}
+
+
+def col(t, c):
+    return {"Column": {"Expression": {"SourceRef": {"Entity": t}}, "Property": c}}
+
+
+def med(c):
+    return {"Measure": {"Expression": {"SourceRef": {"Entity": "fato_indicador"}}, "Property": c}}
+
+
+def proj(campo, nome=None):
+    k = "Column" if "Column" in campo else "Measure"
+    ent = campo[k]["Expression"]["SourceRef"]["Entity"]
+    prop = campo[k]["Property"]
+    d = {"field": campo, "queryRef": f"{ent}.{prop}", "nativeQueryRef": prop}
+    if nome:
+        d["displayName"] = nome
+    return d
+
+
+class Pagina:
+    def __init__(self, nome, titulo):
+        self.nome, self.titulo, self.visuais, self.interacoes = nome, titulo, [], []
+
+    def add(self, nome, tipo, x, y, w, h, papeis=None, titulo=None, objetos=None, ordem=None):
+        v = {"visualType": tipo, "drillFilterOtherVisuals": True}
+        if papeis:
+            v["query"] = {"queryState": {r: {"projections": [proj(*c) if isinstance(c, tuple) else proj(c) for c in cs]} for r, cs in papeis.items()}}
+            if ordem:
+                v["query"]["sortDefinition"] = {"sort": [{"field": ordem[0], "direction": ordem[1]}], "isDefaultSort": False}
+        if objetos:
+            v["objects"] = objetos
+        vco = {}
+        if titulo:
+            vco["title"] = [{"properties": {"show": lit(True), "text": lit(titulo)}}]
+        if vco:
+            v["visualContainerObjects"] = vco
+        vid = nid(self.nome, nome)
+        self.visuais.append({"$schema": f"{SCH}/item/report/definition/visualContainer/2.0.0/schema.json",
+                             "name": vid, "position": {"x": x, "y": y, "z": len(self.visuais) * 1000, "width": w, "height": h,
+                                                       "tabOrder": len(self.visuais) * 1000}, "visual": v})
+        return vid
+
+    def texto(self, nome, texto, x, y, w, h, tamanho=20, negrito=True, cor="#13202B"):
+        par = [{"textRuns": [{"value": texto, "textStyle": {"fontWeight": "bold" if negrito else "normal",
+                                                           "fontSize": f"{tamanho}pt", "color": cor}}]}]
+        return self.add(nome, "textbox", x, y, w, h, objetos={"general": [{"properties": {"paragraphs": par}}]})
+
+    def slicer(self, nome, campo, x, y, w, h, titulo, dropdown=True, unico=False):
+        obj = {"data": [{"properties": {"mode": lit("Dropdown" if dropdown else "Basic")}}]}
+        if unico:
+            obj["selection"] = [{"properties": {"strictSingleSelect": lit(True)}}]
+        return self.add(nome, "slicer", x, y, w, h, {"Values": [campo]}, titulo, obj)
+
+    def sem_filtro(self, origem, *alvos):
+        for a in alvos:
+            self.interacoes.append({"source": origem, "target": a, "type": "NoFilter"})
+
+
+def paginas():
+    E, P, IN = col("dim_empresa", "empresa"), col("dim_periodo", "rotulo"), col("dim_indicador", "nome")
+    U = col("dim_empresa", "universo")
+    ps = []
+
+    # 1 — Visão executiva
+    p = Pagina("visao", "Visão executiva")
+    p.texto("t", "Petrobras vs. pares — visão executiva do trimestre", 20, 12, 820, 44)
+    p.texto("st", "Fontes públicas · indicadores recalculados com a mesma fórmula · valores em análise (✕) ficam fora de medianas e rankings",
+            20, 52, 900, 26, tamanho=10, negrito=False, cor="#46566A")
+    sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True)
+    p.slicer("su", U, 850, 12, 200, 60, "Universo")
+    cards = []
+    for k, (nome, _, _) in enumerate(IND_MEDIDAS[:6]):
+        cards.append(p.add(f"c{k}", "card", 20 + k * 208, 86, 200, 100, {"Values": [med(f"PBR · {nome}")]}, nome))
+    p.add("b1", "clusteredBarChart", 20, 196, 410, 250, {"Category": [E], "Y": [med("Margem EBITDA (%)")]}, "Margem EBITDA (%) por empresa",
+               ordem=(med("Margem EBITDA (%)"), "Descending"))
+    p.add("b2", "clusteredBarChart", 440, 196, 410, 250, {"Category": [E], "Y": [med("DL/EBITDA (x)")]}, "Dívida líquida / EBITDA TTM (x)",
+               ordem=(med("DL/EBITDA (x)"), "Descending"))
+    p.add("b3", "clusteredBarChart", 860, 196, 400, 250, {"Category": [E], "Y": [med("FCF (US$ bi)")]}, "Fluxo de caixa livre (US$ bi)",
+               ordem=(med("FCF (US$ bi)"), "Descending"))
+    l1 = p.add("l1", "lineChart", 20, 456, 830, 250, {"Category": [P], "Series": [E], "Y": [med("Margem EBITDA (%)")]},
+               "Evolução da margem EBITDA (%) — 1T25 a 2T26")
+    l2 = p.add("l2", "clusteredColumnChart", 860, 456, 400, 250, {"Category": [P], "Y": [med("Brent Médio (US$/bbl)")]},
+               "Contexto: Brent médio (US$/bbl)")
+    p.sem_filtro(sp, l1, l2)
+    ps.append(p)
+
+    # 2 — Comparação e evolução
+    p = Pagina("comparacao", "Comparação e evolução")
+    p.texto("t", "Comparação entre empresas e evolução histórica", 20, 12, 700, 44)
+    p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True)
+    sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True)
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo")
+    p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [E], "Y": [(med("Valor Validado"), "Valor")]},
+              "Valor por empresa no período", ordem=(med("Valor Validado"), "Descending"))
+    ln = p.add("l", "lineChart", 650, 86, 610, 300, {"Category": [P], "Series": [E], "Y": [(med("Valor Validado"), "Valor")]},
+              "Evolução 1T25–2T26")
+    m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [col("dim_empresa", "nome")], "Columns": [P],
+                                                       "Values": [(med("Valor Validado"), "Valor")]},
+              "Série trimestral (valor validado)")
+    p.sem_filtro(sp, ln, m)
+    ps.append(p)
+
+    # 3 — Matriz de leitura
+    p = Pagina("matriz", "Matriz de leitura")
+    p.texto("t", "Leitura dos indicadores — matriz do trimestre", 20, 12, 800, 44)
+    p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True)
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo")
+    p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [IN], "Columns": [E], "Values": [(med("Valor Validado"), "Valor")]},
+          "Indicador × empresa (valores validados)")
+    p.add("d", "tableEx", 20, 426, 820, 280, {"Values": [IN, col("dim_indicador", "unidade"), col("dim_indicador", "formula")]},
+          "Definições")
+    p.add("pp", "tableEx", 850, 426, 410, 280, {"Values": [IN, (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
+                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares")
+    ps.append(p)
+
+    # 4 — Qualidade
+    p = Pagina("qualidade", "Qualidade e rastreabilidade")
+    p.texto("t", "Qualidade e rastreabilidade dos dados", 20, 12, 800, 44)
+    p.slicer("se", E, 1060, 12, 200, 60, "Empresa")
+    for k, (n, t) in enumerate([("% Validado", "Valores validados sem ressalva"), ("Valores com ressalva", "Valores com ressalva (▲)"),
+                                ("Valores em análise", "Valores em análise (✕)"), ("Alertas pendentes", "Alertas pendentes de leitura")]):
+        p.add(f"c{k}", "card", 20 + k * 312, 86, 300, 100, {"Values": [med(n)]}, t)
+    p.add("r", "clusteredBarChart", 20, 196, 500, 510, {"Category": [col("qa_log", "regra")], "Y": [med("Alertas pendentes"), med("Alertas justificados")]},
+          "Alertas por regra")
+    p.add("q", "tableEx", 530, 196, 730, 510, {"Values": [col("qa_log", "empresa"), col("qa_log", "periodo"), col("qa_log", "campo"),
+                                                           col("qa_log", "regra"), col("qa_log", "justificado"), col("qa_log", "mensagem")]},
+          "Log de alertas")
+    ps.append(p)
+
+    # 5 — Fontes
+    p = Pagina("fontes", "Fontes e metodologia")
+    p.texto("t", "Catálogo de fontes", 20, 12, 800, 44)
+    p.add("f", "tableEx", 20, 70, 1240, 420, {"Values": [col("dim_fonte", c) for c in ["id", "empresa", "tipo", "fonte", "url_primaria",
+                                                                                      "alternativa_direta", "coletado_em", "primaria"]]},
+          "Fontes utilizadas e rota primária")
+    p.texto("m", "Selo de qualidade: ✓ validado · ▲ ressalva (dado carregado, proxy ou desvio a ler) · ✕ em análise (fora de medianas e rankings). "
+                 "Regras R1–R8: completude, coerência contábil, plausibilidade, desvio histórico, contexto (Brent), revisão, proveniência e "
+                 "reconciliação entre fontes. Detalhes no guia e em poc/build_poc.py.", 20, 500, 1240, 120, tamanho=11, negrito=False, cor="#46566A")
+    ps.append(p)
+    return ps
+
+
+def tema():
+    return {"name": "Benchmarking OG", "dataColors": CORES + ["#13202B", "#46566A", "#0B4F6C"],
+            "foreground": "#13202B", "background": "#FFFFFF", "tableAccent": "#0B4F6C",
+            "good": "#0F7A3D", "neutral": "#A86A00", "bad": "#C0392B", "maximum": "#0B4F6C", "minimum": "#E6EEF3", "center": "#9DB7C6",
+            "textClasses": {"title": {"fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#13202B"},
+                            "label": {"fontFace": "Segoe UI", "fontSize": 10, "color": "#46566A"},
+                            "callout": {"fontFace": "Segoe UI Semibold", "fontSize": 24, "color": "#13202B"}}}
+
+
+def escreve(dest: Path, embutido: bool):
+    if dest.exists():
+        shutil.rmtree(dest)
+    rep, sm = dest / f"{NOME}.Report", dest / f"{NOME}.SemanticModel"
+    def j(p, o):
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(json.dumps(o, ensure_ascii=False, indent=2), encoding="utf-8")
+    j(dest / f"{NOME}.pbip", {"$schema": f"{SCH}/pbip/pbipProperties/1.0.0/schema.json", "version": "1.0",
+                              "artifacts": [{"report": {"path": f"{NOME}.Report"}}], "settings": {"enableAutoRecovery": True}})
+    j(sm / ".platform", {"$schema": f"{SCH}/gitIntegration/platformProperties/2.0.0/schema.json",
+                         "metadata": {"type": "SemanticModel", "displayName": NOME}, "config": {"version": "2.0", "logicalId": gid("sm")}})
+    j(sm / "definition.pbism", {"$schema": f"{SCH}/item/semanticModel/definitionProperties/1.0.0/schema.json", "version": "1.0", "settings": {}})
+    mdl = modelo(embutido)
+    # coluna "universo" em dim_empresa (texto amigável para o slicer)
+    de = next(t for t in mdl["model"]["tables"] if t["name"] == "dim_empresa")
+    de["columns"].append({"name": "universo", "dataType": "string", "sourceColumn": "universo", "lineageTag": gid("col", "dim_empresa", "universo"),
+                          "summarizeBy": "none"})
+    exp = de["partitions"][0]["source"]["expression"]
+    i = next(k for k, linha in enumerate(exp) if linha.strip().startswith("Tipado"))
+    exp[i] = exp[i].rstrip(",") + ","
+    exp.insert(i + 1, '    Universo = Table.AddColumn ( Tipado, "universo", each if [na_poc] then "PoC (PBR + 3 pares)" else "Escala (+3)", type text )')
+    exp[-1] = "    Universo"
+    j(sm / "model.bim", mdl)
+    j(rep / ".platform", {"$schema": f"{SCH}/gitIntegration/platformProperties/2.0.0/schema.json",
+                          "metadata": {"type": "Report", "displayName": NOME}, "config": {"version": "2.0", "logicalId": gid("rep")}})
+    j(rep / "definition.pbir", {"$schema": f"{SCH}/item/report/definitionProperties/2.0.0/schema.json", "version": "4.0",
+                                "datasetReference": {"byPath": {"path": f"../{NOME}.SemanticModel"}}})
+    d = rep / "definition"
+    j(d / "version.json", {"$schema": f"{SCH}/item/report/definition/versionMetadata/1.0.0/schema.json", "version": "2.0.0"})
+    j(d / "report.json", {
+        "$schema": f"{SCH}/item/report/definition/report/2.0.0/schema.json",
+        "themeCollection": {"baseTheme": {"name": "CY24SU10", "reportVersionAtImport": "5.61", "type": "SharedResources"},
+                            "customTheme": {"name": "BenchmarkingOG.json", "reportVersionAtImport": "5.61", "type": "RegisteredResources"}},
+        "resourcePackages": [{"name": "SharedResources", "type": "SharedResources",
+                              "items": [{"name": "CY24SU10", "path": "BaseThemes/CY24SU10.json", "type": "BaseTheme"}]},
+                             {"name": "RegisteredResources", "type": "RegisteredResources",
+                              "items": [{"name": "BenchmarkingOG.json", "path": "BenchmarkingOG.json", "type": "CustomTheme"}]}],
+        "settings": {"useStylableVisualContainerHeader": True, "defaultDrillFilterOtherVisuals": True, "allowChangeFilterTypes": True,
+                     "useEnhancedTooltips": True}})
+    base = tema()
+    base["name"] = "CY24SU10"
+    j(rep / "StaticResources" / "SharedResources" / "BaseThemes" / "CY24SU10.json", base)
+    j(rep / "StaticResources" / "RegisteredResources" / "BenchmarkingOG.json", tema())
+    ps = paginas()
+    j(d / "pages" / "pages.json", {"$schema": f"{SCH}/item/report/definition/pagesMetadata/1.0.0/schema.json",
+                                   "pageOrder": [nid("pg", p.nome) for p in ps], "activePageName": nid("pg", ps[0].nome)})
+    for p in ps:
+        pid = nid("pg", p.nome)
+        pg = {"$schema": f"{SCH}/item/report/definition/page/2.0.0/schema.json", "name": pid, "displayName": p.titulo,
+              "displayOption": "FitToPage", "height": 720, "width": 1280}
+        if p.interacoes:
+            pg["visualInteractions"] = p.interacoes
+        j(d / "pages" / pid / "page.json", pg)
+        for v in p.visuais:
+            j(d / "pages" / pid / "visuals" / v["name"] / "visual.json", v)
+    (dest / ".gitignore").write_text("**/.pbi/localSettings.json\n**/.pbi/cache.abf\n", encoding="utf-8")
+    return ps
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--embutido", action="store_true", help="embute os dados no modelo (abre e atualiza offline)")
+    ap.add_argument("--saida", default=str(RAIZ / "powerbi" / "projeto"))
+    a = ap.parse_args(argv)
+    ps = escreve(Path(a.saida), a.embutido)
+    print(f"OK: PBIP em {a.saida} ({len(ps)} páginas, {sum(len(p.visuais) for p in ps)} visuais, "
+          f"{'dados embutidos' if a.embutido else 'fonte = ' + URL_BASE})")
+
+
+if __name__ == "__main__":
+    main()
