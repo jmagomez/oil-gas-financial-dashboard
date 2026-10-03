@@ -110,17 +110,24 @@ def test_painel_publicado_esta_sincronizado_com_o_template():
     assert tpl.split("__DATA__")[0] in html
 
 
-def test_mensagens_do_log_preservam_abreviacoes():
+def test_mensagens_do_log_preservam_abreviacoes(monkeypatch):
     # regressão: a conversão de decimais para pt-BR trocava "p.p." por "p,p,"
+    monkeypatch.setattr(bp, "LEITURAS", [])
     dados, empresas, base = _base()
+    base = copy.deepcopy(base)
+    base["PBR"]["2026-Q1"]["ebitda"] = base["PBR"]["2026-Q1"]["receita"] * 0.20  # margem cai ~30 p.p.
     log = bp.aplica_regras(dados, empresas, base)
     assert not any("p,p" in x["mensagem"] for x in log.itens)
     assert any("p.p." in x["mensagem"] for x in log.itens)
 
 
-def test_r5_exige_magnitude_compativel_com_o_brent():
-    # EBITDA da Petrobras +104% no 2T26 com Brent +25%: mesma direção, mas 4x a variação -> fica pendente
+def test_r5_exige_magnitude_compativel_com_o_brent(monkeypatch):
+    # EBITDA +104% com Brent +25%: mesma direção, mas 4x a variação -> fica pendente
+    monkeypatch.setattr(bp, "LEITURAS", [])
     dados, empresas, base = _base()
+    base = copy.deepcopy(base)
+    base["PBR"]["2026-Q2"]["ebitda"] = base["PBR"]["2026-Q1"]["ebitda"] * 2.04
+    base["PBR"]["2026-Q2"]["receita"] = base["PBR"]["2026-Q1"]["receita"] * 1.43
     log = bp.aplica_regras(dados, empresas, base)
     it = [x for x in log.itens if x["empresa"] == "PBR" and x["periodo"] == "2026-Q2" and x["campo"] == "ebitda"
           and x["mensagem"].startswith("variação")]
@@ -130,8 +137,55 @@ def test_r5_exige_magnitude_compativel_com_o_brent():
     assert rec and rec[0]["justificado"]
 
 
-def test_r4_sinaliza_salto_material_de_fcf():
+def test_r4_sinaliza_salto_material_de_fcf(monkeypatch):
+    monkeypatch.setattr(bp, "LEITURAS", [])
     dados, empresas, base = _base()
     log = bp.aplica_regras(dados, empresas, base)
     assert any(x["empresa"] == "XOM" and x["periodo"] == "2026-Q2" and x["campo"] == "fcf" and not x["justificado"]
                for x in log.itens)
+
+
+def test_leitura_do_release_fecha_o_alerta_sem_mudar_o_valor():
+    dados, empresas, base = _base()
+    log = bp.aplica_regras(dados, empresas, base)
+    it = [x for x in log.itens if x["empresa"] == "XOM" and x["periodo"] == "2026-Q2" and x["campo"] == "fcf"]
+    assert it and it[0]["justificado"] and it[0]["leitura"] and it[0]["fonte_leitura"].startswith("https://")
+    assert base["XOM"]["2026-Q2"]["fcf"] == 17028
+
+
+def test_leitura_nunca_fecha_vermelho(monkeypatch):
+    dados, empresas, base = _base()
+    base = copy.deepcopy(base)
+    base["XOM"]["2026-Q2"]["fcf"] = 1  # FCF != FCO + capex -> R2 vermelho
+    monkeypatch.setattr(bp, "LEITURAS", [dict(empresa="XOM", periodo="2026-Q2", campo="fcf", explicacao="x",
+                                              implicacao="y", fonte_url="https://exemplo")])
+    log = bp.aplica_regras(dados, empresas, base)
+    verm = [x for x in log.itens if x["empresa"] == "XOM" and x["campo"] == "fcf" and x["severidade"] == "vermelho"]
+    assert verm and not verm[0]["justificado"]
+
+
+def test_petrobras_fluxo_pela_ptax_media_e_divida_pelo_fechamento():
+    _, _, base = _base()
+    for p in bp.PERIODOS:
+        r = base["PBR"][p]
+        cb, brl = r["cambio"], r["brl"]
+        assert r["receita"] == round(brl["receita_brl"] / cb["ptax_media"])
+        assert r["divida_liquida"] == round(brl["divida_liquida_brl"] / cb["ptax_fechamento"])
+        assert abs(r["divida_liquida"] / cb["divida_usd_divulgada"] - 1) < 0.005
+        assert bp.PTAX["trimestres"][p]["media"] == cb["ptax_media"]
+
+
+def test_r7_pega_divida_da_petrobras_convertida_pela_taxa_media():
+    dados, empresas, base = _base()
+    base = copy.deepcopy(base)
+    cb = base["PBR"]["2026-Q2"]["cambio"]
+    cb["ptax_fechamento"] = cb["ptax_media"]  # erro clássico: dívida pela média
+    log = bp.aplica_regras(dados, empresas, base)
+    assert any(x["empresa"] == "PBR" and x["regra"].startswith("R7") and x["severidade"] == "vermelho" for x in log.itens)
+
+
+def test_serie_trimestral_toda_de_fonte_primaria():
+    _, _, base = _base()
+    for t in bp.ORDEM_EMPRESAS:
+        for p in bp.PERIODOS:
+            assert "primária" in base[t][p].get("fonte_dado", ""), (t, p)
