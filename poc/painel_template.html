@@ -23,7 +23,7 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outlin
 .spacer{flex:1}
 .grid{display:grid;gap:14px}.g6{grid-template-columns:repeat(6,minmax(0,1fr))}.g2{grid-template-columns:1.1fr 1fr}.g2e{grid-template-columns:1fr 1fr}
 @media (max-width:1100px){.g6{grid-template-columns:repeat(3,minmax(0,1fr))}.g2,.g2e{grid-template-columns:1fr}}
-@media (max-width:640px){.g6{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:16px}}
+@media (max-width:640px){.bar{position:static}.g6{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:16px}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);min-width:0}
 .sec{margin-top:22px}.sec-h{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}.sec-h .n{font-size:12px;color:var(--accent);font-weight:700}
 .note{color:var(--muted);font-size:12px;margin-top:6px}
@@ -47,6 +47,24 @@ details summary{cursor:pointer;font-weight:600}.legend{display:flex;gap:12px;fle
 .foot{color:var(--muted);font-size:11.5px;margin-top:22px}
 a{color:var(--accent)}
 .logo{float:right;height:35px;width:auto;margin:4px 0 8px 16px}@media(max-width:640px){.logo{float:none;display:block;height:28px;margin:0 0 10px}}
+.headline{margin:14px 0 0;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--PBR);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow)}
+.headline .t{font-size:16px;font-weight:600;line-height:1.4}.headline .pills{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pill{font-size:12px;border-radius:99px;padding:2px 10px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}.pill b{color:var(--ink)}
+.guia{display:none;margin:12px 0 0;background:color-mix(in srgb,var(--accent) 7%,var(--surface));border:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));border-radius:12px;padding:12px 16px}
+.guia.on{display:block}.guia ol{margin:6px 0 4px;padding-left:20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 18px}.guia li{font-size:13px}
+@media (max-width:900px){.guia ol{grid-template-columns:1fr}.headline{grid-template-columns:1fr}}
+.toc{display:flex;gap:4px;flex-wrap:wrap;width:100%;font-size:12.5px}.toc a{text-decoration:none;color:var(--ink-2);padding:3px 10px;border-radius:99px;border:1px solid transparent}
+.toc a:hover,.toc a.on{border-color:var(--line);background:var(--surface);color:var(--accent)}
+.sec,.card[id]{scroll-margin-top:110px}
+.kpi{cursor:pointer;transition:border-color .15s,transform .15s}.kpi:hover{border-color:var(--accent);transform:translateY(-1px)}.kpi.sel{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 35%,transparent)}
+.kpi .hint{font-size:11px;color:var(--muted);margin-top:4px}.info{cursor:help;color:var(--muted);font-weight:400;margin-left:3px}
+.hm tbody tr{cursor:pointer}.hm tbody tr:hover td{outline:1px solid color-mix(in srgb,var(--accent) 30%,transparent)}.hm tr.sel td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.more{border:0;background:none;color:var(--accent);padding:2px 0;font-weight:600}
+.btn-pri{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+#topo{position:fixed;right:18px;bottom:18px;z-index:20;border-radius:99px;width:40px;height:40px;padding:0;box-shadow:var(--shadow);display:none}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:8px 14px;border-radius:8px;font-size:13px;z-index:60;display:none}
+.empty{color:var(--muted);font-size:12.5px;padding:10px 0}
+@media print{.toc,#topo,.guia,.bar button{display:none!important}}
 @media print{.bar{position:static}#tip{display:none!important}.card{break-inside:avoid}}
 </style></head><body><div class="wrap">
 <header>
@@ -55,6 +73,10 @@ a{color:var(--accent)}
  <h1>Petrobras vs. pares: desempenho financeiro trimestral</h1>
  <div class="sub">Fontes exclusivamente públicas. Indicadores recalculados com a mesma fórmula para todas as empresas, em US$. Cada valor traz um selo de qualidade: <span class="st verde">✓ validado</span> <span class="st amarelo">▲ ler com ressalva</span> <span class="st vermelho">✕ em análise (fora de rankings e medianas)</span></div>
  <div class="meta" id="meta"></div>
+ <div class="headline" id="headline" aria-live="polite"></div>
+ <div class="guia" id="guia" role="region" aria-label="Como ler este painel"><b>Como ler este painel em 1 minuto</b>
+  <ol><li><b>Escolha o trimestre</b> no filtro Período (abre no mais recente).</li><li><b>Clique num cartão</b> da Petrobras para ver esse indicador comparado com os pares e na série histórica.</li><li><b>Selos:</b> ✓ validado, ▲ ler com ressalva (passe o mouse para o motivo), ✕ em análise (fica fora de rankings e medianas).</li><li><b>Fontes:</b> cada valor tem fonte e regra de qualidade nos blocos 05 e 06; o CSV baixa exatamente o que está filtrado.</li></ol>
+  <button class="more" id="btnGuiaOk">Entendi, ocultar</button></div>
 </header>
 <div class="bar" role="toolbar" aria-label="Filtros">
  <label class="ctl"><span>Período</span><select id="selP"></select></label>
@@ -62,44 +84,49 @@ a{color:var(--accent)}
  <div class="ctl"><span>Empresas</span><div id="chips" style="display:flex;gap:6px;flex-wrap:wrap"></div></div>
  <div class="ctl"><span>Universo</span><div class="seg" id="segU"><button data-u="poc" aria-pressed="true">PoC · 4</button><button data-u="all" aria-pressed="false">Escala · 7</button></div></div>
  <div class="spacer"></div>
+ <button id="btnReset" title="Voltar ao trimestre mais recente, Margem EBITDA e universo PoC">↺ Limpar filtros</button>
+ <button id="btnLink" title="Copiar link desta visão (filtros incluídos)">🔗 Link</button>
  <button id="btnCsv" title="Baixar a visão atual em CSV">⬇ CSV</button>
+ <button id="btnPrint" title="Imprimir ou salvar em PDF">🖨 PDF</button>
  <button id="btnTema" title="Alternar tema claro/escuro">◐ Tema</button>
+ <button id="btnGuia" class="btn-pri" title="Mostrar o guia rápido">? Como ler</button>
 </div>
+<nav class="toc" aria-label="Seções"><a href="#s1">01 Visão executiva</a><a href="#s2">02 Comparação</a><a href="#s3">03 Evolução</a><a href="#s4">04 Matriz</a><a href="#s5">05 Qualidade</a><a href="#s6">06 Fontes</a><a href="#s7">Metodologia</a></nav>
 
-<section class="sec"><div class="sec-h"><span class="n">01</span><h2>Visão executiva do trimestre: Petrobras</h2></div>
+<section class="sec" id="s1"><div class="sec-h"><span class="n">01</span><h2>Visão executiva do trimestre: Petrobras</h2><span class="note" style="margin:0">clique num cartão para comparar o indicador</span></div>
  <div class="grid g6" id="kpis"></div>
  <div class="card insight" style="margin-top:14px" id="insight"></div>
 </section>
 
 <section class="sec grid g2">
- <div class="card"><div class="sec-h"><span class="n">02</span><h2 id="tBar">Comparação entre empresas</h2></div><div id="bars"></div><div class="note" id="barNote"></div></div>
- <div class="card"><div class="sec-h"><span class="n">03</span><h2 id="tLine">Evolução histórica</h2></div><div id="lines"></div><div class="legend" id="lineLegend"></div>
+ <div class="card" id="s2"><div class="sec-h"><span class="n">02</span><h2 id="tBar">Comparação entre empresas</h2></div><div id="bars"></div><div class="note" id="barNote"></div></div>
+ <div class="card" id="s3"><div class="sec-h"><span class="n">03</span><h2 id="tLine">Evolução histórica</h2></div><div id="lines"></div><div class="legend" id="lineLegend"></div>
   <div style="margin-top:10px"><div class="note" style="margin:0 0 2px">Contexto: Brent médio trimestral (US$/bbl, spot Europa, EIA via FRED)</div><div id="brent"></div></div></div>
 </section>
 
-<section class="sec card"><div class="sec-h"><span class="n">04</span><h2 id="tMat">Leitura dos indicadores: matriz do trimestre</h2></div>
+<section class="sec card" id="s4"><div class="sec-h"><span class="n">04</span><h2 id="tMat">Leitura dos indicadores: matriz do trimestre</h2><span class="note" style="margin:0">clique numa linha para ver o indicador nos gráficos</span></div>
  <div style="overflow:auto"><div id="matrix"></div></div>
  <div class="note">Intensidade da célula = posição no grupo (mais escura = melhor no indicador). Total de efetivo é contexto, sem ordem de mérito. ▲/✕ indicam o selo de qualidade; passe o mouse para ver o motivo.</div>
 </section>
 
 <section class="sec grid g2e">
- <div class="card"><div class="sec-h"><span class="n">05</span><h2>Qualidade e rastreabilidade</h2></div>
+ <div class="card" id="s5"><div class="sec-h"><span class="n">05</span><h2>Qualidade e rastreabilidade</h2></div>
   <div id="qaTiles" class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr));gap:10px"></div>
   <div id="qaRules" style="margin-top:12px"></div>
   <div style="display:flex;gap:8px;align-items:center;margin:10px 0 6px"><span class="note" style="margin:0">Filtrar:</span>
    <div class="seg" id="segQ"><button data-q="todos" aria-pressed="true">Todos</button><button data-q="pendente" aria-pressed="false">Pendentes</button><button data-q="justificado" aria-pressed="false">Justificados</button></div></div>
   <div class="scroll"><table class="tl" id="qa"></table></div>
  </div>
- <div class="card"><div class="sec-h"><span class="n">06</span><h2>Evidência dos controles e catálogo de fontes</h2></div>
+ <div class="card" id="s6"><div class="sec-h"><span class="n">06</span><h2>Evidência dos controles e catálogo de fontes</h2></div>
   <div id="evid" style="overflow-x:auto"></div>
   <div class="scroll" style="margin-top:12px"><table class="tl" id="src"></table></div>
  </div>
 </section>
 
-<section class="sec card"><details><summary>Metodologia, premissas e limitações</summary><div id="metodo" class="note" style="font-size:12.5px;color:var(--ink-2)"></div></details></section>
+<section class="sec card" id="s7"><details><summary>Metodologia, premissas e limitações</summary><div id="metodo" class="note" style="font-size:12.5px;color:var(--ink-2)"></div></details></section>
 <div class="foot" id="foot"></div>
 </div>
-<div id="tip" role="tooltip"></div>
+<div id="tip" role="tooltip"></div><button id="topo" title="Voltar ao topo" aria-label="Voltar ao topo">↑</button><div id="toast" role="status"></div>
 <script>
 const D=__DATA__;
 const POC=D.meta.poc, ALL=D.dim_empresa.map(e=>e.empresa), PER=D.meta.periodos;
@@ -133,11 +160,11 @@ function init(){
  segQ.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.q=b.dataset.q;segQ.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));qa()});
  btnTema.onclick=()=>{const h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('tema',h.dataset.theme)}catch(e){}draw()};
  try{const t=localStorage.getItem('tema');if(t)document.documentElement.dataset.theme=t}catch(e){}
- btnCsv.onclick=csv;
+ btnCsv.onclick=()=>{csv();toast('CSV da visão atual baixado')};
  meta.innerHTML=[`Dados v${D.meta.versao_dados} · atualizados em ${D.meta.gerado_em.split('-').reverse().join('/')}`,`${PER.length} trimestres (${LBL[PER[0]]}–${LBL[PER[PER.length-1]]})`,`${CORE.length} indicadores + ${D.dim_indicador.length-CORE.length} complementares`,`${D.fato.length} registros rastreados`].map(t=>`<span class="tag">${t}</span>`).join('');
  draw();
 }
-function chips(){chipsEl().innerHTML=uni().map(e=>`<button class="chip" data-e="${e}" aria-pressed="${S.on.has(e)}"><span class="sw" style="background:${col(e)}"></span>${e}</button>`).join('');
+function chips(){chipsEl().innerHTML=uni().map(e=>`<button class="chip" data-e="${e}" title="${e} · clique para mostrar/ocultar" aria-pressed="${S.on.has(e)}"><span class="sw" style="background:${col(e)}"></span>${NOME[e]}</button>`).join('');
  chipsEl().querySelectorAll('button').forEach(c=>c.onclick=()=>{const e=c.dataset.e;if(S.on.has(e)&&S.on.size>1)S.on.delete(e);else S.on.add(e);draw()})}
 const chipsEl=()=>document.getElementById('chips');
 
@@ -154,7 +181,8 @@ function kpis(){const ip=PER.indexOf(S.p);kpisEl().innerHTML=CORE.map(i=>{const 
   d=`<span ${cls}>${txt}</span><span>vs ${LBL[PER[ib]]}${anual?' (base anual)':''}</span>`}else d=`<span>${anual?'sem base anual anterior':'início da série'}</span>`;
  const r=rank(i,S.p,'PBR');if(r)d+=`<span class="rank" title="posição entre ${r[1]} empresas com valor validado">${r[0]}º de ${r[1]}</span>`;
  let extra='';if(i==='efetivo'){const pe=get('PBR',S.p,'ebitda_por_empregado');if(pe)extra=`<div class="note" style="margin-top:2px">EBITDA TTM/empregado: US$ ${fmt(pe.valor,'ebitda_por_empregado')} mil</div>`}
- return `<div class="card kpi"><div class="l"><span>${IND[i].nome}</span>${stBadge(f,true)}</div><div class="v">${f?fmt(f.valor,i):'—'}<span class="u">${IND[i].unidade}</span></div><div class="d">${d}</div>${extra}${spark(i)}</div>`}).join('')}
+ return `<div class="card kpi${i===S.i?' sel':''}" data-i="${i}" role="button" tabindex="0" aria-label="Comparar ${IND[i].nome} entre empresas"><div class="l"><span>${IND[i].nome}<span class="info" title="${esc(IND[i].formula)}">ⓘ</span></span>${stBadge(f,true)}</div><div class="v">${f?fmt(f.valor,i):'—'}<span class="u">${IND[i].unidade}</span></div><div class="d">${d}</div>${extra}${spark(i)}<div class="hint">${i===S.i?'● em destaque nos gráficos':'comparar →'}</div></div>`}).join('');
+ kpisEl().querySelectorAll('.kpi').forEach(k=>{const go=()=>{S.i=k.dataset.i;draw();document.getElementById('s2').scrollIntoView({behavior:'smooth'})};k.onclick=go;k.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}})}
 const kpisEl=()=>document.getElementById('kpis');
 function insight(){const p=S.p,peers=uni().filter(e=>e!=='PBR');const g=i=>get('PBR',p,i);const med=i=>median(peers.map(e=>get(e,p,i)).filter(ok).map(f=>f.valor));
  const lines=[];const me=g('margem_ebitda'),ml=g('margem_liquida'),nd=g('nd_ebitda'),fc=g('fcf'),bo=g('ebitda_boe');
@@ -166,7 +194,7 @@ function insight(){const p=S.p,peers=uni().filter(e=>e!=='PBR');const g=i=>get('
  const lt=[...new Map((D.leituras||[]).filter(x=>x.empresa==='PBR'&&x.periodo===p).map(x=>[x.explicacao,x])).values()];lt.forEach(x=>lines.push(`<b>Leitura do release (Petrobras, ${esc(x.natureza)}):</b> ${esc(x.explicacao)} <i>${esc(x.implicacao)}</i> <a href="${esc(x.fonte_url)}" target="_blank" rel="noopener">release</a>`));
  const cb=(D.ptax||{})[p];if(cb)lines.push(`<b>Câmbio:</b> Petrobras convertida pela PTAX do Banco Central — média de R$ ${cb.media.toLocaleString('pt-BR',{minimumFractionDigits:4})} para receita, EBITDA, lucro e caixa; fechamento de R$ ${cb.fechamento.toLocaleString('pt-BR',{minimumFractionDigits:4})} (${cb.data_fechamento.split('-').reverse().join('/')}) para a dívida.`);
  const ip=PER.indexOf(p);if(ip>0){const bv=BRENT[p]/BRENT[PER[ip-1]]-1;lines.push(`<b>Contexto:</b> Brent médio de US$ ${BRENT[p].toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})}/bbl (${bv>=0?'+':''}${(bv*100).toFixed(0)}% t/t).`)}
- insightEl().innerHTML=`<h2 style="margin:0">Leitura automática · ${LBL[p]}</h2><ul>${lines.map(l=>`<li>${l}</li>`).join('')}</ul>`}
+ const N=4,mostra=S.mais?lines:lines.slice(0,N);insightEl().innerHTML=`<h2 style="margin:0">Leitura automática · ${LBL[p]}</h2><ul>${mostra.map(l=>`<li>${l}</li>`).join('')}</ul>${lines.length>N?`<button class="more" id="btnMais">${S.mais?'Mostrar menos':`Ver as ${lines.length} leituras (câmbio, release, contexto)`}</button>`:''}`;const bm=document.getElementById('btnMais');if(bm)bm.onclick=()=>{S.mais=!S.mais;insight()};headline()}
 const insightEl=()=>document.getElementById('insight');
 
 function bars(){const i=S.i,p=S.p;tBar.textContent=`Comparação entre empresas · ${IND[i].nome} · ${LBL[p]}`;
@@ -223,10 +251,10 @@ function matrix(){const p=S.p,es=uni();tMat.textContent=`Leitura dos indicadores
  D.dim_indicador.forEach(ind=>{const i=ind.indicador;const fs=es.map(e=>get(e,p,i));const valid=es.map((e,k)=>({e,f:fs[k]})).filter(o=>ok(o.f));
   const sorted=[...valid].sort((a,b)=>ind.direcao*(b.f.valor-a.f.valor));const n=sorted.length;
   const md=median(valid.filter(o=>o.e!=='PBR').map(o=>o.f.valor));
-  h+=`<tr><td><b>${ind.nome}</b> <span class="note">${ind.unidade}${ind.grupo==='complementar'?' · compl.':''}</span></td>`+fs.map((f,k)=>{if(!f||f.valor==null)return '<td class="note">n/d</td>';
+  h+=`<tr data-i="${i}" class="${i===S.i?'sel':''}" title="Ver ${ind.nome} nos gráficos"><td><b>${ind.nome}</b> <span class="note">${ind.unidade}${ind.grupo==='complementar'?' · compl.':''}</span></td>`+fs.map((f,k)=>{if(!f||f.valor==null)return '<td class="note">n/d</td>';
    let bg='';if(ind.direcao&&ok(f)&&n>1){const r=sorted.findIndex(o=>o.e===es[k]);const a=(0.30*(1-r/(n-1))+0.03).toFixed(2);bg=`background:color-mix(in srgb,var(--hm) ${Math.round(a*100)}%,transparent)`}
    return `<td class="c num" style="${bg}" title="${esc(f.obs||STL[f.status])}">${fmt(f.valor,i)} ${f.status!=='verde'?`<span class="st ${f.status}">${f.status==='vermelho'?'✕':'▲'}</span>`:''}</td>`}).join('')+`<td class="num note">${fmt(md,i)}</td></tr>`});
- matrixEl().innerHTML=h+'</tbody></table>'}
+ matrixEl().innerHTML=h+'</tbody></table>';matrixEl().querySelectorAll('tbody tr').forEach(r=>r.onclick=()=>{S.i=r.dataset.i;draw();document.getElementById('s2').scrollIntoView({behavior:'smooth'})})}
 const matrixEl=()=>document.getElementById('matrix');
 
 function qa(){const es=uni();const L=D.qa.filter(x=>es.includes(x.empresa));const F=D.fato.filter(f=>es.includes(f.empresa));
@@ -250,6 +278,25 @@ function metodo(){document.getElementById('metodo').innerHTML=`<p><b>Indicadores
 function csv(){const es=[...S.on];const rows=[['empresa','periodo','indicador','valor','unidade','status','obs','fonte']];D.fato.filter(f=>es.includes(f.empresa)).forEach(f=>rows.push([f.empresa,f.periodo,f.indicador,f.valor,f.unidade,f.status,f.obs,f.fonte]));
  const blob=new Blob([String.fromCharCode(0xFEFF)+rows.map(r=>r.map(x=>`"${String(x??'').replace(/"/g,'""')}"`).join(';')).join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='benchmarking_visao_atual.csv';a.click()}
 
-function draw(){chips();kpis();insight();bars();lines();matrix();qa();metodo()}
-init();
+
+function headline(){const p=S.p,peers=uni().filter(e=>e!=='PBR');const med=i=>median(peers.map(e=>get(e,p,i)).filter(ok).map(f=>f.valor));
+ const me=get('PBR',p,'margem_ebitda'),nd=get('PBR',p,'nd_ebitda'),fc=get('PBR',p,'fcf');const r=rank('margem_ebitda',p,'PBR');
+ let t=`No ${LBL[p]}, a Petrobras `;t+=ok(me)?(r&&r[0]===1?`teve a <b>maior margem EBITDA do grupo</b> (${fmt(me.valor,'margem_ebitda')}% vs. mediana de ${fmt(med('margem_ebitda'),'margem_ebitda')}% dos pares)`:`teve margem EBITDA de <b>${fmt(me.valor,'margem_ebitda')}%</b> (${r?r[0]+'º de '+r[1]:''}; mediana dos pares ${fmt(med('margem_ebitda'),'margem_ebitda')}%)`):'não tem margem EBITDA validada';
+ if(ok(nd)){const x=get('PBR',p,'nd_ex_arrend_ebitda');t+=`, com alavancagem de ${fmt(nd.valor,'nd_ebitda')}x DL/EBITDA${ok(x)?` (${fmt(x.valor,'nd_ex_arrend_ebitda')}x sem arrendamentos)`:''}`}t+='.';
+ const pend=D.qa.filter(x=>uni().includes(x.empresa)&&x.periodo===p&&!x.justificado).length;const ip=PER.indexOf(p);
+ const pills=[`<span class="pill">Brent <b>US$ ${BRENT[p].toLocaleString('pt-BR',{maximumFractionDigits:1})}</b>/bbl${ip>0?` (${BRENT[p]>=BRENT[PER[ip-1]]?'+':''}${((BRENT[p]/BRENT[PER[ip-1]]-1)*100).toFixed(0)}% t/t)`:''}</span>`,
+  ok(fc)?`<span class="pill">FCF <b>US$ ${fmt(fc.valor,'fcf')} bi</b></span>`:'',`<span class="pill">Alertas pendentes: <b>${pend}</b></span>`,`<span class="pill">Comparando: <b>${[...S.on].map(e=>NOME[e]).join(', ')}</b></span>`].join('');
+ document.getElementById('headline').innerHTML=`<div><div class="t">${t}</div><div class="pills">${pills}</div></div><div class="note" style="margin:0;text-align:right">Universo ${S.u==='poc'?'PoC (4)':'Escala (7)'}<br>Indicador em foco: <b>${IND[S.i].nome}</b></div>`}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(()=>t.style.display='none',2200)}
+function hashSet(){try{history.replaceState(null,'','#'+new URLSearchParams({p:S.p,i:S.i,u:S.u,e:[...S.on].join(',')}).toString())}catch(e){}}
+function hashGet(){try{const h=new URLSearchParams(location.hash.slice(1));if(PER.includes(h.get('p')))S.p=h.get('p');if(IND[h.get('i')])S.i=h.get('i');if(h.get('u')==='all'||h.get('u')==='poc')S.u=h.get('u');
+ const es=(h.get('e')||'').split(',').filter(e=>uni().includes(e));S.on=new Set(es.length?es:uni());segU.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.u===S.u))}catch(e){}}
+function extras(){const g=document.getElementById('guia');let visto=false;try{visto=localStorage.getItem('guiaVisto')==='1'}catch(e){}if(!visto)g.classList.add('on');
+ btnGuia.onclick=()=>g.classList.toggle('on');btnGuiaOk.onclick=()=>{g.classList.remove('on');try{localStorage.setItem('guiaVisto','1')}catch(e){}};
+ btnReset.onclick=()=>{S={p:PER[PER.length-1],i:'margem_ebitda',u:'poc',on:new Set(POC),q:S.q,mais:false};segU.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.u==='poc'));draw();toast('Filtros restaurados')};
+ btnLink.onclick=()=>{hashSet();const u=location.href;(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>toast('Link desta visão copiado'),()=>toast('Copie o endereço da barra do navegador'))};
+ btnPrint.onclick=()=>window.print();const top=document.getElementById('topo');top.onclick=()=>scrollTo({top:0,behavior:'smooth'});
+ const toc=[...document.querySelectorAll('.toc a')];addEventListener('scroll',()=>{top.style.display=scrollY>600?'block':'none';let cur=null;toc.forEach(a=>{const el=document.querySelector(a.getAttribute('href'));if(el&&el.getBoundingClientRect().top<160)cur=a});toc.forEach(a=>a.classList.toggle('on',a===cur))},{passive:true})}
+function draw(){selP.value=S.p;selI.value=S.i;chips();kpis();insight();bars();lines();matrix();qa();metodo();hashSet()}
+hashGet();extras();init();
 </script></body></html>
