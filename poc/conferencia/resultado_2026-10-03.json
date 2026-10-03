@@ -1,0 +1,35 @@
+{
+ "executado_em": "2026-10-03",
+ "metodo": "poc/confere_documentos.py --plano (mesmo algoritmo) executado no navegador sobre o documento oficial: texto de HTML pelo DOM e de PDF pelo pdf.js. Nenhum modelo de linguagem participa da conferência.",
+ "resultado": {
+  "Shell": {
+   "checagens": 68,
+   "no_texto": 68,
+   "derivadas_ok": 0
+  },
+  "BP": {
+   "checagens": 55,
+   "no_texto": 55,
+   "derivadas_ok": 0
+  },
+  "TotalEnergies": {
+   "checagens": 72,
+   "no_texto": 67,
+   "derivadas_ok": 5,
+   "nota": "lucro antes do IR não é impresso; = lucro consolidado + IR, fecha nos 5 trimestres"
+  },
+  "Equinor": {
+   "checagens": 65,
+   "no_texto": 63,
+   "derivadas_ok": 2,
+   "nota": "dívida bruta com arrendamentos é a soma de 4 linhas do balanço; 2T25 conferido no 6-K de 23/07/2025 na SEC"
+  }
+ },
+ "total": {
+  "checagens": 260,
+  "no_texto": 253,
+  "derivadas_ok": 7,
+  "divergencias": 0
+ },
+ "outros": "Petrobras conferida no texto dos PDFs do release (pdf.js); ExxonMobil e Chevron pela API XBRL da SEC (poc/coleta_sec_xbrl.py, 12/12 trimestres)."
+}
