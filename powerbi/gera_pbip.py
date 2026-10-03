@@ -281,6 +281,8 @@ class Pagina:
         if nome == "t" and LOGO_B64.exists():  # título de página: logo da Petrobras à esquerda
             self.logo(x, y + 9, 128, 25)
             x, w = x + 140, w - 140
+            if len(texto) > 34:  # título longo: reduz a fonte para caber ao lado do logo
+                tamanho = min(tamanho, 16)
         par = [{"textRuns": [{"value": texto, "textStyle": {"fontWeight": "bold" if negrito else "normal",
                                                            "fontSize": f"{tamanho}pt", "color": cor}}]}]
         return self.add(nome, "textbox", x, y, w, h, objetos={"general": [{"properties": {"paragraphs": par}}]})
@@ -371,7 +373,7 @@ def paginas():
 
     # 2 — Comparação e evolução
     p = Pagina("comparacao", "Comparação e evolução")
-    p.texto("t", "Comparação entre empresas e evolução histórica", 20, 12, 700, 44)
+    p.texto("t", "Comparação e evolução histórica", 20, 12, 700, 44)
     p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True, padrao="Margem EBITDA")
     sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True, padrao=ULT)
     p.slicer("su", U, 1080, 12, 180, 60, "Universo", padrao=UNI_POC)
