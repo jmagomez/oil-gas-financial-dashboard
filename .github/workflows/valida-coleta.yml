@@ -1,0 +1,36 @@
+name: Valida coleta primária (SEC XBRL e CVM)
+
+# Confere, com rede, os números da série da PoC contra as bases estruturadas dos reguladores:
+#   ExxonMobil e Chevron  -> API XBRL da SEC (10-Q/10-K)
+#   Petrobras             -> Dados Abertos da CVM (ITR/DFP)
+# Roda todo dia 20 (depois da temporada de resultados) e sob demanda. Falha se algum valor
+# divergir mais de 0,5% do que está em poc/coleta/ e grava o relatório como artefato.
+
+on:
+  schedule:
+    - cron: "0 9 20 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  valida:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: SEC XBRL (XOM, CVX)
+        run: set -o pipefail; python3 poc/coleta_sec_xbrl.py --verificar | tee xbrl.txt
+      - name: CVM Dados Abertos (PBR)
+        if: always()
+        run: set -o pipefail; python3 poc/coleta_cvm.py --verificar | tee cvm.txt
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: validacao-coleta
+          path: |
+            xbrl.txt
+            cvm.txt
