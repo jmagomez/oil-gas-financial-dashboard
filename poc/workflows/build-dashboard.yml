@@ -19,6 +19,12 @@ on:
       - poc/painel_template.html
       - poc/fontes.json
       - powerbi/gera_pbip.py
+      - poc/leituras.json
+      - poc/decomposicao.json
+      - poc/contexto_mercado.json
+      - poc/assets/**
+      - poc/coleta/**
+      - poc/ptax/**
   workflow_dispatch:
 
 permissions:
