@@ -1,0 +1,313 @@
+{
+ "descricao": "Leituras de release que explicam alertas de QA. Uma leitura fecha o alerta da mesma empresa/período/campo (passa a 'explicado pelo release'), mas não altera o valor. 'implicacao' diz como usar o número na análise.",
+ "leituras": [
+  {
+   "empresa": "PBR",
+   "periodo": "2025-Q4",
+   "campo": "ebitda",
+   "natureza": "não recorrente",
+   "explicacao": "Margem EBITDA (RCVM 156) cai de 51,6% para 39,7%. Cerca de R$ 10,1 bi vêm da virada do impairment (reversão de R$ 1,5 bi no 3T25 para perda de R$ 8,5 bi) e R$ 1,2 bi da equivalência patrimonial. Sem esses itens, EBITDA ajustado de R$ 59,9 bi (47%); sem eventos exclusivos, 46,3% contra 50,9% no 3T25. A queda operacional (−9,4%) acompanha o Brent (−7,8%) e a sazonalidade do diesel. O lucro (−52%) ainda sofre perda cambial de R$ 8,0 bi; sem eventos, cai 10%.",
+   "implicacao": "Não é deterioração operacional: o 4T25 não deve ser usado como início de tendência de margem.",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/ff03b826-dc9a-f3e5-33a5-629148e15e31?origin=2",
+   "trecho": "O EBITDA ajustado sem eventos exclusivos apresentou redução de 9,4% (…) reflete a queda de 7,8% do Brent",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "PBR",
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Margem EBITDA (RCVM 156) cai de 51,6% para 39,7%. Cerca de R$ 10,1 bi vêm da virada do impairment (reversão de R$ 1,5 bi no 3T25 para perda de R$ 8,5 bi) e R$ 1,2 bi da equivalência patrimonial. Sem esses itens, EBITDA ajustado de R$ 59,9 bi (47%); sem eventos exclusivos, 46,3% contra 50,9% no 3T25. A queda operacional (−9,4%) acompanha o Brent (−7,8%) e a sazonalidade do diesel. O lucro (−52%) ainda sofre perda cambial de R$ 8,0 bi; sem eventos, cai 10%.",
+   "implicacao": "Não é deterioração operacional: o 4T25 não deve ser usado como início de tendência de margem.",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/ff03b826-dc9a-f3e5-33a5-629148e15e31?origin=2",
+   "trecho": "O EBITDA ajustado sem eventos exclusivos apresentou redução de 9,4% (…) reflete a queda de 7,8% do Brent",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "PBR",
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Lucro sobe de R$ 15,6 bi para R$ 32,7 bi (+110%) quase só por eventos exclusivos: ganho cambial de R$ 12,3 bi (contra perda de R$ 8,0 bi) e reversão de impairment de R$ 2,1 bi. Sem eventos, o lucro cai 7,2%. Margem EBITDA 50,8%. A alta do Brent de março ainda não chegou às receitas.",
+   "implicacao": "Alta do lucro é contábil (câmbio sobre a dívida em dólar e impairment), não operacional.",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/c59102ba-ab78-db77-c32c-ba5923cfa6ff?origin=2",
+   "trecho": "o aumento recente dos preços do petróleo e o recorde da produção ainda não se refletiram nas receitas do 1º trimestre",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "PBR",
+   "periodo": "2026-Q2",
+   "campo": "ebitda",
+   "natureza": "operacional",
+   "explicacao": "EBITDA RCVM +49% (R$ 62,9 bi → R$ 93,9 bi; margem 55,4%), ajustado sem eventos +63% (margem 59,4%), com Brent +29,7% (US$ 104,52 no release) e mais exportação com produção recorde. Os eventos exclusivos foram negativos (imposto de exportação −R$ 4,9 bi; contingências −R$ 1,8 bi): não há ganho não recorrente inflando o trimestre.",
+   "implicacao": "Alta operacional, mas apoiada num pico de preço (Brent > US$ 100) e com imposto de exportação novo: não extrapolar.",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/857e970b-1bf4-9ea4-093f-b93bfc2bac95?origin=2",
+   "trecho": "aumento da exportação viabilizado pelo aumento da produção",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "PBR",
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "natureza": "operacional",
+   "explicacao": "EBITDA RCVM +49% (R$ 62,9 bi → R$ 93,9 bi; margem 55,4%), ajustado sem eventos +63% (margem 59,4%), com Brent +29,7% (US$ 104,52 no release) e mais exportação com produção recorde. Os eventos exclusivos foram negativos (imposto de exportação −R$ 4,9 bi; contingências −R$ 1,8 bi): não há ganho não recorrente inflando o trimestre.",
+   "implicacao": "Alta operacional, mas apoiada num pico de preço (Brent > US$ 100) e com imposto de exportação novo: não extrapolar.",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/857e970b-1bf4-9ea4-093f-b93bfc2bac95?origin=2",
+   "trecho": "aumento da exportação viabilizado pelo aumento da produção",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "XOM",
+   "periodo": "2026-Q2",
+   "campo": "ebitda",
+   "natureza": "não recorrente",
+   "explicacao": "Base do 1T26 deprimida por efeitos de tempo (marcação a mercado de derivativos) de −US$ 3,9 bi, que viraram +US$ 2,5 bi no 2T26 (swing de ~US$ 6,4 bi). Itens identificados de −US$ 2,6 bi no 2T26 (impairments e reservas). Lucro ajustado: 8.772 → 14.680 (+67%), coerente com preços e margens.",
+   "implicacao": "Variação ampliada por timing de derivativos; a alta subjacente é ~2/3 da reportada.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26991.htm",
+   "trecho": "timing effects (…) primarily related to unsettled derivatives which are required to be marked to current period-end prices",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "XOM",
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Base do 1T26 deprimida por efeitos de tempo (marcação a mercado de derivativos) de −US$ 3,9 bi, que viraram +US$ 2,5 bi no 2T26 (swing de ~US$ 6,4 bi). Itens identificados de −US$ 2,6 bi no 2T26 (impairments e reservas). Lucro ajustado: 8.772 → 14.680 (+67%), coerente com preços e margens.",
+   "implicacao": "Variação ampliada por timing de derivativos; a alta subjacente é ~2/3 da reportada.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26991.htm",
+   "trecho": "timing effects (…) primarily related to unsettled derivatives which are required to be marked to current period-end prices",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "XOM",
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "natureza": "operacional",
+   "explicacao": "FCO sem capital de giro sobe de 10.463 para 25.654 com o lucro; o capital de giro foi negativo nos dois trimestres e o capex ficou estável (6,5 bi).",
+   "implicacao": "Salto de FCF é de geração operacional, não de capital de giro.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26991.htm",
+   "trecho": "Cash flow from operating activities was $23.6 billion and free cash flow was $17.2 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "CVX",
+   "periodo": "2026-Q1",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "FCO de 2,5 bi, deprimido por consumo de capital de giro de 4,6 bi com a alta abrupta das commodities em março/2026; efeitos de tempo de −2,9 bi e reserva legal de 360 mi no lucro.",
+   "implicacao": "FCF negativo é transitório (capital de giro).",
+   "fonte_url": "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-first-quarter-2026-results",
+   "trecho": "higher working capital outflows largely resulting from the sharp increase in commodity prices in March",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "CVX",
+   "periodo": "2026-Q2",
+   "campo": "ebitda",
+   "natureza": "não recorrente",
+   "explicacao": "Brent US$ 81 → 104, realização de líquidos +36% e virada dos efeitos de tempo (−2,9 bi → +1,4 bi; swing ~4,3 bi). Base do 1T26 deprimida amplia a variação (+446% no lucro).",
+   "implicacao": "Parte relevante é timing de derivativos/LIFO; comparar com o lucro ajustado.",
+   "fonte_url": "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-second-quarter-2026-results",
+   "trecho": "This includes $1.4 billion in favorable timing effects",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "CVX",
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Brent US$ 81 → 104, realização de líquidos +36% e virada dos efeitos de tempo (−2,9 bi → +1,4 bi; swing ~4,3 bi). Base do 1T26 deprimida amplia a variação (+446% no lucro).",
+   "implicacao": "Parte relevante é timing de derivativos/LIFO; comparar com o lucro ajustado.",
+   "fonte_url": "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-second-quarter-2026-results",
+   "trecho": "This includes $1.4 billion in favorable timing effects",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "CVX",
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "Liberação de capital de giro de 2,9 bi somada ao lucro elevado; com isso a dívida total caiu 8,4 bi (recorde) e a dívida líquida 11,6 bi.",
+   "implicacao": "Desalavancagem real, mas parte vem da reversão do capital de giro do 1T26.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/a06302026ex9918-k.htm",
+   "trecho": "Total debt was reduced by a record $8.4 billion in the quarter",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "CVX",
+   "periodo": "2026-Q2",
+   "campo": "divida_liquida",
+   "natureza": "capital de giro",
+   "explicacao": "Liberação de capital de giro de 2,9 bi somada ao lucro elevado; com isso a dívida total caiu 8,4 bi (recorde) e a dívida líquida 11,6 bi.",
+   "implicacao": "Desalavancagem real, mas parte vem da reversão do capital de giro do 1T26.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/a06302026ex9918-k.htm",
+   "trecho": "Total debt was reduced by a record $8.4 billion in the quarter",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "SHEL",
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "1T26 teve perda de US$ 2,4 bi em itens identificados (valor justo de derivativos) e o 2T26 ganho de ~0,4 bi. Lucro ajustado subiu 42% (6.915 → 9.836).",
+   "implicacao": "Alta subjacente é menos da metade da reportada (+90%).",
+   "fonte_url": "https://www.globenewswire.com/news-release/2026/07/30/3335785/0/en/shell-plc-2nd-and-half-year-quarter-2026-unaudited-results.html",
+   "trecho": "includes the impact of identified items and a current cost of supplies adjustment of $0.6 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "SHEL",
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "Capital de giro: saída de US$ 11,2 bi no 1T26 e entrada de 3,4 bi no 2T26 (swing ~14,6 bi). Capex estável.",
+   "implicacao": "FCF do 1T26 e do 2T26 devem ser lidos juntos (média do semestre).",
+   "fonte_url": "https://www.globenewswire.com/news-release/2026/07/30/3335785/0/en/shell-plc-2nd-and-half-year-quarter-2026-unaudited-results.html",
+   "trecho": "working capital inflows of $3.4 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "2025-Q2",
+   "campo": "lucro_liquido",
+   "natureza": "operacional",
+   "explicacao": "Lucro subjacente de 2,4 bi contra 1,4 bi no 1T25: refino, varejo e trading de petróleo melhores. Base do 1T25 baixa (687).",
+   "implicacao": "Alta operacional sobre base deprimida.",
+   "fonte_url": "https://www.bp.com/press-and-publications/press-releases/second-quarter-2025-results",
+   "trecho": "Underlying RC profit for the quarter was $2.4 billion, compared with $1.4 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Prejuízo por impairments de ~US$ 4,6 bi antes de impostos em gás e baixo carbono; parte está em coligadas (abaixo do EBITDA), por isso o EBITDA padronizado cai só 18%.",
+   "implicacao": "Prejuízo contábil; não usar o 4T25 como base de tendência.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000002/a31122025bp6kq4.htm",
+   "trecho": "pre-tax net impairments and impairments in equity-accounted entities of $4.6 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "2026-Q1",
+   "campo": "ebitda",
+   "natureza": "não recorrente",
+   "explicacao": "Resultado excepcional de trading de petróleo; impairment cai de 3.624 para 589. EBITDA padronizado +71% sobre base do 4T25 afetada por impairments.",
+   "implicacao": "Trading excepcional não é recorrente.",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "trecho": "exceptional oil trading result and stronger midstream performance (paráfrase)",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Resultado excepcional de trading de petróleo; impairment cai de 3.624 para 589. EBITDA padronizado +71% sobre base do 4T25 afetada por impairments.",
+   "implicacao": "Trading excepcional não é recorrente.",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "trecho": "exceptional oil trading result and stronger midstream performance (paráfrase)",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "Formação de capital de giro cai de 6,0 bi (1T26) para 1,0 bi; FCO de 10,9 bi.",
+   "implicacao": "Normalização do capital de giro.",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/3m82HmOzrcUhzGfOQ2Uajc/9fbef18373195a44947e3a797d6cc0cf/bp-second-quarter-2026-results.pdf",
+   "trecho": "after a $1.0 billion working capital build (…), was $10.9 billion",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "2025-Q2",
+   "campo": "fcf",
+   "natureza": "impostos",
+   "explicacao": "Duas parcelas do imposto de renda norueguês (US$ 6,85 bi) pagas no trimestre; FCO de 2,5 bi.",
+   "implicacao": "Sazonalidade fiscal da Noruega (parcelas concentradas em alguns trimestres).",
+   "fonte_url": "https://www.globenewswire.com/news-release/2025/07/23/3119968/0/en/Equinor-second-quarter-2025-results.html",
+   "trecho": "paid two NCS tax instalments totalling USD 6.85 billion in the quarter",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "2025-Q3",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Impairments de 754 mi (premissas de preço) e alíquota efetiva de 104,4%.",
+   "implicacao": "Prejuízo contábil/fiscal, não operacional.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062525000114/eqnr-20250930.htm",
+   "trecho": "net impairments of USD 754 million, primarily due to updated forward-looking price assumptions",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Volta ao lucro com impairments menores (626 mi) e alíquota normalizada.",
+   "implicacao": "Base do 3T25 distorcida.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm",
+   "trecho": "Net impairments of USD 626 million",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "2025-Q4",
+   "campo": "fcf",
+   "natureza": "impostos",
+   "explicacao": "Três parcelas do imposto norueguês (6,2 bi) no trimestre e capex maior (4,1 bi).",
+   "implicacao": "Sazonalidade fiscal.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm",
+   "trecho": "Tax payments in the fourth quarter totalled USD 6,240 million",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Resultado operacional maior, impairments menores e ganho de ~933 mi no valor justo da participação na Ørsted. Contra o 1T25, +18%.",
+   "implicacao": "Parte da alta é ganho financeiro não recorrente.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm",
+   "trecho": "positive fair value development on financial investments in the first quarter of 2026",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "natureza": "não recorrente",
+   "explicacao": "Lucro ajustado +41%; o restante vem dos itens de ajuste (+0,4 bi no 1T26 contra −0,9 bi de impairments no 4T25). Brent +27% no release.",
+   "implicacao": "Base do 4T25 deprimida por impairments.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "trecho": "adjustment items: $1.4 billion of inventory valuation and fair value effects",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "2026-Q1",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "Aumento de capital de giro de 5,1 bi, metade sazonal e metade efeito de preços nos estoques; mesmo padrão do 1T25.",
+   "implicacao": "Sazonal: comparar 1T com 1T.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "trecho": "a $5.1 billion increase in working capital, half of it reflecting business seasonality",
+   "lido_em": "2026-10-02"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "natureza": "capital de giro",
+   "explicacao": "Liberação de capital de giro com a queda de preços no fim do trimestre; CFFO de 9,8 bi.",
+   "implicacao": "Reversão do 1T26.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "trecho": "cash flow from operations excluding working capital (CFFO) of $9,804 million",
+   "lido_em": "2026-10-02"
+  }
+ ]
+}
