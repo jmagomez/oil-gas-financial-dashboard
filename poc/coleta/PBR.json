@@ -1,0 +1,375 @@
+{
+ "empresa": "PBR",
+ "moeda": "R$ milhões (salvo indicação)",
+ "convencao_sinais": "resultado_financeiro_brl positivo = receita financeira líquida; ir_cs negativo = despesa; lucro_liquido_brl = atribuível aos acionistas da Petrobras; lucro_liquido_total inclui minoritários (base da reconciliação do EBITDA)",
+ "trimestres": {
+  "2025-Q1": {
+   "receita_brl": 123144,
+   "lucro_liquido_brl": 35209,
+   "lucro_liquido_total_brl": 35331,
+   "ebitda_brl": 62016,
+   "ebitda_ajustado_brl": 61084,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 62281,
+   "lair_brl": 53635,
+   "resultado_financeiro_brl": 10595,
+   "ir_cs_brl": -18304,
+   "da_brl": 18976,
+   "fco_brl": 49338,
+   "capex_brl": 23297,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 321748,
+   "divida_liquida_usd": 56034,
+   "valores_usd_divulgados": {
+    "lucro_liquido_usd_bi": 6.0,
+    "ebitda_ajustado_usd_bi": 10.5,
+    "fco_usd_bi": 8.5,
+    "capex_total_usd_mi": 4065,
+    "nota": "US$ arredondados da Agência Petrobras; capex total US$ do release"
+   },
+   "brent_medio_usd_bbl": 75.66,
+   "cambio_medio": 5.84,
+   "margem_ebitda_pct": 50.4,
+   "margem_ebitda_ajustado_sem_eventos_pct": 50.6,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/5d4444c6-6401-0914-ab6a-aa1fbdb3ddb9?origin=1",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/petrobras-atinge-lucro-liquido-de-r-35-bilhoes-no-primeiro-trimestre-de-2025",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 1T25 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "CONFIRMADO: 62.016 é o EBITDA (RCVM 156: LL 35.331 - RF 10.595 + IR/CS 18.304 + DD&A 18.976). EBITDA AJUSTADO = 61.084; ajustado sem eventos exclusivos = 62.281. Base do usuário (receita, lucro, FCO, capex, dív. líq. US$ 56.034) confere. Capex total (investimentos) divulgado = US$ 4.065 mi; agência cita R$ 23,7 bi."
+  },
+  "2025-Q2": {
+   "receita_brl": 119128,
+   "lucro_liquido_brl": 26652,
+   "lucro_liquido_total_brl": 26774,
+   "ebitda_brl": 51420,
+   "ebitda_ajustado_brl": 52257,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 57902,
+   "lair_brl": 36040,
+   "resultado_financeiro_brl": 5572,
+   "ir_cs_brl": -9266,
+   "da_brl": 20952,
+   "fco_brl": 42424,
+   "capex_brl": 23170,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 319590,
+   "divida_liquida_usd": 58563,
+   "valores_usd_divulgados": {
+    "lucro_liquido_usd_bi": 4.7,
+    "lucro_sem_eventos_usd_bi": 4.1,
+    "ebitda_ajustado_usd_bi": 10.2,
+    "fco_usd_bi": 7.5,
+    "capex_total_usd_mi": 4431,
+    "divida_bruta_usd_bi": 68.1
+   },
+   "brent_medio_usd_bbl": 67.82,
+   "cambio_medio": 5.67,
+   "margem_ebitda_pct": 43.2,
+   "margem_ebitda_ajustado_sem_eventos_pct": 48.6,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/2ee2f004-c464-8fbe-2af8-2d6ede2c93e0?origin=1",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/negocio/petrobras-lucra-r-26-7-bilhoes-no-segundo-trimestre-de-2025",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 2T25 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "Lucro sem eventos exclusivos R$ 23,2 bi. Eventos no EBITDA: equalização AIP (3.849), ACT (1.214), contingências (711)."
+  },
+  "2025-Q3": {
+   "receita_brl": 127906,
+   "lucro_liquido_brl": 32705,
+   "lucro_liquido_total_brl": 32847,
+   "ebitda_brl": 66024,
+   "ebitda_ajustado_brl": 63913,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 65133,
+   "lair_brl": 44951,
+   "resultado_financeiro_brl": 1316,
+   "ir_cs_brl": -12104,
+   "da_brl": 22389,
+   "fco_brl": 53655,
+   "capex_brl": 26629,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 314082,
+   "divida_liquida_usd": 59053,
+   "valores_usd_divulgados": {
+    "lucro_liquido_usd_bi": 6.0,
+    "ebitda_ajustado_usd_bi": 11.7,
+    "fco_usd_bi": 9.9,
+    "capex_total_usd_mi": 5510
+   },
+   "brent_medio_usd_bbl": 69.07,
+   "cambio_medio": 5.45,
+   "margem_ebitda_pct": 51.6,
+   "margem_ebitda_ajustado_sem_eventos_pct": 50.9,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/ab9a8804-f73f-f537-dcc1-1ea123e998ff?origin=1",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/petrobras-atinge-lucro-l%C3%ADquido-de-r-32-7-bilh%C3%B5es-no-terceiro-trimestre-de-2025",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 3T25 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "Reversão de impairment +1.539 (eleva EBITDA RCVM acima do ajustado). Lucro sem eventos exclusivos 28.651. Agência cita capex R$ 30 bi (conceito investimentos), diferente da linha de caixa 26.629."
+  },
+  "2025-Q4": {
+   "receita_brl": 127371,
+   "lucro_liquido_brl": 15563,
+   "lucro_liquido_total_brl": 15653,
+   "ebitda_brl": 50556,
+   "ebitda_ajustado_brl": 59923,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 58989,
+   "lair_brl": 15973,
+   "resultado_financeiro_brl": -12512,
+   "ir_cs_brl": -320,
+   "da_brl": 22071,
+   "fco_brl": 54916,
+   "capex_brl": 35618,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 333403,
+   "divida_liquida_usd": 60593,
+   "valores_usd_divulgados": {
+    "investimentos_totais_usd_mi": 6313,
+    "nota": "lucro/EBITDA em US$ do 4T25 isolado não extraídos; ano 2025: lucro US$ 19,6 bi, EBITDA ajustado US$ 43,8 bi, FCO US$ 36 bi, capex US$ 20,3 bi (Agência)"
+   },
+   "brent_medio_usd_bbl": 63.69,
+   "cambio_medio": 5.39,
+   "margem_ebitda_pct": 39.7,
+   "margem_ebitda_ajustado_sem_eventos_pct": 46.3,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/ff03b826-dc9a-f3e5-33a5-629148e15e31?origin=2",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/negocio/lucro-l%C3%ADquido-da-petrobras-alcan%C3%A7a-r-110-bilh%C3%B5es-em-2025",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 4T25 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "Lucro sem eventos exclusivos 25.743. Impairment líquido (8.546) e perdas cambiais (7.984). Resultado financeiro líquido negativo (12.512). Lucro atribuível 15.563 confirmado no release 1T26 (comparativo)."
+  },
+  "2026-Q1": {
+   "receita_brl": 123686,
+   "lucro_liquido_brl": 32663,
+   "lucro_liquido_total_brl": 32761,
+   "ebitda_brl": 62884,
+   "ebitda_ajustado_brl": 59643,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 61670,
+   "lair_brl": 49136,
+   "resultado_financeiro_brl": 7866,
+   "ir_cs_brl": -16375,
+   "da_brl": 21614,
+   "fco_brl": 43975,
+   "capex_brl": 23734,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 324078,
+   "divida_liquida_usd": 62093,
+   "valores_usd_divulgados": {
+    "lucro_liquido_usd_bi": 6.2,
+    "lucro_sem_eventos_usd_bi": 4.5,
+    "ebitda_ajustado_usd_bi": 11.3,
+    "ebitda_ajustado_sem_eventos_usd_bi": 11.7,
+    "fco_usd_bi": 8.4,
+    "capex_usd_bi": 5.1,
+    "divida_bruta_usd_bi": 71.2
+   },
+   "brent_medio_usd_bbl": 80.61,
+   "cambio_medio": 5.26,
+   "margem_ebitda_pct": 50.8,
+   "margem_ebitda_ajustado_sem_eventos_pct": 49.9,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/c59102ba-ab78-db77-c32c-ba5923cfa6ff?origin=2",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/negocio/petrobras-registra-lucro-l%C3%ADquido-de-r-32-7-bilh%C3%B5es-no-primeiro-trimestre-de-2026",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 1T26 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "Reversão de impairment +2.139/2.180 e ganho cambial +12.313. Lucro sem eventos 23.909 (-7,2% t/t). Capital de giro -R$ 6,9 bi no FCO (exportações em trânsito)."
+  },
+  "2026-Q2": {
+   "receita_brl": 169530,
+   "lucro_liquido_brl": 52445,
+   "lucro_liquido_total_brl": 52495,
+   "ebitda_brl": 93859,
+   "ebitda_ajustado_brl": 93843,
+   "ebitda_ajustado_sem_eventos_exclusivos_brl": 100640,
+   "lair_brl": 70830,
+   "resultado_financeiro_brl": -1526,
+   "ir_cs_brl": -18335,
+   "da_brl": 21503,
+   "fco_brl": 61813,
+   "capex_brl": 23040,
+   "capex_linha": "Aquisições de ativos imobilizados e intangíveis (DFC / tabela de fluxo de caixa livre do release), em caixa",
+   "divida_liquida_brl": 312602,
+   "divida_liquida_usd": 60388,
+   "valores_usd_divulgados": {
+    "lucro_liquido_usd_bi": 10.4,
+    "lucro_sem_eventos_usd_bi": 11.1,
+    "ebitda_ajustado_usd_bi": 18.6,
+    "ebitda_ajustado_sem_eventos_usd_bi": 20.0,
+    "fco_usd_bi": 12.3,
+    "capex_usd_bi": 5.3,
+    "divida_bruta_usd_mi": 70806
+   },
+   "brent_medio_usd_bbl": 104.52,
+   "cambio_medio": 5.05,
+   "margem_ebitda_pct": 55.4,
+   "margem_ebitda_ajustado_sem_eventos_pct": 59.4,
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/857e970b-1bf4-9ea4-093f-b93bfc2bac95?origin=2",
+   "fonte_url_complementar": "https://agencia.petrobras.com.br/w/negocio/petrobras-lucra-r-52-4-bilh%C3%B5es-no-segundo-trimestre-de-2026",
+   "fonte_documento": "Relatório 'Desempenho Financeiro' 2T26 (RI Petrobras, PDF api.mziq.com) + Agência Petrobras",
+   "observacao": "Imposto de exportação de petróleo (4.872) e contingências (1.763) tratados como eventos exclusivos. Lucro sem eventos 55.813. Agência cita capex R$ 26,7 bi (investimentos), linha de caixa 23.040."
+  }
+ },
+ "leituras": [
+  {
+   "periodo": "2025-Q4",
+   "itens": [
+    {
+     "item": "Impairment líquido (perda) – excluído do EBITDA ajustado",
+     "valor_brl": -8546,
+     "efeito": "EBITDA RCVM (-8.540 na reconciliação) e lucro; 3T25 tinha reversão +1.549 => swing ~R$ 10,1 bi"
+    },
+    {
+     "item": "Resultado de participações em investimentos",
+     "valor_brl": -1175,
+     "efeito": "EBITDA RCVM (excluído do ajustado); 3T25 +184"
+    },
+    {
+     "item": "Perdas cambiais real x dólar",
+     "valor_brl": -7984,
+     "efeito": "lucro (resultado financeiro); 3T25 ganho +5.636"
+    },
+    {
+     "item": "Perdas com contingências judiciais",
+     "valor_brl": -2287,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Acordo Coletivo de Trabalho",
+     "valor_brl": -1474,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Programas de anistia BA/RJ",
+     "valor_brl": -728,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Resultado com desmantelamento de áreas (positivo)",
+     "valor_brl": 3101,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Equalização de gastos AIP (positivo)",
+     "valor_brl": 2545,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Alienações/baixas de ativos",
+     "valor_brl": -325,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Acordo de coparticipação",
+     "valor_brl": 681,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Efeito IR/CS sobre eventos",
+     "valor_brl": 5191,
+     "efeito": "lucro"
+    }
+   ],
+   "conclusao": "EBITDA RCVM caiu de 66.024 (margem 51,6%) para 50.556 (39,7%): -15,5 bi, dos quais ~10,1 bi vêm do swing de impairment (reversão 1,5 bi no 3T25 -> perda 8,5 bi no 4T25) e ~1,4 bi de equivalência patrimonial. Excluindo esses itens, EBITDA ajustado 59.923 (47%) e, sem eventos exclusivos, 58.989 (46,3%) vs 65.133 (50,9%) no 3T25 — queda operacional de 9,4% explicada por Brent -7,8% e sazonalidade do diesel. Lucro caiu 52% por impairment, perda cambial (-8,0 bi vs +5,6 bi) e resultado financeiro -12,5 bi; sem eventos, lucro 25.743 vs 28.651 (-10%). OBS: as margens da base do usuário (~57% -> ~34%) não batem com o release (51,6% -> 39,7% no EBITDA RCVM; 50% -> 47% no ajustado).",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/ff03b826-dc9a-f3e5-33a5-629148e15e31?origin=2",
+   "trecho": "\"O EBITDA ajustado sem eventos exclusivos apresentou redução de 9,4% em relação ao trimestre anterior. Esse resultado reflete a queda de 7,8% do Brent no trimestre, as menores vendas de derivados no mercado interno, principalmente pela sazonalidade no mercado de diesel.\""
+  },
+  {
+   "periodo": "2026-Q1",
+   "itens": [
+    {
+     "item": "Reversão de impairment",
+     "valor_brl": 2139,
+     "efeito": "EBITDA RCVM (+2.180 na reconciliação, excluído do ajustado) e lucro"
+    },
+    {
+     "item": "Ganhos cambiais real x dólar",
+     "valor_brl": 12313,
+     "efeito": "lucro (vs -7.984 no 4T25 => swing +20,3 bi)"
+    },
+    {
+     "item": "Alienações/baixas de ativos",
+     "valor_brl": 392,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Acordo de coparticipação",
+     "valor_brl": 616,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Contingências judiciais",
+     "valor_brl": -696,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Imposto de exportação",
+     "valor_brl": -639,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Programas de anistia BA/RJ",
+     "valor_brl": -618,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Efeito IR/CS sobre eventos",
+     "valor_brl": -4581,
+     "efeito": "lucro"
+    }
+   ],
+   "conclusao": "A margem NÃO é ~40% no release: EBITDA RCVM 62.884 / receita 123.686 = 50,8%; ajustado 48%; sem eventos 49,9%. O salto do lucro (+110% t/t, 15.563 -> 32.663) decorre quase todo de eventos exclusivos: ganho cambial +12,3 bi (vs perda 8,0 bi) e reversão de impairment +2,1 bi (vs perda 8,5 bi); resultado financeiro passou de -12,5 bi para +7,9 bi. Excluindo eventos, o lucro caiu 7,2% (25.743 -> 23.909) e o EBITDA ajustado sem eventos subiu só 4,5%, porque o Brent mais alto (US$ 80,61, +27%) ainda não chegou às receitas (defasagem embarque/reconhecimento; receita caiu para 123,7 bi).",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/c59102ba-ab78-db77-c32c-ba5923cfa6ff?origin=2",
+   "trecho": "\"o aumento recente dos preços do petróleo e o recorde da produção ainda não se refletiram nas receitas do 1º trimestre\"; EBITDA ajustado sem eventos: \"o aumento nas vendas de derivados produzidos e menores despesas operacionais, em especial a redução dos custos exploratórios\", compensado por \"menores exportações de petróleo realizadas no período\"."
+  },
+  {
+   "periodo": "2026-Q2",
+   "itens": [
+    {
+     "item": "Imposto de exportação de petróleo",
+     "valor_brl": -4872,
+     "efeito": "EBITDA e lucro (penaliza)"
+    },
+    {
+     "item": "Contingências judiciais",
+     "valor_brl": -1763,
+     "efeito": "EBITDA e lucro"
+    },
+    {
+     "item": "Impairment (perda líquida)",
+     "valor_brl": -812,
+     "efeito": "EBITDA RCVM (-1.158 na reconciliação) e lucro"
+    },
+    {
+     "item": "Ganhos cambiais real x dólar",
+     "valor_brl": 1808,
+     "efeito": "lucro (menor que os 12.313 do 1T26)"
+    },
+    {
+     "item": "Acordo de coparticipação",
+     "valor_brl": 445,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Alienações/baixas de ativos",
+     "valor_brl": 205,
+     "efeito": "EBITDA RCVM e lucro"
+    },
+    {
+     "item": "Efeito IR/CS sobre eventos",
+     "valor_brl": 1888,
+     "efeito": "lucro"
+    }
+   ],
+   "conclusao": "Não há reversão/não recorrente positivo explicando o salto — os eventos exclusivos são NEGATIVOS (-6,8 bi no EBITDA ajustado). O crescimento é operacional: Brent +29,7% (US$ 104,52), receita +37% (169.530), mais exportação com produção recorde e maior fatia de derivados próprios (menos importação). EBITDA RCVM +49% (62.884 -> 93.859; margem 55,4%), ajustado +57%, ajustado sem eventos +63% (100.640; margem 59,4%). Lucro +61% (52.445); sem eventos +134% (55.813). O '+104%' da base do usuário não é reproduzível pelo release (nenhuma métrica de EBITDA cresce 104% t/t).",
+   "fonte_url": "https://api.mziq.com/mzfilemanager/v2/d/25fdf098-34f5-4608-b7fa-17d60b2de47d/857e970b-1bf4-9ea4-093f-b93bfc2bac95?origin=2",
+   "trecho": "EBITDA ajustado impulsionado por maior Brent, \"aumento da exportação viabilizado pelo aumento da produção\" e \"maior participação de derivados produzidos no mix de vendas, refletindo o maior FUT e gerando uma menor necessidade de importações.\""
+  }
+ ],
+ "efetivo": {
+  "2024-12-31": {
+   "controladora": null,
+   "sistema": null
+  },
+  "2025-12-31": {
+   "controladora": null,
+   "sistema": null
+  },
+  "fonte_url": null,
+  "observacao": "Não obtido. 20-F 2025 (https://www.sec.gov/Archives/edgar/data/1119639/000129281426002168/pbrform20f_2025.htm, arquivado 09/04/2026) existe, mas o arquivo de 9,6 MB foi truncado pelo fetch antes do Item 6.D e o download direto de sec.gov/api.mziq.com é bloqueado pelo proxy. Página institucional https://petrobras.com.br/quem-somos/perfil diz 'Mais de 50.687' empregados, sem data nem separação controladora/sistema — não usado."
+ },
+ "pendencias": [
+  "Efetivo (Parte C): extrair Item 6.D 'Employees' do 20-F 2025 (e 2024) ou item 10.1 do Formulário de Referência 2026.",
+  "Valores em US$ do 4T25 isolado (receita/EBITDA/lucro) não extraídos; demais US$ são arredondados (US$ bi) da Agência Petrobras.",
+  "Receita em US$ não extraída para nenhum trimestre.",
+  "Números lidos via WebFetch (sumarizador) dos PDFs do release; consistência verificada por reconciliação aritmética (LL+RF+IR+DD&A=EBITDA; ajustes=EBITDA ajustado; eventos=EBITDA ajustado sem eventos/lucro sem eventos) — todas fecham. Recomenda-se conferência visual das tabelas.",
+  "Margens da base do usuário (3T25 ~57%, 4T25 ~34%, 1T26 ~40%) e EBITDA 2T26 +104% t/t NÃO conferem com o release; base provavelmente veio de agregador ou mistura conceitos/moedas."
+ ]
+}
