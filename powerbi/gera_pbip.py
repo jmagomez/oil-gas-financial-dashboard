@@ -74,7 +74,8 @@ TABELAS = {
         ("empresa", "string", "type text", False, None), ("periodo", "string", "type text", False, None),
         ("campo", "string", "type text", False, None), ("regra", "string", "type text", False, None),
         ("severidade", "string", "type text", False, None), ("justificado", "boolean", "type logical", False, None),
-        ("mensagem", "string", "type text", False, None)]),
+        ("mensagem", "string", "type text", False, None), ("leitura", "string", "type text", False, None),
+        ("fonte_leitura", "string", "type text", False, None)]),
 }
 ORDENA_POR = {("dim_empresa", "empresa"): "ordem", ("dim_empresa", "nome"): "ordem",
               ("dim_periodo", "rotulo"): "ordem", ("dim_periodo", "periodo"): "ordem",
@@ -399,7 +400,8 @@ def paginas():
                                                      "selector": {"metadata": "fato_indicador.Alertas justificados"}}]}, ROTULOS))
     p.add("q", "tableEx", 530, 196, 730, 510, {"Values": [(col("qa_log", "empresa"), "Empresa"), (col("qa_log", "trimestre"), "Período"),
                                                            (col("qa_log", "campo"), "Campo"), (col("qa_log", "regra"), "Regra"),
-                                                           (col("qa_log", "situacao"), "Situação"), (col("qa_log", "mensagem"), "Mensagem")]},
+                                                           (col("qa_log", "situacao"), "Situação"), (col("qa_log", "mensagem"), "Mensagem"),
+                                                           (col("qa_log", "leitura"), "Leitura do release")]},
           "Log de alertas", GRADE_TAB, ordem=(col("qa_log", "situacao"), "Descending"))
     ps.append(p)
 
@@ -412,7 +414,9 @@ def paginas():
           "Fontes utilizadas e rota primária", GRADE_TAB)
     p.texto("m", "Selo de qualidade: ✓ validado · ▲ ressalva (dado carregado, proxy ou desvio a ler) · ✕ em análise (fora de medianas e rankings). "
                  "Regras R1–R8: completude, coerência contábil, plausibilidade, desvio histórico, contexto (Brent), revisão, proveniência e "
-                 "reconciliação entre fontes. Detalhes no guia e em poc/build_poc.py.", 20, 584, 1240, 100, tamanho=11, negrito=False, cor="#46566A")
+                 "reconciliação entre fontes. Série 1T25–2T26 de releases oficiais (poc/coleta/); Petrobras pela PTAX do Banco Central "
+                 "(média para fluxos, fechamento para dívida). Alertas explicados pelo release têm a leitura e o link em qa_log. "
+                 "Detalhes no guia e em poc/build_poc.py.", 20, 584, 1240, 100, tamanho=11, negrito=False, cor="#46566A")
     ps.append(p)
     return ps
 
@@ -455,7 +459,7 @@ def escreve(dest: Path, embutido: bool):
     mdl = modelo(embutido)
     # colunas derivadas em Power Query (texto amigável para slicers e tabelas)
     deriva(mdl, "dim_empresa", "universo", 'if [na_poc] then "PoC (PBR + 3 pares)" else "Escala (+3)"')
-    deriva(mdl, "qa_log", "situacao", 'if [justificado] then "justificado pelo contexto" else "pendente de leitura"')
+    deriva(mdl, "qa_log", "situacao", 'if [justificado] then (if [leitura] <> null and [leitura] <> "" then "explicado pelo release" else "justificado pelo contexto") else "pendente de leitura"')
     deriva(mdl, "qa_log", "trimestre",
            'if Text.Contains ( [periodo], "-Q" ) then Text.End ( [periodo], 1 ) & "T" & Text.Middle ( [periodo], 2, 2 ) else [periodo]')
     deriva(mdl, "dim_fonte", "classe",
