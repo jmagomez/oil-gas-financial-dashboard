@@ -60,6 +60,9 @@ def periodos_da_base(base):
 # Brent medio trimestral (FRED/IMF, serie POILBREUSDQ) -- contexto para a regra R5.
 CONTEXTO = POC / "contexto_mercado.json"
 BRENT = {k: v for k, v in json.loads(CONTEXTO.read_text(encoding="utf-8"))["brent_medio_usd_bbl"].items()} if CONTEXTO.exists() else {}
+PTAX = json.loads(CONTEXTO.read_text(encoding="utf-8")).get("ptax", {}) if CONTEXTO.exists() else {}
+# Leituras de release que explicam alertas (poc/leituras.json): fecham o alerta sem alterar o valor.
+LEITURAS = json.loads((POC / "leituras.json").read_text(encoding="utf-8"))["leituras"] if (POC / "leituras.json").exists() else []
 PERIODOS: list[str] = []
 ROTULO: dict[str, str] = {}
 DIAS: dict[str, int] = {}
@@ -131,6 +134,9 @@ def carrega(caminho=JSON_DADOS):
         q["periodo"] = f"{ano}-{tri}"
         linhas = {h["periodo"]: h for h in e.get("historico", [])}
         linhas[q["periodo"]] = q
+        for p, conv in (e.get("conversao_brl") or {}).items():  # Petrobras: valores em R$ e câmbio usado
+            if p in linhas:
+                linhas[p] = {**linhas[p], **conv}
         base[t] = linhas
     define_periodos(base)
     return dados, empresas, base
@@ -146,7 +152,25 @@ class Log:
     def add(self, t, p, campo, regra, sev, msg, justificado=False):
         msg = re.sub(r"(\d),(\d{3})", r"\1.\2", re.sub(r"(\d),(\d{3})", r"\1.\2", msg))  # milhar pt-BR
         self.itens.append(dict(empresa=t, periodo=p, campo=campo, regra=regra, severidade=sev,
-                               justificado=justificado, mensagem=msg))
+                               justificado=justificado, mensagem=msg, leitura="", fonte_leitura=""))
+
+    def aplica_leituras(self, leituras):
+        """Fecha alertas amarelos com uma leitura de release (mesma empresa, período e campo).
+
+        A leitura não muda o valor: registra por que a variação é real e como usá-la na análise.
+        Vermelho (erro provável de dado) nunca é fechado por leitura."""
+        usadas = set()
+        for x in self.itens:
+            for k, lt in enumerate(leituras):
+                if (lt["empresa"], lt["periodo"], lt["campo"]) == (x["empresa"], x["periodo"], x["campo"]) \
+                        and x["severidade"] == "amarelo" and x["regra"].startswith("R4"):
+                    usadas.add(k)
+                    x["leitura"] = f"{lt['explicacao']} Implicação: {lt['implicacao']}"
+                    x["fonte_leitura"] = lt["fonte_url"]
+                    if not x["justificado"]:
+                        x["justificado"] = True
+                        x["mensagem"] += " — explicado pelo release (ver leitura)"
+        return usadas
 
     def status_campo(self, t, p, campo):
         pior = "verde"
@@ -184,15 +208,26 @@ def aplica_regras(dados, empresas, base):
                     log.add(t, p, "ebitda", "R3 Plausibilidade", "vermelho", f"margem EBITDA {m:.1f}% fora da faixa −20% a 80%")
             if r.get("producao_kboed") is not None and r["producao_kboed"] <= 0:
                 log.add(t, p, "producao_kboed", "R3 Plausibilidade", "vermelho", "produção não positiva")
-            # R7 -- proveniência / quebra de fonte
+            # R7 -- proveniência / quebra de fonte: a série da PoC é de fonte primária; trimestre que entrou
+            # pelo agregador (update_fundamentals.py) fica com ressalva até ser substituído pelo release.
+            if "primária" not in (r.get("fonte_dado") or ""):
+                for c in ("receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional", "divida_liquida"):
+                    log.add(t, p, c, "R7 Proveniência", "amarelo",
+                            "valor provisório de agregador: substituir pelo release (poc/integra_fontes_primarias.py)")
             if r.get("fonte_dado"):
                 txt = r["fonte_dado"]
                 if "corrigid" in txt:
                     log.add(t, p, "divida_liquida", "R7 Proveniência", "amarelo",
                             "valor ajustado para a base padronizada (ver fonte_dado no JSON)")
-            if p == "2025-Q1" and t == "TTE":
-                log.add(t, p, "ebitda", "R7 Proveniência", "amarelo",
-                        "EBITDA ajustado da empresa usado como proxy (IR trimestral indisponível no release)")
+            # R7 -- câmbio da Petrobras: dívida convertida pela PTAX de fechamento deve bater com a divulgada em US$
+            cb = r.get("cambio")
+            if cb and r.get("brl", {}).get("divida_liquida_brl"):
+                usd = r["brl"]["divida_liquida_brl"] / cb["ptax_fechamento"]
+                if abs(usd / cb["divida_usd_divulgada"] - 1) > 0.005:
+                    log.add(t, p, "divida_liquida", "R7 Proveniência", "vermelho",
+                            f"dívida pela PTAX de fechamento ({usd:,.0f}) difere da divulgada em US$ ({cb['divida_usd_divulgada']:,})")
+            elif t == "PBR":
+                log.add(t, p, "divida_liquida", "R7 Proveniência", "amarelo", "câmbio do trimestre não registrado")
             # R4/R5 -- desvio histórico vs. trimestre anterior
             if i == 0:
                 continue
@@ -226,8 +261,6 @@ def aplica_regras(dados, empresas, base):
                         razao = f"{abs(var / brent_var):.1f}".replace(".", ",")
                         msg += (f" — mesma direção do Brent ({brent_var:+.0%}), mas {razao}× a variação dele"
                                 f" (acima de {ELASTICIDADE_MAX:.0f}×): ler o release")
-                    elif p == "2025-Q2":
-                        msg += " — possível quebra de definição entre o release (1T25) e o agregador"
                     log.add(t, p, c, "R4 Desvio histórico", "amarelo", msg, justificado=explicado)
             # Margem EBITDA: salto de mais de 15 p.p. sem contrapartida no Brent pede leitura
             if prev.get("ebitda") is not None and prev.get("receita") and r.get("ebitda") is not None and r.get("receita"):
@@ -286,6 +319,7 @@ def aplica_regras(dados, empresas, base):
         elif not ef.get("fonte_primaria"):
             log.add(t, "2025-Q4", "efetivo", "R7 Proveniência", "amarelo",
                     "efetivo de fonte secundária — confirmar no relatório anual/20-F")
+    log.aplica_leituras(LEITURAS)
     return log
 
 
@@ -418,7 +452,8 @@ def main(argv=None):
     payload = dict(meta=dict(gerado_em=dados["referencia"].get("atualizado_em"), versao_dados=dados["referencia"].get("versao_dados"),
                              periodos=PERIODOS, poc=POC_EMPRESAS),
                    fato=fato, qa=log.itens, dim_empresa=dim_emp, dim_periodo=dim_per,
-                   dim_indicador=dim_ind, fontes=fontes,
+                   dim_indicador=dim_ind, fontes=fontes, leituras=LEITURAS,
+                   ptax={p: v for p, v in PTAX.get("trimestres", {}).items() if p in PERIODOS},
                    evidencia=json.loads((POC / "evidencia_qa_v12.json").read_text(encoding="utf-8"))
                    if (POC / "evidencia_qa_v12.json").exists() else None)
     (POC / "poc_data.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
