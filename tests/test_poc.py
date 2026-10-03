@@ -107,7 +107,8 @@ def test_painel_publicado_esta_sincronizado_com_o_template():
     html = caminho.read_text(encoding="utf-8")
     assert "__DATA__" not in html
     tpl = (ROOT / "poc" / "painel_template.html").read_text(encoding="utf-8")
-    assert tpl.split("__DATA__")[0] in html
+    antes, depois = tpl.split("__DATA__")[0].split("__LOGO__")
+    assert antes in html and depois in html and "__LOGO__" not in html
 
 
 def test_mensagens_do_log_preservam_abreviacoes(monkeypatch):
