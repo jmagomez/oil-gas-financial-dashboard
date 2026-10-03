@@ -102,10 +102,10 @@
   "id": "M-BRENT",
   "empresa": "—",
   "tipo": "Brent médio trimestral (contexto)",
-  "fonte": "FRED/IMF — POILBREUSDQ",
-  "url_primaria": "https://fred.stlouisfed.org/series/POILBREUSDQ",
-  "alternativa_direta": "—",
-  "coletado_em": "2026-10-02",
+  "fonte": "EIA via FRED — DCOILBRENTEU (Brent spot Europa, diário; média do trimestre)",
+  "url_primaria": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+  "alternativa_direta": "EIA RBRTE (eia.gov); Brent datado dos releases para conferência",
+  "coletado_em": "2026-10-03",
   "frequencia": "Trimestral",
   "primaria": true
  },
@@ -118,6 +118,17 @@
   "alternativa_direta": "API Olinda/BCB (CotacaoDolarPeriodo)",
   "coletado_em": "2026-10-02",
   "frequencia": "Diária",
+  "primaria": true
+ },
+ {
+  "id": "F-DECOMP",
+  "empresa": "Todas",
+  "tipo": "Arrendamentos e EBITDA ajustado (definição da empresa)",
+  "fonte": "Releases e demonstrações (poc/decomposicao.json); XOM e CVX: SEC XBRL FinanceLeaseLiability",
+  "url_primaria": "ver poc/decomposicao.json",
+  "alternativa_direta": "—",
+  "coletado_em": "2026-10-03",
+  "frequencia": "Trimestral",
   "primaria": true
  }
 ]
