@@ -86,6 +86,8 @@ IND_MEDIDAS = [  # medida por indicador: (nome, codigo, formato)
     ("FCF (US$ bi)", "fcf", "#,0.0"), ("DL/EBITDA (x)", "nd_ebitda", "#,0.00"),
     ("EBITDA por boe (US$)", "ebitda_boe", "#,0.0"), ("Efetivo", "efetivo", "#,0"),
     ("EBITDA TTM por empregado (US$ mil)", "ebitda_por_empregado", "#,0"),
+    ("DL sem arrendamentos/EBITDA (x)", "nd_ex_arrend_ebitda", "#,0.00"),
+    ("Margem EBITDA ajustada (%)", "margem_ebitda_ajustada", "#,0.0"),
 ]
 
 
@@ -243,6 +245,10 @@ def proj(campo, nome=None):
     return d
 
 
+LOGO = "petrobras_logo.png"
+LOGO_B64 = RAIZ / "poc" / "assets" / "petrobras_logo.b64"
+
+
 class Pagina:
     def __init__(self, nome, titulo):
         self.nome, self.titulo, self.visuais, self.interacoes = nome, titulo, [], []
@@ -266,7 +272,15 @@ class Pagina:
                                                        "tabOrder": len(self.visuais) * 1000}, "visual": v})
         return vid
 
+    def logo(self, x, y, w, h):
+        img = {"imageUrl": {"expr": {"ResourcePackageItem": {"PackageName": "RegisteredResources", "PackageType": 1,
+                                                                "ItemName": LOGO}}}}
+        return self.add("logo", "image", x, y, w, h, objetos={"general": [{"properties": img}]})
+
     def texto(self, nome, texto, x, y, w, h, tamanho=20, negrito=True, cor="#13202B"):
+        if nome == "t" and LOGO_B64.exists():  # título de página: logo da Petrobras à esquerda
+            self.logo(x, y + 9, 128, 25)
+            x, w = x + 140, w - 140
         par = [{"textRuns": [{"value": texto, "textStyle": {"fontWeight": "bold" if negrito else "normal",
                                                            "fontSize": f"{tamanho}pt", "color": cor}}]}]
         return self.add(nome, "textbox", x, y, w, h, objetos={"general": [{"properties": {"paragraphs": par}}]})
@@ -478,13 +492,17 @@ def escreve(dest: Path, embutido: bool):
         "resourcePackages": [{"name": "SharedResources", "type": "SharedResources",
                               "items": [{"name": "CY24SU10", "path": "BaseThemes/CY24SU10.json", "type": "BaseTheme"}]},
                              {"name": "RegisteredResources", "type": "RegisteredResources",
-                              "items": [{"name": "BenchmarkingOG.json", "path": "BenchmarkingOG.json", "type": "CustomTheme"}]}],
+                              "items": [{"name": "BenchmarkingOG.json", "path": "BenchmarkingOG.json", "type": "CustomTheme"}]
+                              + ([{"name": LOGO, "path": LOGO, "type": "Image"}] if LOGO_B64.exists() else [])}],
         "settings": {"useStylableVisualContainerHeader": True, "defaultDrillFilterOtherVisuals": True, "allowChangeFilterTypes": True,
                      "useEnhancedTooltips": True}})
     base = tema()
     base["name"] = "CY24SU10"
     j(rep / "StaticResources" / "SharedResources" / "BaseThemes" / "CY24SU10.json", base)
     j(rep / "StaticResources" / "RegisteredResources" / "BenchmarkingOG.json", tema())
+    if LOGO_B64.exists():
+        import base64
+        (rep / "StaticResources" / "RegisteredResources" / LOGO).write_bytes(base64.b64decode("".join(LOGO_B64.read_text().split())))
     ps = paginas()
     j(d / "pages" / "pages.json", {"$schema": f"{SCH}/item/report/definition/pagesMetadata/1.0.0/schema.json",
                                    "pageOrder": [nid("pg", p.nome) for p in ps], "activePageName": nid("pg", ps[0].nome)})
