@@ -2,79 +2,79 @@
  {
   "id": "F-PBR",
   "empresa": "Petrobras",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — PBR (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Release \"Desempenho Financeiro\" (RI, api.mziq.com) e Agência Petrobras — valores em R$ convertidos pela PTAX — URL e linha de origem por trimestre em poc/coleta/PBR.json",
   "url_primaria": "https://www.investidorpetrobras.com.br/resultados-e-comunicados/central-de-resultados/",
-  "alternativa_direta": "CVM Dados Abertos — ITR/DFP (dados.cvm.gov.br)",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-XOM",
   "empresa": "ExxonMobil",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — XOM (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "8-K Ex. 99.1/99.2 (sec.gov) e investor.exxonmobil.com — URL e linha de origem por trimestre em poc/coleta/XOM.json",
   "url_primaria": "https://investor.exxonmobil.com/",
-  "alternativa_direta": "SEC EDGAR XBRL companyfacts (10-Q/10-K)",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-SHEL",
   "empresa": "Shell",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — SHEL (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Unaudited Results (GlobeNewswire), 6-K e QRA (shell.com) — URL e linha de origem por trimestre em poc/coleta/SHEL.json",
   "url_primaria": "https://www.shell.com/investors/results-and-reporting/quarterly-results.html",
-  "alternativa_direta": "Quarterly Databook (Excel) + 6-K",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-EQNR",
   "empresa": "Equinor",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — EQNR (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Financial statements and review (6-K, sec.gov; equinor.com) — URL e linha de origem por trimestre em poc/coleta/EQNR.json",
   "url_primaria": "https://www.equinor.com/investors/quarterly-results",
-  "alternativa_direta": "Financial statements and review + 6-K",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-CVX",
   "empresa": "Chevron",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — CVX (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Release Ex. 99.1, 10-Q e 10-K (sec.gov) — URL e linha de origem por trimestre em poc/coleta/CVX.json",
   "url_primaria": "https://www.chevron.com/investors",
-  "alternativa_direta": "SEC EDGAR XBRL companyfacts (10-Q/10-K)",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-BP",
   "empresa": "BP",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — BP (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Stock exchange announcement trimestral (bp.com; 6-K) — URL e linha de origem por trimestre em poc/coleta/BP.json",
   "url_primaria": "https://www.bp.com/en/global/corporate/investors/results-reporting-and-presentations.html",
-  "alternativa_direta": "Stock exchange announcement + 6-K",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-TTE",
   "empresa": "TotalEnergies",
-  "tipo": "Demonstrações trimestrais 2T25–2T26 (agregador)",
-  "fonte": "Yahoo Finance via yfinance — TTE (coleta 13/08/2026)",
+  "tipo": "Demonstrações trimestrais 2T25–2T26 (primária)",
+  "fonte": "Press release trimestral com demonstrações (totalenergies.com) — URL e linha de origem por trimestre em poc/coleta/TTE.json",
   "url_primaria": "https://totalenergies.com/investors/results",
-  "alternativa_direta": "Press release de resultados + 6-K",
-  "coletado_em": "2026-08-13",
+  "alternativa_direta": "Coleta anterior (Yahoo Finance, 13/08/2026) mantida só para comparação",
+  "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
-  "primaria": false
+  "primaria": true
  },
  {
   "id": "F-REL-1T25",
@@ -107,6 +107,17 @@
   "alternativa_direta": "—",
   "coletado_em": "2026-10-02",
   "frequencia": "Trimestral",
+  "primaria": true
+ },
+ {
+  "id": "F-PTAX",
+  "empresa": "Petrobras",
+  "tipo": "Câmbio R$/US$ (PTAX de venda)",
+  "fonte": "Banco Central do Brasil — boletim PTAX diário; média do trimestre para fluxos, fechamento para dívida (poc/ptax/raw.txt)",
+  "url_primaria": "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?method=exibeFormularioConsultaBoletim",
+  "alternativa_direta": "API Olinda/BCB (CotacaoDolarPeriodo)",
+  "coletado_em": "2026-10-02",
+  "frequencia": "Diária",
   "primaria": true
  }
 ]
