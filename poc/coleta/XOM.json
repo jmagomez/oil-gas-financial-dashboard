@@ -1,0 +1,156 @@
+{
+ "empresa": "XOM",
+ "trimestres": {
+  "2025-Q2": {
+   "receita": 79477,
+   "lucro_liquido": 7082,
+   "ebitda": 16951,
+   "ebitda_componentes": {
+    "income_before_income_taxes": 10705,
+    "interest_expense": 145,
+    "depreciation_and_depletion_incl_impairments": 6101
+   },
+   "fluxo_caixa_operacional": 11550,
+   "capex": -6283,
+   "fcf": 5267,
+   "divida_liquida": 24637,
+   "divida_componentes": {
+    "notes_and_loans_payable": 5419,
+    "long_term_debt": 33570,
+    "total_debt": 38989,
+    "cash_and_cash_equivalents": 14352
+   },
+   "fonte_url": "https://investor.exxonmobil.com/sec-filings/all-sec-filings/content/0000034088-25-000040/livef8k2q25991.htm",
+   "fonte_documento": "8-K 2T25, Exhibit 99.1 (Exxon Mobil Corp, acc. 0000034088-25-000040)",
+   "observacao": "Valores trimestrais diretos do release. FCF pela definicao da base (FCO+capex)=5.267; o FCF divulgado pela XOM e 5.393 (inclui vendas de ativos/outros ajustes). Identified items 2T25 = zero. Bate 100% com Yahoo."
+  },
+  "2025-Q3": {
+   "receita": 83331,
+   "lucro_liquido": 7548,
+   "ebitda": 17497,
+   "ebitda_componentes": {
+    "income_before_income_taxes": 10932,
+    "interest_expense": 90,
+    "depreciation_and_depletion_incl_impairments": 6475
+   },
+   "fluxo_caixa_operacional": 14788,
+   "capex": -8727,
+   "fcf": 6061,
+   "divida_liquida": 28222,
+   "divida_componentes": {
+    "notes_and_loans_payable": 9212,
+    "long_term_debt": 32824,
+    "total_debt": 42036,
+    "cash_and_cash_equivalents": 13814
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/34088/000003408825000059/livef8k3q25991.htm",
+   "fonte_documento": "8-K 3T25, Exhibit 99.1 (acc. 0000034088-25-000059)",
+   "observacao": "FCO e capex do trimestre conferidos tambem por diferenca dos acumulados (9M 39.291-6M 24.503=14.788; 20.908-12.181=8.727). FCF XOM divulgado 6.332 (definicao propria). Identified items -510 (impairments 155 + reestruturacao 355). Bate 100% com Yahoo."
+  },
+  "2025-Q4": {
+   "receita": 80039,
+   "lucro_liquido": 6501,
+   "ebitda": 15909,
+   "ebitda_componentes": {
+    "income_before_income_taxes": 8031,
+    "interest_expense": 163,
+    "depreciation_and_depletion_incl_impairments": 7715
+   },
+   "fluxo_caixa_operacional": 12679,
+   "capex": -7450,
+   "fcf": 5229,
+   "divida_liquida": 32856,
+   "divida_componentes": {
+    "notes_and_loans_payable": 9296,
+    "long_term_debt": 34241,
+    "total_debt": 43537,
+    "cash_and_cash_equivalents": 10681
+   },
+   "fonte_url": "https://investor.exxonmobil.com/sec-filings/all-sec-filings/content/0000034088-26-000033/livef8k4q25991.htm",
+   "fonte_documento": "8-K 4T25, Exhibit 99.1 (acc. 0000034088-26-000033)",
+   "observacao": "Receita, IBT, juros, D&D e lucro trimestrais do release (conferidos: FY - 9M). FCO e capex do 4T25 CALCULADOS por subtracao: FY 51.970 - 9M 39.291 = 12.679; FY 28.358 - 9M 20.908 = 7.450. FCF XOM divulgado 5.566. Identified items: impairments 1.855, parcialmente compensados por ganho em venda de ativos 720 e beneficio fiscal 288. Bate com Yahoo."
+  },
+  "2026-Q1": {
+   "receita": 83161,
+   "lucro_liquido": 4183,
+   "ebitda": 14033,
+   "ebitda_componentes": {
+    "income_before_income_taxes": 6967,
+    "interest_expense": 295,
+    "depreciation_and_depletion_incl_impairments": 6771
+   },
+   "fluxo_caixa_operacional": 8705,
+   "capex": -6470,
+   "fcf": 2235,
+   "divida_liquida": 39226,
+   "divida_componentes": {
+    "notes_and_loans_payable": 14531,
+    "long_term_debt": 33130,
+    "total_debt": 47661,
+    "cash_and_cash_equivalents": 8435
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/34088/000003408826000065/livef8k1q26991.htm",
+   "fonte_documento": "8-K 1T26, Exhibit 99.1 (acc. 0000034088-26-000065)",
+   "observacao": "Valores trimestrais diretos do release do 1T26; consistentes com o acumulado 6M26 do release do 2T26 (ex.: IBT 26.391-19.424=6.967; juros 522-227=295; D&D 15.460-8.689=6.771; lucro 18.708-14.525=4.183). Release informa divida total 47.661 e divida liquida 39.226. Lucro afetado por identified items -706 e timing effects -3.883 (MTM de derivativos). FCF XOM divulgado 2.699. DIVERGE do Yahoo em lucro (4.470), EBITDA (12.060) e FCF (2.240)."
+  },
+  "2026-Q2": {
+   "receita": 114529,
+   "lucro_liquido": 14525,
+   "ebitda": 28340,
+   "ebitda_componentes": {
+    "income_before_income_taxes": 19424,
+    "interest_expense": 227,
+    "depreciation_and_depletion_incl_impairments": 8689
+   },
+   "fluxo_caixa_operacional": 23555,
+   "capex": -6527,
+   "fcf": 17028,
+   "divida_liquida": 31780,
+   "divida_componentes": {
+    "notes_and_loans_payable": 10139,
+    "long_term_debt": 32229,
+    "total_debt": 42368,
+    "cash_and_cash_equivalents": 10588
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26992.htm",
+   "fonte_documento": "8-K 2T26, Exhibits 99.1 e 99.2 (ExxonMobil Holdings Corp, CIK 2115436, acc. 0002115436-26-000006)",
+   "observacao": "Receita, IBT, juros, D&D e lucro trimestrais da Ex.99.2; FCO e capex trimestrais da Ex.99.1 (tabelas de FCO ex-capital de giro e FCF), conferidos com acumulado 6M (32.260-8.705=23.555; 12.997-6.470=6.527). FCF XOM divulgado 17.236. Filer passou a ser ExxonMobil Holdings Corp (novo CIK 2115436). Bate com Yahoo."
+  }
+ },
+ "explicacoes": [
+  {
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "explicacao": "Lucro GAAP 4.183 -> 14.525 (+247% t/t pela fonte primaria; o +225% do alerta usa o 1T26 do Yahoo de 4.470, que nao confere com o release). O salto e majoritariamente efeito de base: o 1T26 foi deprimido por timing effects de -3.883 (MTM de derivativos nao liquidados) e identified items -706 (Oriente Medio). No 2T26 os timing effects viraram +2.483 (swing de ~+6,4 bi), enquanto os identified items foram -2.638 (impairments -1.079; outros -1.559 = 1.365 em adicoes a reservas financeiras + 194 de impactos no Oriente Medio). Lucro ajustado (ex identified items e timing) foi 8.772 -> 14.680 (+67%), coerente com precos/margens mais altos.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26991.htm",
+   "trecho": "Estimated timing effects excluded from Adjusted Earnings/(Loss) are primarily related to unsettled derivatives which are required to be marked to current period-end prices."
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "lucro_liquido",
+   "explicacao": "Earnings considerations (8-K de 07/07/2026) estimavam para o 2T26 vs 1T26: precos de liquidos +3,5 a 3,9 bi (Upstream); margens Energy Products +2,0 a 2,4 bi, Chemical +1,0 a 1,2 bi, Specialty +0,3 a 0,5 bi; timing effects Energy Products +2,2 a 3,0 bi; impairments Energy Products -0,8 a -1,0 bi; outras reservas Upstream -1,2 a -1,4 bi; disrupcoes no Oriente Medio Upstream -0,6 a -0,8 bi.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000003/f8k2q991070726.htm",
+   "trecho": "Liquids prices ... 3.5–3.9 (Upstream); Timing effects ... Energy Products 2.2–3.0"
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "ebitda",
+   "explicacao": "Pela fonte primaria o EBITDA vai de 14.033 (1T26) para 28.340 (2T26), +102% t/t, nao +135%: o 1T26 do Yahoo (12.060) esta ~2,0 bi abaixo do calculado com IBT 6.967 + juros 295 + D&D 6.771. O aumento decorre do IBT (6.967 -> 19.424), puxado pelo swing de timing effects (MTM de derivativos) e por precos/margens; D&D sobe para 8.689 por incluir impairments (identified item -1.079 apos impostos), que sao somados de volta no EBITDA.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26992.htm",
+   "trecho": "Depreciation and depletion (includes impairments) 8,689 (2Q26); Income before income taxes 19,424"
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "explicacao": "FCF (FCO+capex) 2.235 (1T26) -> 17.028 (2T26). NAO e capital de giro: a variacao de capital de giro foi negativa nos dois trimestres (-1.758 no 1T26; -2.099 no 2T26). O FCO ex-capital de giro saltou 10.463 -> 25.654, acompanhando o lucro (inclui o swing de timing effects e precos/margens) e itens nao-caixa somados de volta (D&D com impairments). Capex praticamente estavel (6.470 -> 6.527). O release resume: FCO 23,6 bi e FCF 17,2 bi (definicao XOM, que soma vendas de ativos/outros).",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000006/livef8k2q26991.htm",
+   "trecho": "Cash flow from operating activities was $23.6 billion and free cash flow was $17.2 billion"
+  }
+ ],
+ "pendencias": [
+  "1T26: Yahoo diverge da fonte primaria em lucro (4.470 vs 4.183), EBITDA (12.060 vs 14.033) e FCF (2.240 vs 2.235; FCO 8.710 vs 8.705); divida liquida 39.230 vs 39.226 (arredondamento). Nao ha mencao a revisao do 1T26 no release do 2T26; causa da diferenca do Yahoo nao identificavel pela fonte primaria (provavel erro/preliminar do agregador).",
+  "4T25: FCO e capex trimestrais obtidos por subtracao (FY - 9M); nao ha coluna trimestral do fluxo de caixa no release do 4T25 conforme extraido.",
+  "Acesso direto ao EDGAR/IR via curl bloqueado pelo proxy; dados lidos via WebFetch (extracao por modelo). Todos os numeros foram conferidos por consistencia cruzada entre trimestral e acumulado (IBT, juros, D&D, lucro, FCO, capex) e com as dividas liquidas divulgadas, mas recomenda-se conferencia visual final das tabelas.",
+  "Divisao por segmento das 'reservas financeiras' de 1.365 no 2T26 nao confirmada (earnings considerations aponta Upstream; extracao do release foi ambigua) - nao afeta os campos coletados."
+ ]
+}
