@@ -1,15 +1,23 @@
-name: Valida coleta primária (SEC XBRL e CVM)
+name: Valida coleta primária (SEC XBRL, CVM e documentos)
 
-# Confere, com rede, os números da série da PoC contra as bases estruturadas dos reguladores:
-#   ExxonMobil e Chevron  -> API XBRL da SEC (10-Q/10-K)
-#   Petrobras             -> Dados Abertos da CVM (ITR/DFP)
-# Roda todo dia 20 (depois da temporada de resultados) e sob demanda. Falha se algum valor
-# divergir mais de 0,5% do que está em poc/coleta/ e grava o relatório como artefato.
+# Confere, com rede, os números da série da PoC contra as fontes oficiais:
+#   ExxonMobil e Chevron      -> API XBRL da SEC (10-Q/10-K)
+#   Petrobras                 -> Dados Abertos da CVM (ITR/DFP)
+#   Shell, BP, Equinor, TTE   -> texto do 6-K/release (poc/conferencia/plano_documentos.json)
+# Roda todo dia 20 (depois da temporada de resultados), sob demanda e em PR que mude a coleta.
+# Falha se algum valor divergir e grava os relatórios como artefato.
 
 on:
   schedule:
     - cron: "0 9 20 * *"
   workflow_dispatch:
+  pull_request:
+    paths:
+      - "poc/coleta/**"
+      - "poc/coleta_*.py"
+      - "poc/confere_documentos.py"
+      - "poc/conferencia/**"
+      - ".github/workflows/valida-coleta.yml"
 
 permissions:
   contents: read
@@ -22,11 +30,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - run: pip install pdfminer.six
       - name: SEC XBRL (XOM, CVX)
         run: set -o pipefail; python3 poc/coleta_sec_xbrl.py --verificar | tee xbrl.txt
       - name: CVM Dados Abertos (PBR)
         if: always()
         run: set -o pipefail; python3 poc/coleta_cvm.py --verificar | tee cvm.txt
+      - name: Documentos oficiais (SHEL, BP, EQNR, TTE)
+        if: always()
+        run: set -o pipefail; python3 poc/confere_documentos.py | tee documentos.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -34,3 +46,4 @@ jobs:
           path: |
             xbrl.txt
             cvm.txt
+            documentos.txt
