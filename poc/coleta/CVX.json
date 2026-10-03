@@ -1,0 +1,183 @@
+{
+ "empresa": "CVX",
+ "trimestres": {
+  "2025-Q2": {
+   "receita": 44375,
+   "lucro_liquido": 2490,
+   "ebitda": 8765,
+   "ebitda_componentes": {
+    "income_before_income_tax_expense": 4147,
+    "interest_and_debt_expense": 274,
+    "dda": 4344
+   },
+   "fluxo_caixa_operacional": 8576,
+   "capex": -3712,
+   "fcf": 4864,
+   "divida_liquida": 25406,
+   "divida_componentes": {
+    "short_term_debt": 6191,
+    "long_term_debt": 23276,
+    "total_debt": 29467,
+    "cash_and_cash_equivalents": 4061
+   },
+   "fonte_url": [
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341025000062/cvx-20250630.htm",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341025000058/a06302025ex9918-k.htm",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/a06302026ex9918-k.htm"
+   ],
+   "fonte_documento": "10-Q 2T25 (DRE trimestral, balanço 30/06/2025); FCO/capex trimestrais do 10-Q são acumulados 6M (13.765 / 7.639) — valor do trimestre 8.576 / 3.712 tirado da coluna comparativa 'Three Months Ended June 30, 2025' do release 2T26 (Ex. 99.1)",
+   "observacao": "EBITDA primário 8.765 vs Yahoo 8.653 (−112; Yahoo usa definição própria). DL 25.406 vs Yahoo 25.401 (arredondamento/definição). Release 2T25 reporta FCO arredondado ($8,6 bi). Inclui perda de $215 mi em itens especiais (ajuste a valor justo de ações da Hess e custos de pensão)."
+  },
+  "2025-Q3": {
+   "receita": 48169,
+   "lucro_liquido": 3539,
+   "ebitda": 11565,
+   "ebitda_componentes": {
+    "income_before_income_tax_expense": 5414,
+    "interest_and_debt_expense": 370,
+    "dda": 5781
+   },
+   "fluxo_caixa_operacional": 9385,
+   "capex": -4444,
+   "fcf": 4941,
+   "divida_liquida": 33819,
+   "divida_componentes": {
+    "short_term_debt": 3591,
+    "long_term_debt": 37953,
+    "total_debt": 41544,
+    "cash_and_cash_equivalents": 7725
+   },
+   "fonte_url": [
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341025000108/cvx-20250930.htm",
+    "https://chevroncorp.gcs-web.com/static-files/4aaa3d8c-2f68-49fd-a253-378fb877f5a8"
+   ],
+   "fonte_documento": "10-Q 3T25: DRE trimestral; FCO e capex do trimestre = 9M (23.150 / 12.083) − 6M do 10-Q 2T25 (13.765 / 7.639)",
+   "observacao": "Primeiro trimestre com a Hess consolidada (aquisição concluída em jul/2025): produção recorde 4,1 MMboe/d, +21% a/a, Hess contribuindo 495 Mboe/d; dívida total salta de 29.467 para 41.544 (dívida da Hess assumida) — explica DL 25.406 → 33.819. Itens especiais: perda líquida de $235 mi (severance/custos de transação Hess, parcialmente compensada pelo valor justo das ações Hess). EBITDA primário 11.565 vs Yahoo 11.810 (+245 no Yahoo; definição diferente). DL 33.819 vs Yahoo 33.817."
+  },
+  "2025-Q4": {
+   "receita": 45787,
+   "lucro_liquido": 2770,
+   "ebitda": 10844,
+   "ebitda_componentes": {
+    "income_before_income_tax_expense": 4599,
+    "interest_and_debt_expense": 361,
+    "dda": 5884
+   },
+   "fluxo_caixa_operacional": 10789,
+   "capex": -5264,
+   "fcf": 5525,
+   "divida_liquida": 34465,
+   "divida_componentes": {
+    "short_term_debt": 977,
+    "long_term_debt": 39781,
+    "total_debt": 40758,
+    "cash_and_cash_equivalents": 6293
+   },
+   "fonte_url": [
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000019/a12312025ex9918-k.htm",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000078/R7.htm",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341025000108/cvx-20250930.htm",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000113/cvx-20260331.htm"
+   ],
+   "fonte_documento": "Release 4T25 (Ex. 99.1, DRE trimestral; caixa em US$ bi arredondado); FCO e capex exatos = 10-K 2025 (33.939 / 17.347) − 9M do 10-Q 3T25 (23.150 / 12.083); split da dívida em 31/12/2025 da coluna comparativa do balanço do 10-Q 1T26",
+   "observacao": "EBITDA primário 10.844 vs Yahoo 10.924. DL 34.465 vs Yahoo 34.461. Itens especiais: perda de $128 mi com liquidação de pensão; lucro ajustado $3,0 bi."
+  },
+  "2026-Q1": {
+   "receita": 47556,
+   "lucro_liquido": 2210,
+   "ebitda": 10099,
+   "ebitda_componentes": {
+    "income_before_income_tax_expense": 3946,
+    "interest_and_debt_expense": 345,
+    "dda": 5808
+   },
+   "fluxo_caixa_operacional": 2514,
+   "capex": -4063,
+   "fcf": -1549,
+   "divida_liquida": 40105,
+   "divida_componentes": {
+    "short_term_debt": 5828,
+    "long_term_debt": 39600,
+    "total_debt": 45428,
+    "cash_and_cash_equivalents": 5323
+   },
+   "fonte_url": [
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000113/cvx-20260331.htm",
+    "https://chevroncorp.gcs-web.com/static-files/8a8dc1c0-be26-45a5-8f61-cd119e5e416b",
+    "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-first-quarter-2026-results"
+   ],
+   "fonte_documento": "10-Q 1T26 e release 1T26 (valores trimestrais, sem subtração)",
+   "observacao": "DIVERGÊNCIAS MATERIAIS vs Yahoo: lucro 2.210 (Yahoo 2.290; release: 'Reported earnings of $2.2 billion', EPS $1,11) e EBITDA 10.099 (Yahoo 9.050, −1.049). Receita 47.556 (Yahoo 47.560, arredondado). FCF −1.549 (Yahoo −1.550). DL 40.105 (Yahoo 40.100). Working capital consumiu 4.625 no trimestre; dívida curto prazo sobe de 977 para 5.828."
+  },
+  "2026-Q2": {
+   "receita": 67199,
+   "lucro_liquido": 12072,
+   "ebitda": 23118,
+   "ebitda_componentes": {
+    "income_before_income_tax_expense": 16684,
+    "interest_and_debt_expense": 352,
+    "dda": 6082
+   },
+   "fluxo_caixa_operacional": 22633,
+   "capex": -4538,
+   "fcf": 18095,
+   "divida_liquida": 28548,
+   "divida_componentes": {
+    "short_term_debt": 401,
+    "long_term_debt": 36674,
+    "total_debt": 37075,
+    "cash_and_cash_equivalents": 8527
+   },
+   "fonte_url": [
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/a06302026ex9918-k.htm",
+    "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-second-quarter-2026-results",
+    "https://www.sec.gov/Archives/edgar/data/93410/000009341026000167/cvx-20260630.htm"
+   ],
+   "fonte_documento": "Release 2T26 (Ex. 99.1, colunas 'Three Months Ended June 30, 2026') e 10-Q 2T26 (balanço 30/06/2026)",
+   "observacao": "EBITDA primário 23.118 vs Yahoo 23.034. DL 28.548 vs Yahoo 28.545. Brent médio $104/bbl (1T26 $81). Timing effects favoráveis de $1,4 bi; ganho em venda de ativos $230 mi; custos de pensão $86 mi; lucro ajustado $12,0 bi. Working capital liberou 2.945."
+  }
+ },
+ "explicacoes": [
+  {
+   "periodo": "2026-Q1",
+   "campo": "fcf",
+   "explicacao": "FCF de 5.525 (4T25) para −1.549 decorre de FCO de apenas 2.514, deprimido por consumo de capital de giro de 4.625 (alta abrupta das commodities em março/2026 elevou recebíveis/estoques), mais capex 4.063. FCF ajustado (ex-working capital) foi $4,1 bi. Lucro também caiu por timing effects desfavoráveis de ~$2,9 bi (marcação a mercado de derivativos e LIFO) e reserva legal de $360 mi.",
+   "fonte_url": "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-first-quarter-2026-results",
+   "trecho": "Cash flow from operations in the first quarter of 2026 was lower than a year ago primarily due to higher working capital outflows largely resulting from the sharp increase in commodity prices in March 2026. | Reported earnings decreased compared to first quarter 2025 primarily due to unfavorable timing effects of approximately $2.9 billion. | Included in the quarter was a net loss of $360 million related to a legal reserve."
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "divida_liquida",
+   "explicacao": "DL sobe 34.465 → 40.105: dívida de curto prazo de 977 para 5.828 (financiamento do working capital + retorno de $6,0 bi aos acionistas com FCF negativo) e caixa cai 6.293 → 5.323.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000113/cvx-20260331.htm",
+   "trecho": "Short-term debt 5,828 (Mar 31, 2026) vs 977 (Dec 31, 2025); Long-term debt 39,600 vs 39,781 [balanço do 10-Q]; release: 'returned $6.0 billion cash to shareholders'"
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "ebitda/lucro_liquido",
+   "explicacao": "Com números primários a variação t/t é lucro +446% (2.210 → 12.072) e EBITDA +129% (10.099 → 23.118), não +427%/+155% do Yahoo (cuja base 1T26 está subestimada). O salto se explica por: Brent $81 → $104 (+28%) e realização de líquidos $51,94 → $70,80/bbl (+36%); reversão dos timing effects (−$2,9 bi no 1T26 para +$1,4 bi no 2T26, ~$4,3 bi de swing após IR); margens de refino maiores; volumes recordes; e itens especiais (reserva legal −$360 mi no 1T26; ganho em venda de ativos +$230 mi no 2T26). Alavancagem operacional sobre custos fixos amplifica o efeito preço.",
+   "fonte_url": "https://chevroncorp.gcs-web.com/news-releases/news-release-details/chevron-reports-second-quarter-2026-results",
+   "trecho": "This includes $1.4 billion in favorable timing effects | Avg. Brent Spot Price $104 [2Q26], $81 [1Q26] | Liquids Realization $70.80 [2Q26], $51.94 [1Q26] | U.S. upstream earnings were higher primarily due to higher liquids realizations and sales volumes"
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "fcf/divida_liquida",
+   "explicacao": "FCF −1.549 → 18.095: FCO de 22.633 inclui liberação de capital de giro de 2.945 (reversão parcial do consumo de 4.625 no 1T26) somada ao lucro elevado; capex 4.538. FCF ajustado $15,4 bi. Com isso a dívida total caiu 45.428 → 37.075 (−8.353, 'record $8.4 billion', sobretudo quitação do curto prazo 5.828 → 401) e o caixa subiu 5.323 → 8.527; DL cai 40.105 → 28.548 (−11.557; Yahoo −11.555).",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/93410/000009341026000162/a06302026ex9918-k.htm",
+   "trecho": "Total debt was reduced by a record $8.4 billion in the quarter | Cash flow from operations in the second quarter of 2026 was $22.6 billion | Net decrease (increase) in operating working capital 2,945"
+  },
+  {
+   "periodo": "2025-Q3",
+   "campo": "geral",
+   "explicacao": "3T25 é o primeiro trimestre com Hess consolidada: produção +21% a/a, DD&A sobe de 4.344 para 5.781, juros de 274 para 370 e dívida total de 29.467 para 41.544. Comparações com 2T25 não são like-for-like.",
+   "fonte_url": "https://chevroncorp.gcs-web.com/static-files/4aaa3d8c-2f68-49fd-a253-378fb877f5a8",
+   "trecho": "Record production of 4.1 million BOE per day; 21 percent higher than last year | a net loss of $235 million due to severance and other transaction costs related to the acquisition of Hess Corporation (Hess), partly offset by the fair value measurement of Hess shares"
+  }
+ ],
+ "pendencias": [
+  "Data exata de fechamento da Hess (18/07/2025, segundo divulgação pública) não foi lida em página primária aberta nesta coleta; trechos obtidos confirmam apenas inclusão a partir do 3T25.",
+  "Extração feita via WebFetch (resumo por modelo); acesso direto por curl a sec.gov/gcs-web bloqueado pelo proxy. Valores conferidos por consistência cruzada (10-Q x release x Yahoo), mas os trechos citados são reprodução do conteúdo das páginas, não cópia byte a byte.",
+  "Origem das diferenças de EBITDA do Yahoo (−112 no 2T25, +245 no 3T25, +80 no 4T25, −1.049 no 1T26, −84 no 2T26) e do lucro 1T26 (2.290 vs 2.210) não é documentada pela fonte primária; provável definição/atualização própria do Yahoo. Corrigir base para os valores primários.",
+  "Release 2T25 e 4T25 trazem FCO/capex arredondados em US$ bi; valores exatos derivados de 10-Q/10-K por subtração."
+ ]
+}
