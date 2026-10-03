@@ -57,7 +57,7 @@ def periodos_da_base(base):
     return todos[-JANELA:]
 
 
-# Brent medio trimestral (FRED/IMF, serie POILBREUSDQ) -- contexto para a regra R5.
+# Brent medio trimestral (EIA via FRED, serie DCOILBRENTEU, spot diario) -- contexto para a regra R5.
 CONTEXTO = POC / "contexto_mercado.json"
 BRENT = {k: v for k, v in json.loads(CONTEXTO.read_text(encoding="utf-8"))["brent_medio_usd_bbl"].items()} if CONTEXTO.exists() else {}
 PTAX = json.loads(CONTEXTO.read_text(encoding="utf-8")).get("ptax", {}) if CONTEXTO.exists() else {}
@@ -103,7 +103,14 @@ INDICADORES = [
      "Empregados no fim do exercício (divulgação anual); trimestres seguintes repetem o último valor divulgado", "core"),
     ("ebitda_por_empregado", "EBITDA TTM por empregado", "US$ mil", 1, 0,
      "EBITDA dos últimos 12 meses ÷ efetivo do fim do exercício mais recente", "complementar"),
+    ("nd_ex_arrend_ebitda", "Dívida líquida sem arrendamentos / EBITDA", "x", -1, 2,
+     "(Dívida líquida − passivo de arrendamento) ÷ EBITDA TTM; nas americanas sai só o arrendamento financeiro (US GAAP)",
+     "complementar"),
+    ("margem_ebitda_ajustada", "Margem EBITDA ajustada (definição da empresa)", "%", 1, 1,
+     "EBITDA ajustado divulgado pela empresa ÷ receita (Petrobras: sem eventos exclusivos); não comparável entre empresas",
+     "complementar"),
 ]
+DECOMP = json.loads((POC / "decomposicao.json").read_text(encoding="utf-8")) if (POC / "decomposicao.json").exists() else {}
 IND = {i[0]: i for i in INDICADORES}
 
 # Insumos de cada indicador -- o status do indicador herda o pior status dos insumos.
@@ -115,6 +122,8 @@ INSUMOS = {
     "ebitda_boe": ["ebitda", "producao_kboed"],
     "efetivo": [],
     "ebitda_por_empregado": ["ebitda"],
+    "nd_ex_arrend_ebitda": ["divida_liquida", "ebitda"],
+    "margem_ebitda_ajustada": ["receita"],
 }
 OBRIGATORIOS = ["receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional", "fcf", "capex",
                 "divida_liquida", "producao_kboed"]
@@ -373,6 +382,17 @@ def calcula(empresas, base, log):
                 obs = "EBITDA do trimestre ×4 (janela TTM indisponível antes do 4T25)"
             nd = r.get("divida_liquida")
             add(t, p, "nd_ebitda", nd / ebitda_12m if nd is not None and ebitda_12m else None, status_nd, obs, fonte)
+            arr = DECOMP.get("arrendamentos", {}).get(t, {})
+            if nd is not None and ebitda_12m and p in arr.get("valores", {}):
+                o = obs
+                if arr.get("anual"):
+                    o = (o + "; " if o else "") + "arrendamento financeiro anual (10-K); operacionais fora da dívida (US GAAP)"
+                add(t, p, "nd_ex_arrend_ebitda", (nd - arr["valores"][p]) / ebitda_12m,
+                    status_nd if not arr.get("anual") else ("amarelo" if status_nd == "verde" else status_nd), o, "F-DECOMP")
+            aj = DECOMP.get("ebitda_ajustado", {}).get(t, {})
+            if rec and p in aj.get("valores", {}):
+                add(t, p, "margem_ebitda_ajustada", aj["valores"][p] / rec * 100, st("margem_ebitda_ajustada"),
+                    aj.get("definicao", ""), "F-DECOMP")
             prod = r.get("producao_kboed")
             add(t, p, "ebitda_boe", eb * 1000 / (prod * DIAS[p]) if eb is not None and prod else None,
                 st("ebitda_boe"), "inclui downstream nas integradas", fonte)
@@ -464,6 +484,8 @@ def main(argv=None):
     escreve_csv(POC / "dim_indicador.csv", dim_ind)
     escreve_csv(POC / "dim_fonte.csv", fontes)
     tpl = (POC / "painel_template.html").read_text(encoding="utf-8")
+    logo = POC / "assets" / "petrobras_logo.b64"
+    tpl = tpl.replace("__LOGO__", "data:image/png;base64," + "".join(logo.read_text().split()) if logo.exists() else "")
     html = tpl.replace("__DATA__", json.dumps(payload, ensure_ascii=False))
     (POC / "painel_benchmarking_poc.html").write_text(html, encoding="utf-8")
 
