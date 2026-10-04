@@ -27,7 +27,7 @@ from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 PLANO = RAIZ / "poc" / "conferencia" / "plano_documentos.json"
-UA = "oil-gas-financial-dashboard github.com/jmagomez/oil-gas-financial-dashboard"  # a SEC exige identificação
+UA = "oil-gas-financial-dashboard 60618813+jmagomez@users.noreply.github.com"  # a SEC exige nome e e-mail de contato (sem isso: HTTP 403)
 
 
 def baixa(url: str, cache: Path | None) -> bytes:

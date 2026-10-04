@@ -14,7 +14,8 @@ Campos em R$ milhões (a conversão para US$ fica em poc/integra_fontes_primaria
     fco_brl              6.01
     capex_brl            DFC: aquisições de ativos imobilizados e intangíveis (6.02.xx), positivo
     divida_bruta_brl     financiamentos (2.01.04 + 2.02.01) + arrendamentos (circulante e não circulante)
-    divida_liquida_brl   = dívida bruta − caixa e equivalentes − títulos negociáveis (como a Petrobras define)
+    divida_liquida_brl   = dívida bruta − caixa e equivalentes − aplicações financeiras de curto e longo prazo
+                         (disponibilidades ajustadas, como a Petrobras define)
 
 Trimestres: a DRE do ITR traz o trimestre isolado; a DFC só o acumulado (diferença de acumulados);
 o 4T sai da DFP (ano − 9 meses).
@@ -89,7 +90,7 @@ def _ini(p):
     return f"{a}-{3 * q - 2:02d}-01"
 
 
-def _busca(ls, demo, fim, ini=None, conta=None, desc=None, nivel=None):
+def _busca(ls, demo, fim, ini=None, conta=None, desc=None, nivel=None, prefixo=None):
     """Soma das contas que casam (conta exata ou regex na descrição; nivel = nº de pontos do código).
 
     Quando uma conta e uma subconta casam com a mesma descrição, só as folhas entram (sem dupla contagem)."""
@@ -102,6 +103,8 @@ def _busca(ls, demo, fim, ini=None, conta=None, desc=None, nivel=None):
         if desc and not re.search(desc, l["desc"]):
             continue
         if nivel is not None and l["conta"].count(".") != nivel:
+            continue
+        if prefixo and not l["conta"].startswith(prefixo):
             continue
         sel.append(l)
     codigos = {l["conta"] for l in sel}
@@ -148,7 +151,12 @@ def trimestre(ls, p) -> dict:
     financ = saldo(ls, p, desc=r"^(emprestimos e )?financiamentos$")
     arrend = saldo(ls, p, desc=r"arrendamento")
     caixa = saldo(ls, p, conta="1.01.01")
-    titulos = saldo(ls, p, desc=r"^(titulos|aplicacoes financeiras)", nivel=2)
+    titulos = saldo(ls, p, desc=r"^(titulos|aplicacoes financeiras)", nivel=2, prefixo="1.01.")
+    # Disponibilidades ajustadas da Petrobras incluem os títulos de longo prazo (1.02.01.x): no 1T25,
+    # R$ 4.806 mi ao custo amortizado; sem eles a dívida líquida saía 1,4% acima da divulgada.
+    titulos_lp = _busca(ls, "BPA", _fim(p), desc=r"^aplicacoes financeiras", nivel=3, prefixo="1.02.01.")
+    if titulos_lp:
+        titulos = (titulos or 0) + titulos_lp
     r.update(financiamentos_brl=financ, arrendamentos_brl=arrend, caixa_brl=caixa, titulos_brl=titulos)
     if None not in (financ, arrend, caixa):
         r["divida_liquida_brl"] = financ + arrend - caixa - (titulos or 0)

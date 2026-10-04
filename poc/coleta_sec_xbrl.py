@@ -34,7 +34,7 @@ from pathlib import Path
 RAIZ = Path(__file__).resolve().parent.parent
 COLETA = RAIZ / "poc" / "coleta"
 FIXTURES = RAIZ / "tests" / "fixtures" / "xbrl"
-USER_AGENT = "oil-gas-financial-dashboard (github.com/jmagomez/oil-gas-financial-dashboard)"
+USER_AGENT = "oil-gas-financial-dashboard 60618813+jmagomez@users.noreply.github.com"  # a SEC exige nome e e-mail de contato (sem isso: HTTP 403)
 DESDE = "2025-01-01"
 
 # Conceitos us-gaap por campo, em ordem de preferência.
