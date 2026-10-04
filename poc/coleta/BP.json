@@ -1,0 +1,171 @@
+{
+ "empresa": "BP",
+ "trimestres": {
+  "2025-Q2": {
+   "receita": 46627,
+   "lucro_liquido": 1629,
+   "ebitda": 9854,
+   "ebitda_componentes": {
+    "profit_before_interest_and_taxation": 4056,
+    "depreciation_depletion_amortization": 4641,
+    "net_impairment_and_losses_on_sale": 1157
+   },
+   "fluxo_caixa_operacional": 6271,
+   "capex": -3361,
+   "fcf": 2910,
+   "divida_liquida": 40679,
+   "divida_componentes": {
+    "net_debt_oficial": 26043,
+    "arrendamentos": 14636,
+    "net_partner_receivable_leases_JO_info": -1030,
+    "net_debt_including_leases_oficial_bp_info": 39649
+   },
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "fonte_documento": "bp 3Q25 results (SEA, coluna 2Q25) — números conferidos também na coluna 2Q25 do release 2T26",
+   "observacao": "Receita/lucro/FCO iguais ao Yahoo. EBITDA primário 9.854 vs Yahoo 8.835 (Yahoo não soma o impairment integral). Capex bp 3.361 vs Yahoo 3.236. arrendamentos = 'Lease liabilities' brutos (mesmo critério do 1T25: 26.968+12.484). A bp publica 'Net debt including leases' deduzindo o 'net partner receivable for leases entered into on behalf of joint operations' (campo _info); no 1T25 esse ajuste era só −91, mas desde o 2T25 é ~−1,0-1,1 bi, por isso a base padronizada fica ~1 bi acima do número oficial da bp. capex = 'Total capital expenditure' (definição bp, inclui inorgânico) — Yahoo usa outra linha (provavelmente compras de PP&E)."
+  },
+  "2025-Q3": {
+   "receita": 48420,
+   "lucro_liquido": 1161,
+   "ebitda": 9673,
+   "ebitda_componentes": {
+    "profit_before_interest_and_taxation": 4448,
+    "depreciation_depletion_amortization": 4472,
+    "net_impairment_and_losses_on_sale": 753
+   },
+   "fluxo_caixa_operacional": 7786,
+   "capex": -3381,
+   "fcf": 4405,
+   "divida_liquida": 40683,
+   "divida_componentes": {
+    "net_debt_oficial": 26054,
+    "arrendamentos": 14629,
+    "net_partner_receivable_leases_JO_info": -1082,
+    "net_debt_including_leases_oficial_bp_info": 39601
+   },
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "fonte_documento": "bp Third quarter 2025 results (stock exchange announcement)",
+   "observacao": "Receita/lucro/FCO iguais ao Yahoo. EBITDA 9.673 vs Yahoo 8.975; capex 3.381 vs 3.171. arrendamentos = 'Lease liabilities' brutos (mesmo critério do 1T25: 26.968+12.484). A bp publica 'Net debt including leases' deduzindo o 'net partner receivable for leases entered into on behalf of joint operations' (campo _info); no 1T25 esse ajuste era só −91, mas desde o 2T25 é ~−1,0-1,1 bi, por isso a base padronizada fica ~1 bi acima do número oficial da bp. capex = 'Total capital expenditure' (definição bp, inclui inorgânico) — Yahoo usa outra linha (provavelmente compras de PP&E)."
+  },
+  "2025-Q4": {
+   "receita": 47383,
+   "lucro_liquido": -3422,
+   "ebitda": 7889,
+   "ebitda_componentes": {
+    "profit_before_interest_and_taxation": -261,
+    "depreciation_depletion_amortization": 4526,
+    "net_impairment_and_losses_on_sale": 3624
+   },
+   "fluxo_caixa_operacional": 7602,
+   "capex": -4168,
+   "fcf": 3434,
+   "divida_liquida": 36753,
+   "divida_componentes": {
+    "net_debt_oficial": 22182,
+    "arrendamentos": 14571,
+    "net_partner_receivable_leases_JO_info": -1067,
+    "net_debt_including_leases_oficial_bp_info": 35686
+   },
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "fonte_documento": "bp First quarter 2026 results (coluna 4Q25) + 6-K 4Q25 (sec.gov a31122025bp6kq4.htm) para receita, D&A, impairment, PBIT, lucro, FCO, capex e net debt",
+   "observacao": "Capex bp 4.168 (inclui inorgânico) vs Yahoo 3.463 → FCF 3.434 vs 4.139. EBITDA 7.889 vs Yahoo 4.312 (Yahoo aparentemente não soma os 3.624 de impairment). Leases 4T25 = 14.571 (bruto) / 13.504 líquido do partner receivable; nenhum bate com os 13.633 implícitos no Yahoo. arrendamentos = 'Lease liabilities' brutos (mesmo critério do 1T25: 26.968+12.484). A bp publica 'Net debt including leases' deduzindo o 'net partner receivable for leases entered into on behalf of joint operations' (campo _info); no 1T25 esse ajuste era só −91, mas desde o 2T25 é ~−1,0-1,1 bi, por isso a base padronizada fica ~1 bi acima do número oficial da bp. capex = 'Total capital expenditure' (definição bp, inclui inorgânico) — Yahoo usa outra linha (provavelmente compras de PP&E)."
+  },
+  "2026-Q1": {
+   "receita": 52255,
+   "lucro_liquido": 3842,
+   "ebitda": 13485,
+   "ebitda_componentes": {
+    "profit_before_interest_and_taxation": 8486,
+    "depreciation_depletion_amortization": 4410,
+    "net_impairment_and_losses_on_sale": 589
+   },
+   "fluxo_caixa_operacional": 2860,
+   "capex": -3290,
+   "fcf": -430,
+   "divida_liquida": 39666,
+   "divida_componentes": {
+    "net_debt_oficial": 25309,
+    "arrendamentos": 14357,
+    "net_partner_receivable_leases_JO_info": -1072,
+    "net_debt_including_leases_oficial_bp_info": 38594
+   },
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "fonte_documento": "bp First quarter 2026 results (stock exchange announcement)",
+   "observacao": "Arrendamentos REAIS do 1T26 = 14.357 (substitui estimativa 13.633). DL padronizada 39.666 (oficial bp incl. leases 38.594) vs estimativa 38.942. Capex 3.290 vs Yahoo 3.242; FCF −430 vs −382. EBITDA 13.485 vs Yahoo 11.884. arrendamentos = 'Lease liabilities' brutos (mesmo critério do 1T25: 26.968+12.484). A bp publica 'Net debt including leases' deduzindo o 'net partner receivable for leases entered into on behalf of joint operations' (campo _info); no 1T25 esse ajuste era só −91, mas desde o 2T25 é ~−1,0-1,1 bi, por isso a base padronizada fica ~1 bi acima do número oficial da bp. capex = 'Total capital expenditure' (definição bp, inclui inorgânico) — Yahoo usa outra linha (provavelmente compras de PP&E)."
+  },
+  "2026-Q2": {
+   "receita": 69105,
+   "lucro_liquido": 3911,
+   "ebitda": 14190,
+   "ebitda_componentes": {
+    "profit_before_interest_and_taxation": 8941,
+    "depreciation_depletion_amortization": 4149,
+    "net_impairment_and_losses_on_sale": 1100
+   },
+   "fluxo_caixa_operacional": 10858,
+   "capex": -3086,
+   "fcf": 7772,
+   "divida_liquida": 36607,
+   "divida_componentes": {
+    "net_debt_oficial": 22251,
+    "arrendamentos": 14356,
+    "net_partner_receivable_leases_JO_info": -1040,
+    "net_debt_including_leases_oficial_bp_info": 35567
+   },
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/3m82HmOzrcUhzGfOQ2Uajc/9fbef18373195a44947e3a797d6cc0cf/bp-second-quarter-2026-results.pdf",
+   "fonte_documento": "bp Second quarter 2026 results (stock exchange announcement, 4 Aug 2026)",
+   "observacao": "Receita/lucro/FCO iguais ao Yahoo. Capex 3.086 vs Yahoo 3.087 (arredondamento); FCF 7.772. EBITDA 14.190 vs Yahoo 13.671. DL 36.607 (oficial bp 35.567; Yahoo 35.468). arrendamentos = 'Lease liabilities' brutos (mesmo critério do 1T25: 26.968+12.484). A bp publica 'Net debt including leases' deduzindo o 'net partner receivable for leases entered into on behalf of joint operations' (campo _info); no 1T25 esse ajuste era só −91, mas desde o 2T25 é ~−1,0-1,1 bi, por isso a base padronizada fica ~1 bi acima do número oficial da bp. capex = 'Total capital expenditure' (definição bp, inclui inorgânico) — Yahoo usa outra linha (provavelmente compras de PP&E)."
+  }
+ },
+ "explicacoes": [
+  {
+   "periodo": "2025-Q2",
+   "campo": "lucro_liquido",
+   "explicacao": "Alta t/t (687→1.629) vem do resultado subjacente: underlying RC profit 2,4 bi vs 1,4 bi no 1T25, com margens de refino melhores, customers e trading de petróleo fortes; itens de ajuste pré-tax adversos de ~0,7 bi (vs ~0,8 bi no 1T25) e perda de estoque ~0,6 bi.",
+   "fonte_url": "https://www.bp.com/press-and-publications/press-releases/second-quarter-2025-results",
+   "trecho": "Reported profit for the quarter was $1.6 billion, compared with $0.7 billion for the first quarter 2025. ... Underlying RC profit for the quarter was $2.4 billion, compared with $1.4 billion for the previous quarter."
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido/ebitda",
+   "explicacao": "Prejuízo de −3.422 vem de impairments: itens de ajuste com ~4,6 bi pré-tax (~4 bi pós-tax) de impairments ligados aos negócios de transição em gas & low carbon energy, mais perda de estoque de 0,67 bi pós-tax. Underlying RC profit foi 1,54 bi. Na definição padronizada o EBITDA (7.889) soma de volta os 3.624 de impairment da DRE; parte do impairment está em equity-accounted entities (abaixo do PBIT, não adicionada) — por isso o EBITDA ainda cai −18% t/t. O −52% do Yahoo (4.312) não decorre da definição padronizada.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000002/a31122025bp6kq4.htm",
+   "trecho": "Adjusting items include pre-tax net impairments and impairments in equity-accounted entities of $4.6 billion primarily related to our transition businesses in the gas & low carbon energy segment."
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "ebitda/lucro_liquido",
+   "explicacao": "Volta ao lucro e EBITDA forte (PBIT −261 → 8.486; impairment 3.624 → 589): underlying RC profit 3,2 bi vs 1,5 bi no 4T25, com resultado excepcional de oil trading e midstream mais forte. Na base padronizada o EBITDA sobe +71% (7.889→13.485), não +176%.",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "trecho": "underlying replacement cost profit of $3.2 billion reflects an exceptional oil trading result and stronger midstream performance (paráfrase do extrator; comparação: 4T25 $1.5 billion)"
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "fcf",
+   "explicacao": "FCF negativo por formação de capital de giro de 6,0 bi (linha de movimentos de estoques e outros ativos/passivos: −10.542 vs +1.785 no 4T25): ~4,1 bi efeitos sazonais e estoque elevado (rotas de navegação mais longas e preços em alta), ~1,1 bi timing de pagamentos, ~0,8 bi outros (pagamentos do acordo do Golfo do México).",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "trecho": "Operating cash flow for the quarter, after a $6.0 billion working capital build (after adjusting for inventory holding gains, fair value accounting effects and other adjusting items), was $2.9 billion."
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "explicacao": "FCO salta para 10,9 bi com lucro maior e formação de capital de giro menor (1,0 bi vs 6,0 bi).",
+   "fonte_url": "https://www.bp.com/api/files/6cqieuqhq4no/master/3m82HmOzrcUhzGfOQ2Uajc/9fbef18373195a44947e3a797d6cc0cf/bp-second-quarter-2026-results.pdf",
+   "trecho": "Operating cash flow for the quarter, after a $1.0 billion working capital build (...), was $10.9 billion, around $8.0 billion higher than the previous quarter, reflecting higher earnings and a lower working capital build."
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "fcf",
+   "explicacao": "FCO do 4T25 estável (7,6 bi, −0,2 bi t/t: lucro subjacente menor parcialmente compensado por impostos pagos menores); o FCF primário cai para 3.434 porque o capex bp do 4T25 foi 4.168 (Yahoo 3.463).",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000002/a31122025bp6kq4.htm",
+   "trecho": "Operating cash flow for the quarter of $7.6 billion was around $0.2 billion lower than the previous quarter reflecting lower underlying earnings partly offset by lower cash taxes paid."
+  }
+ ],
+ "pendencias": [
+  "Extração feita via WebFetch (resumo por modelo) porque curl para bp.com/sec.gov está bloqueado pelo proxy; os números das tabelas foram cruzados entre 2+ releases (ex.: 2T25 em 3T25 e 2T26; 4T25 no 6-K 4T25 e no release 1T26; 1T26 nos releases 1T26 e 2T26) e bateram. Trechos textuais podem ter pequenas diferenças de redação.",
+  "Definir se 'arrendamentos' deve ser bruto (lease liabilities, usado aqui e coerente com o 1T25 = 12.484) ou líquido do partner receivable (critério da 'net debt including leases' oficial da bp). Diferença ~1,0-1,1 bi a partir do 2T25.",
+  "4T25: parte dos 4,6 bi de impairment está em equity-accounted entities (fora do PBIT); o EBITDA padronizado não a adiciona de volta.",
+  "Capex do 4T25 (4.168) inclui inorgânico pela definição bp; se a base quiser só orgânico, precisa de outra linha da tabela de capex (não coletada).",
+  "Trecho do release 2T25 sobre FCO ('which includes the $1.1 billion settlement payment for the Gulf of America') não usado como explicação por possível imprecisão do extrator."
+ ]
+}

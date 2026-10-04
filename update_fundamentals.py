@@ -119,6 +119,8 @@ FAIXAS: dict[str, tuple[float, float]] = {
     "roa_pct": (-60.0, 60.0),
 }
 
+FONTE_PROVISORIA = "Yahoo Finance (agregador, provisório): substituir pelo release com poc/integra_fontes_primarias.py"
+
 TOLERANCIA_COERENCIA = 0.02  # 2% de folga nas identidades contabeis
 
 # Ordem dos campos de um item de `historico`, para a escrita cirurgica.
@@ -531,18 +533,24 @@ def aplica_fundamentos(
         empresa["historico"] = historico
 
         empresa["q_recente"] = {c: novo.get(c, atual.get(c)) for c in CAMPOS_TRIMESTRE}
-        empresa["proveniencia"] = {
-            "fundamentos": {
-                "fonte": "Yahoo Finance (demonstracoes trimestrais)",
-                "coletado_em": hoje.isoformat(),
-                "campos": CAMPOS_DERIVAVEIS,
-            },
-            "producao_kboed": {
-                "fonte": "release da empresa",
-                "trimestre_do_dado": atual["trimestre"],
-                "observacao": "carregado do trimestre anterior; atualizar a mao com o release",
-            },
+        # Trimestre novo entra PROVISORIO: o agregador antecipa o numero, mas a serie da PoC e de
+        # fonte primaria. poc/build_poc.py marca (R7) todo periodo cujo fonte_dado nao diga
+        # "primária" ate que poc/integra_fontes_primarias.py o substitua pelo release.
+        empresa["q_recente"]["fonte_dado"] = FONTE_PROVISORIA
+        # Preserva a proveniencia curada (URLs por trimestre etc.) e acrescenta a do trimestre novo.
+        prov = dict(empresa.get("proveniencia") or {})
+        prov["fundamentos_provisorio"] = {
+            "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+            "trimestre": rotulo,
+            "coletado_em": hoje.isoformat(),
+            "campos": CAMPOS_DERIVAVEIS,
         }
+        prov["producao_kboed"] = {
+            "fonte": "release da empresa",
+            "trimestre_do_dado": atual["trimestre"],
+            "observacao": "carregado do trimestre anterior; atualizar a mao com o release",
+        }
+        empresa["proveniencia"] = prov
 
         rel.novos.append({
             "ticker": ticker, "de": atual["trimestre"], "para": rotulo,
@@ -553,8 +561,8 @@ def aplica_fundamentos(
 
 
 def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
-    """Converte um q_recente no formato de item de `historico`."""
-    return {
+    """Converte um q_recente no formato de item de `historico` (preserva fonte_dado, se houver)."""
+    item = {
         "periodo": rotulo_historico(bloco.get("trimestre", "")),
         "receita": bloco.get("receita"),
         "lucro_liquido": bloco.get("lucro_liquido"),
@@ -565,6 +573,9 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
         "divida_liquida": bloco.get("divida_liquida"),
         "producao_kboed": bloco.get("producao_kboed"),
     }
+    if bloco.get("fonte_dado"):
+        item["fonte_dado"] = bloco["fonte_dado"]
+    return item
 
 
 # ---------------------------------------------------------------------------

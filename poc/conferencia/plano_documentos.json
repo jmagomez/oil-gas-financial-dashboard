@@ -1,0 +1,1468 @@
+{
+ "descricao": "Plano de conferência determinística: cada valor coletado em poc/coleta/<TICKER>.json deve aparecer no texto do documento oficial (6-K/release). Executado por poc/confere_documentos.py.",
+ "documentos": [
+  {
+   "url": "https://www.globenewswire.com/news-release/2025/07/31/3124670/0/en/Shell-Plc-2nd-QUARTER-2025-HALF-YEAR-UNAUDITED-RESULTS.html",
+   "checagens": [
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:receita",
+     "valor": 65406
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:lucro_liquido",
+     "valor": 3601
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:fluxo_caixa_operacional",
+     "valor": 11937
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:capex",
+     "valor": 5817
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:eb.income_before_taxation",
+     "valor": 5975
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:eb.interest_expense",
+     "valor": 1075
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:eb.dda_incl_impairments",
+     "valor": 6670
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:eb.adjusted_ebitda_shell",
+     "valor": 13313
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.current_debt",
+     "valor": 10457
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.non_current_debt",
+     "valor": 65218
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.total_debt",
+     "valor": 75675
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.debt_related_derivatives_net_liability",
+     "valor": 589
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.collateral_debt_related_derivatives",
+     "valor": 366
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "SHEL:dl.cash_and_cash_equivalents",
+     "valor": 32682
+    }
+   ]
+  },
+  {
+   "url": "https://www.globenewswire.com/news-release/2025/10/30/3177081/0/en/Shell-Plc-3rd-Quarter-Results-Unaudited-Results.html",
+   "checagens": [
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:receita",
+     "valor": 68153
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:lucro_liquido",
+     "valor": 5322
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:fluxo_caixa_operacional",
+     "valor": 12207
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:capex",
+     "valor": 4907
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:eb.income_before_taxation",
+     "valor": 7924
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:eb.interest_expense",
+     "valor": 1284
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:eb.dda_incl_impairments",
+     "valor": 6607
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:eb.adjusted_ebitda_shell",
+     "valor": 14773
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:dl.current_debt",
+     "valor": 10022
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:dl.non_current_debt",
+     "valor": 63955
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:dl.total_debt",
+     "valor": 73977
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "SHEL:dl.cash_and_cash_equivalents",
+     "valor": 33053
+    }
+   ]
+  },
+  {
+   "url": "https://www.globenewswire.com/news-release/2026/02/05/3232666/0/en/Shell-Plc-4th-Quarter-2025-and-Full-Year-Unaudited-Results.html",
+   "checagens": [
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:receita",
+     "valor": 64093
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:lucro_liquido",
+     "valor": 4134
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:fluxo_caixa_operacional",
+     "valor": 9438
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:capex",
+     "valor": 6015
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:eb.income_before_taxation",
+     "valor": 6898
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:eb.interest_expense",
+     "valor": 1193
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:eb.dda_incl_impairments",
+     "valor": 6581
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:eb.adjusted_ebitda_shell",
+     "valor": 12799
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.current_debt",
+     "valor": 9128
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.non_current_debt",
+     "valor": 66515
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.total_debt",
+     "valor": 75643
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.debt_related_derivatives_net_liability",
+     "valor": 547
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.collateral_debt_related_derivatives",
+     "valor": 287
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "SHEL:dl.cash_and_cash_equivalents",
+     "valor": 30216
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/1306965/000162828026031628/quarterlyexhibit992-q12026.htm",
+   "checagens": [
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:receita",
+     "valor": 69691
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:lucro_liquido",
+     "valor": 5694
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:fluxo_caixa_operacional",
+     "valor": 6062
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:capex",
+     "valor": 4202
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:eb.income_before_taxation",
+     "valor": 9328
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:eb.interest_expense",
+     "valor": 1473
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:eb.dda_incl_impairments",
+     "valor": 5743
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:eb.adjusted_ebitda_shell",
+     "valor": 17741
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.current_debt",
+     "valor": 10060
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.non_current_debt",
+     "valor": 65585
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.total_debt",
+     "valor": 75645
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.debt_related_derivatives_net_liability",
+     "valor": 706
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.collateral_debt_related_derivatives",
+     "valor": 627
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "SHEL:dl.cash_and_cash_equivalents",
+     "valor": 23117
+    }
+   ]
+  },
+  {
+   "url": "https://www.globenewswire.com/news-release/2026/07/30/3335785/0/en/shell-plc-2nd-and-half-year-quarter-2026-unaudited-results.html",
+   "checagens": [
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:receita",
+     "valor": 94664
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:lucro_liquido",
+     "valor": 10821
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:fluxo_caixa_operacional",
+     "valor": 21432
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:capex",
+     "valor": 4237
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:eb.income_before_taxation",
+     "valor": 15754
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:eb.interest_expense",
+     "valor": 1114
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:eb.dda_incl_impairments",
+     "valor": 6183
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:eb.adjusted_ebitda_shell",
+     "valor": 20710
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.current_debt",
+     "valor": 8542
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.non_current_debt",
+     "valor": 64534
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.total_debt",
+     "valor": 73076
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.debt_related_derivatives_net_liability",
+     "valor": 662
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.collateral_debt_related_derivatives",
+     "valor": 611
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "SHEL:dl.cash_and_cash_equivalents",
+     "valor": 31374
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062525000105/a01equinorquarterlyreport-.htm",
+   "checagens": [
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:receita",
+     "valor": 25145
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:lucro_liquido",
+     "valor": 1313
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:fluxo_caixa_operacional",
+     "valor": 2477
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:capex",
+     "valor": 3401
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:eb.net_operating_income",
+     "valor": 5721
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:eb.depreciation_amortisation_net_impairments",
+     "valor": 3422
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.finance_debt_nao_circulante",
+     "valor": 22356
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.lease_liabilities_nao_circulante",
+     "valor": 2148
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.finance_debt_circulante",
+     "valor": 8644
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.lease_liabilities_circulante",
+     "valor": 1197
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.divida_bruta_com_leases",
+     "valor": 34345,
+     "derivado": [
+      "EQNR:dl.finance_debt_nao_circulante",
+      "EQNR:dl.lease_liabilities_nao_circulante",
+      "EQNR:dl.finance_debt_circulante",
+      "EQNR:dl.lease_liabilities_circulante"
+     ]
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.cash_and_cash_equivalents",
+     "valor": 9472
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "EQNR:dl.current_financial_investments",
+     "valor": 14327
+    }
+   ],
+   "url_original": "https://ml-eu.globenewswire.com/Resource/Download/fd68c2ee-6540-41de-ae8e-c6ceaf33dbdb",
+   "nota": "6-K de 23/07/2025 (mesmo relatório do 2T25); o endereço GlobeNewswire original não permite conferência automática"
+  },
+  {
+   "url": "https://cdn.equinor.com/files/h61q9gi9/global/1076ae946124491794687a843c115299662e71e0.pdf?equinor-q3-2025-financial-statements-and-review.pdf=",
+   "checagens": [
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:receita",
+     "valor": 26049
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:lucro_liquido",
+     "valor": 210
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:fluxo_caixa_operacional",
+     "valor": 6346
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:capex",
+     "valor": 3420
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:eb.net_operating_income",
+     "valor": 5270
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:eb.depreciation_amortisation_net_impairments",
+     "valor": 3297
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.finance_debt_nao_circulante",
+     "valor": 22903
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.lease_liabilities_nao_circulante",
+     "valor": 2168
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.finance_debt_circulante",
+     "valor": 4762
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.lease_liabilities_circulante",
+     "valor": 1121
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.divida_bruta_com_leases",
+     "valor": 30954,
+     "derivado": [
+      "EQNR:dl.finance_debt_nao_circulante",
+      "EQNR:dl.lease_liabilities_nao_circulante",
+      "EQNR:dl.finance_debt_circulante",
+      "EQNR:dl.lease_liabilities_circulante"
+     ]
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.cash_and_cash_equivalents",
+     "valor": 8114
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "EQNR:dl.current_financial_investments",
+     "valor": 14276
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm",
+   "checagens": [
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:receita",
+     "valor": 25346
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:lucro_liquido",
+     "valor": 1314
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:fluxo_caixa_operacional",
+     "valor": 2107
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:capex",
+     "valor": 4146
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:eb.net_operating_income",
+     "valor": 5487
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:eb.depreciation_amortisation_net_impairments",
+     "valor": 3290
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.finance_debt_nao_circulante",
+     "valor": 23763
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.lease_liabilities_nao_circulante",
+     "valor": 2221
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.finance_debt_circulante",
+     "valor": 4047
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.lease_liabilities_circulante",
+     "valor": 1190
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.divida_bruta_com_leases",
+     "valor": 31221,
+     "derivado": [
+      "EQNR:dl.finance_debt_nao_circulante",
+      "EQNR:dl.lease_liabilities_nao_circulante",
+      "EQNR:dl.finance_debt_circulante",
+      "EQNR:dl.lease_liabilities_circulante"
+     ]
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.cash_and_cash_equivalents",
+     "valor": 5036
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "EQNR:dl.current_financial_investments",
+     "valor": 14297
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm",
+   "checagens": [
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:receita",
+     "valor": 27843
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:lucro_liquido",
+     "valor": 3106
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:fluxo_caixa_operacional",
+     "valor": 5213
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:capex",
+     "valor": 3116
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:eb.net_operating_income",
+     "valor": 8784
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:eb.depreciation_amortisation_net_impairments",
+     "valor": 2520
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.finance_debt_nao_circulante",
+     "valor": 22162
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.lease_liabilities_nao_circulante",
+     "valor": 2774
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.finance_debt_circulante",
+     "valor": 5542
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.lease_liabilities_circulante",
+     "valor": 1379
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.divida_bruta_com_leases",
+     "valor": 31857,
+     "derivado": [
+      "EQNR:dl.finance_debt_nao_circulante",
+      "EQNR:dl.lease_liabilities_nao_circulante",
+      "EQNR:dl.finance_debt_circulante",
+      "EQNR:dl.lease_liabilities_circulante"
+     ]
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.cash_and_cash_equivalents",
+     "valor": 5884
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "EQNR:dl.current_financial_investments",
+     "valor": 14212
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000025/equinorfinancialstatements.htm",
+   "checagens": [
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:receita",
+     "valor": 35177
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:lucro_liquido",
+     "valor": 4848
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:fluxo_caixa_operacional",
+     "valor": 9470
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:capex",
+     "valor": 2872
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:eb.net_operating_income",
+     "valor": 12993
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:eb.depreciation_amortisation_net_impairments",
+     "valor": 2719
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.finance_debt_nao_circulante",
+     "valor": 21594
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.lease_liabilities_nao_circulante",
+     "valor": 2649
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.finance_debt_circulante",
+     "valor": 6807
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.lease_liabilities_circulante",
+     "valor": 1369
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.divida_bruta_com_leases",
+     "valor": 32419,
+     "derivado": [
+      "EQNR:dl.finance_debt_nao_circulante",
+      "EQNR:dl.lease_liabilities_nao_circulante",
+      "EQNR:dl.finance_debt_circulante",
+      "EQNR:dl.lease_liabilities_circulante"
+     ]
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.cash_and_cash_equivalents",
+     "valor": 8062
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "EQNR:dl.current_financial_investments",
+     "valor": 15664
+    }
+   ]
+  },
+  {
+   "url": "https://totalenergies.com/system/files/documents/totalenergies_1q25-results-press-release_2025.pdf",
+   "checagens": [
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:receita",
+     "valor": 47899
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:lucro_liquido",
+     "valor": 3851
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 2563
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:capex",
+     "valor": 4222
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 3921
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 2733
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 6654,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 435
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 2998
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 83
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 20101
+    },
+    {
+     "periodo": "2025-Q1",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8533
+    }
+   ]
+  },
+  {
+   "url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-3q25_2025_en.pdf",
+   "checagens": [
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:receita",
+     "valor": 44676
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:lucro_liquido",
+     "valor": 2687
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 5960
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:capex",
+     "valor": 4766
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 2746
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 2106
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 4852,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 489
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 3258
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 96
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 25927
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8907
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:receita",
+     "valor": 43844
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:lucro_liquido",
+     "valor": 3683
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 8349
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:capex",
+     "valor": 3812
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 3762
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 2423
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 6185,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 543
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 3280
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 104
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 24553
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8827
+    }
+   ]
+  },
+  {
+   "url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-q4-2025_2026_en.pdf",
+   "checagens": [
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:receita",
+     "valor": 45925
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:lucro_liquido",
+     "valor": 2906
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 10471
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:capex",
+     "valor": 4153
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 2928
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 1830
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 4758,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 600
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 3776
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 99
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 20215
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8567
+    }
+   ]
+  },
+  {
+   "url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "checagens": [
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:receita",
+     "valor": 49516
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:lucro_liquido",
+     "valor": 5810
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 3361
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:capex",
+     "valor": 4621
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 5932
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 3788
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 9720,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 569
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 3206
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 90
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 23049
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8491
+    }
+   ]
+  },
+  {
+   "url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "checagens": [
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:receita",
+     "valor": 57097
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:lucro_liquido",
+     "valor": 5438
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:fluxo_caixa_operacional",
+     "valor": 10858
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:capex",
+     "valor": 4232
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.consolidated_net_income",
+     "valor": 5475
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.income_taxes",
+     "valor": 3154
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.income_before_income_taxes",
+     "valor": 8629,
+     "derivado": [
+      "TTE:eb.consolidated_net_income",
+      "TTE:eb.income_taxes"
+     ]
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.cost_of_net_debt",
+     "valor": 572
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.dda_tangible_assets_mineral_interests_DRE",
+     "valor": 3075
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:eb.amortization_intangibles_(tabela adj. EBITDA)",
+     "valor": 95
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:dl.net_debt_oficial",
+     "valor": 19710
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "TTE:dl.lease_liabilities",
+     "valor": 8904
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000016/bp-20260630.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:receita",
+     "valor": 46627
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:lucro_liquido",
+     "valor": 1629
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 6271
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:capex",
+     "valor": 3361
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 4056
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4641
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 1157
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 26043
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14636
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1030
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 39649
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:receita",
+     "valor": 69105
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:lucro_liquido",
+     "valor": 3911
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 10858
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:capex",
+     "valor": 3086
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 8941
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4149
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 1100
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 22251
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14356
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1040
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 35567
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380725000031/a30092025bp6kq3.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:receita",
+     "valor": 48420
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:lucro_liquido",
+     "valor": 1161
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 7786
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:capex",
+     "valor": 3381
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 4448
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4472
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 753
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 26054
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14629
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1082
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 39601
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000002/a31122025bp6kq4.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:receita",
+     "valor": 47383
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:lucro_liquido",
+     "valor": 3422
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 7602
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:capex",
+     "valor": 4168
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 261
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4526
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 3624
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 22182
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14571
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1067
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 35686
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000010/a31032026bp6kq1.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:receita",
+     "valor": 52255
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:lucro_liquido",
+     "valor": 3842
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 2860
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:capex",
+     "valor": 3290
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 8486
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4410
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 589
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 25309
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14357
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1072
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 38594
+    }
+   ]
+  }
+ ],
+ "regras": {
+  "formato": "número procurado como 12,345 / 12.345 / 12 345 (ou sem separador abaixo de 1.000), sem casar dentro de outro número; sinal ignorado",
+  "derivado": "valor que o documento não imprime (soma calculada na coleta): confere se a soma dos componentes listados, do mesmo período, bate com tolerância de 1"
+ }
+}

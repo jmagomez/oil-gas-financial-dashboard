@@ -307,7 +307,18 @@ def test_entrada_nao_e_modificada(dados):
 
 def test_ordem_dos_campos_do_trimestre_e_preservada(dados):
     saida, _ = uf.aplica_fundamentos(dados, _coletado())
-    assert list(saida["empresas"][0]["q_recente"].keys()) == uf.CAMPOS_TRIMESTRE
+    assert list(saida["empresas"][0]["q_recente"].keys()) == uf.CAMPOS_TRIMESTRE + ["fonte_dado"]
+
+
+def test_trimestre_novo_entra_como_provisorio_e_preserva_proveniencia(dados):
+    dados = json.loads(json.dumps(dados))
+    dados["empresas"][0]["proveniencia"] = {"fundamentos": {"urls_por_trimestre": {"2026-Q1": "https://x"}}}
+    dados["empresas"][0]["q_recente"]["fonte_dado"] = "release oficial (primária)"
+    saida, _ = uf.aplica_fundamentos(dados, _coletado())
+    xom = saida["empresas"][0]
+    assert xom["q_recente"]["fonte_dado"] == uf.FONTE_PROVISORIA
+    assert xom["proveniencia"]["fundamentos"]["urls_por_trimestre"]["2026-Q1"] == "https://x"
+    assert "primária" in xom["historico"][-1]["fonte_dado"]  # o trimestre que sai mantém a origem
 
 
 def test_historico_acumulado_fica_em_ordem(dados):

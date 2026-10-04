@@ -1,0 +1,402 @@
+{
+ "descricao": "Decomposição da dívida líquida (arrendamentos) e EBITDA ajustado na definição de cada empresa. US$ milhões. Fonte: releases e demonstrações (conferidos no navegador em 03/10/2026; pdf.js/HTML, não extração por modelo).",
+ "arrendamentos": {
+  "PBR": {
+   "valores": {
+    "2025-Q1": 40658,
+    "2025-Q2": 42273,
+    "2025-Q3": 42589,
+    "2025-Q4": 43352,
+    "2026-Q1": 43677,
+    "2026-Q2": 44972
+   },
+   "fonte": "Release 'Desempenho Financeiro' da Petrobras, tabela de endividamento (Arrendamentos, US$ milhões)",
+   "escopo": "passivo de arrendamento total (IFRS 16)"
+  },
+  "SHEL": {
+   "valores": {
+    "2025-Q1": 28488,
+    "2025-Q2": 28955,
+    "2025-Q3": 28571,
+    "2025-Q4": 28933,
+    "2026-Q1": 30594,
+    "2026-Q2": 29627
+   },
+   "fonte": "Shell Unaudited Results, 'Reconciliation of total debt': 'Of which: Lease liabilities'",
+   "escopo": "passivo de arrendamento total (IFRS 16)"
+  },
+  "EQNR": {
+   "valores": {
+    "2025-Q1": 3495,
+    "2025-Q2": 3345,
+    "2025-Q3": 3289,
+    "2025-Q4": 3411,
+    "2026-Q1": 4153,
+    "2026-Q2": 4018
+   },
+   "fonte": "Equinor Financial statements and review (balanço: lease liabilities circulante + não circulante)",
+   "escopo": "passivo de arrendamento total (IFRS 16)"
+  },
+  "BP": {
+   "valores": {
+    "2025-Q1": 12484,
+    "2025-Q2": 14636,
+    "2025-Q3": 14629,
+    "2025-Q4": 14571,
+    "2026-Q1": 14357,
+    "2026-Q2": 14356
+   },
+   "fonte": "bp stock exchange announcement, net debt including leases (lease liabilities)",
+   "escopo": "passivo de arrendamento total (IFRS 16)"
+  },
+  "TTE": {
+   "valores": {
+    "2025-Q1": 8533,
+    "2025-Q2": 8907,
+    "2025-Q3": 8827,
+    "2025-Q4": 8567,
+    "2026-Q1": 8491,
+    "2026-Q2": 8904
+   },
+   "fonte": "TotalEnergies press release, net debt e lease liabilities",
+   "escopo": "passivo de arrendamento total (IFRS 16)"
+  },
+  "XOM": {
+   "valores": {
+    "2025-Q1": 2659,
+    "2025-Q2": 2659,
+    "2025-Q3": 2659,
+    "2025-Q4": 2659,
+    "2026-Q1": 2659,
+    "2026-Q2": 2659
+   },
+   "fonte": "SEC XBRL FinanceLeaseLiability (10-K 2025), único saldo divulgado em XBRL",
+   "escopo": "só arrendamento financeiro (US GAAP); operacionais (6.834 em 31/12/2025) ficam fora da dívida",
+   "anual": true
+  },
+  "CVX": {
+   "valores": {
+    "2025-Q1": 1445,
+    "2025-Q2": 1445,
+    "2025-Q3": 1445,
+    "2025-Q4": 1445,
+    "2026-Q1": 1445,
+    "2026-Q2": 1445
+   },
+   "fonte": "SEC XBRL FinanceLeaseLiability (10-K 2025), único saldo divulgado em XBRL",
+   "escopo": "só arrendamento financeiro (US GAAP); operacionais (5.985 em 31/12/2025) ficam fora da dívida",
+   "anual": true
+  }
+ },
+ "ebitda_ajustado": {
+  "PBR": {
+   "valores": {
+    "2025-Q1": 10642,
+    "2025-Q2": 10219,
+    "2025-Q3": 11954,
+    "2025-Q4": 10936,
+    "2026-Q1": 11726,
+    "2026-Q2": 19931
+   },
+   "brl": {
+    "2025-Q1": 62281,
+    "2025-Q2": 57902,
+    "2025-Q3": 65133,
+    "2025-Q4": 58989,
+    "2026-Q1": 61670,
+    "2026-Q2": 100640
+   },
+   "definicao": "EBITDA ajustado sem eventos exclusivos (Petrobras), convertido pela PTAX média",
+   "fonte": "Release 'Desempenho Financeiro' (Tabela 1)"
+  },
+  "SHEL": {
+   "valores": {
+    "2025-Q1": 15250,
+    "2025-Q2": 13313,
+    "2025-Q3": 14773,
+    "2025-Q4": 12799,
+    "2026-Q1": 17741,
+    "2026-Q2": 20710
+   },
+   "definicao": "Adjusted EBITDA (Shell)",
+   "fonte": "Shell Unaudited Results"
+  },
+  "TTE": {
+   "valores": {
+    "2025-Q1": 10504,
+    "2025-Q2": 9690,
+    "2025-Q3": 10295,
+    "2025-Q4": 10066,
+    "2026-Q1": 12552,
+    "2026-Q2": 13179
+   },
+   "definicao": "Adjusted EBITDA (TotalEnergies)",
+   "fonte": "TotalEnergies press release"
+  }
+ },
+ "pagamentos_arrendamento": {
+  "PBR": {
+   "valores": {
+    "2025-Q1": 2091,
+    "2025-Q2": 2273,
+    "2025-Q3": 2414,
+    "2025-Q4": 2627,
+    "2026-Q1": 2440,
+    "2026-Q2": 2775
+   },
+   "valores_brl": {
+    "2025-Q1": 12237,
+    "2025-Q2": 12878,
+    "2025-Q3": 13153,
+    "2025-Q4": 14169,
+    "2026-Q1": 12834,
+    "2026-Q2": 14011
+   },
+   "ressalva": false,
+   "escopo": "Linha 'Amortizações de arrendamentos' da DFC do release (R$ mi), convertida pela PTAX média do trimestre; soma de 2025 confere com o total anual do release (R$ 52.437 mi)",
+   "fonte": "Release 'Desempenho Financeiro' da Petrobras (1T25, 4T25 e 2T26), fluxo de caixa"
+  },
+  "BP": {
+   "valores": {
+    "2025-Q1": 903,
+    "2025-Q2": 960,
+    "2025-Q3": 992,
+    "2025-Q4": 940,
+    "2026-Q1": 940,
+    "2026-Q2": 937
+   },
+   "principal": {
+    "2025-Q1": 727,
+    "2025-Q2": 784,
+    "2025-Q3": 816,
+    "2025-Q4": 764,
+    "2026-Q1": 764,
+    "2026-Q2": 761
+   },
+   "juros_trimestre_estimado": 176,
+   "ressalva": true,
+   "escopo": "Principal: 'Lease liability payments' da DFC (trimestral); juros: InterestExpenseOnLeaseLiabilities de 2025 (US$ 704 mi, 20-F) ÷ 4",
+   "fonte": "bp results (3Q25, 1Q26, 2Q26) e 20-F 2025 (API XBRL da SEC)"
+  },
+  "EQNR": {
+   "valores": {
+    "2025-Q1": 394,
+    "2025-Q2": 409,
+    "2025-Q3": 423,
+    "2025-Q4": 353,
+    "2026-Q1": 429,
+    "2026-Q2": 459
+   },
+   "principal": {
+    "2025-Q1": 364,
+    "2025-Q2": 379,
+    "2025-Q3": 393,
+    "2025-Q4": 323,
+    "2026-Q1": 399,
+    "2026-Q2": 429
+   },
+   "juros_trimestre_estimado": 30,
+   "ressalva": true,
+   "escopo": "Principal: 'Repayment of lease liabilities' da DFC (1T25 e 4T25 por diferença de acumulados: 9M 1.136 e ano 1.459, XBRL); juros: InterestExpenseOnLeaseLiabilities de 2025 (US$ 120 mi) ÷ 4",
+   "fonte": "Equinor 6-K (2T25, 2T26) e 20-F 2025 (API XBRL da SEC)"
+  },
+  "SHEL": {
+   "valores": {
+    "2025-Q1": 1426,
+    "2025-Q2": 1426,
+    "2025-Q3": 1426,
+    "2025-Q4": 1426,
+    "2026-Q1": 1426,
+    "2026-Q2": 1426
+   },
+   "ressalva": true,
+   "escopo": "Shell não divulga o pagamento de arrendamentos por trimestre: CashOutflowForLeases de 2025 (US$ 7.127 mi, IFRS 16.53g) menos arrendamentos variáveis já no EBITDA (US$ 1.423 mi), ÷ 4; 2026 repete o rateio de 2025",
+   "fonte": "Shell 20-F 2025 (API XBRL da SEC)"
+  },
+  "CVX": {
+   "valores": {
+    "2025-Q1": 44.5,
+    "2025-Q2": 44.5,
+    "2025-Q3": 44.5,
+    "2025-Q4": 44.5,
+    "2026-Q1": 44.5,
+    "2026-Q2": 44.5
+   },
+   "ressalva": true,
+   "escopo": "US GAAP: o custo do arrendamento operacional já está no EBITDA; sai o arrendamento financeiro: principal US$ 136 mi + juros US$ 42 mi em 2025 (10-K, XBRL) ÷ 4",
+   "fonte": "Chevron 10-K 2025 (API XBRL da SEC)"
+  },
+  "XOM": {
+   "valores": {
+    "2025-Q1": 0,
+    "2025-Q2": 0,
+    "2025-Q3": 0,
+    "2025-Q4": 0,
+    "2026-Q1": 0,
+    "2026-Q2": 0
+   },
+   "ressalva": true,
+   "escopo": "US GAAP: o custo do arrendamento operacional já está no EBITDA; os pagamentos do arrendamento financeiro não são divulgados em XBRL nem no 10-Q (passivo de US$ 2,7 bi): ajuste zero, por isso com ressalva",
+   "fonte": "ExxonMobil 10-K 2025"
+  }
+ },
+ "segmento_upstream": {
+  "PBR": {
+   "ebitda": {
+    "2025-Q1": 9977,
+    "2025-Q2": 8952,
+    "2025-Q3": 10923,
+    "2025-Q4": 9471,
+    "2026-Q1": 10299,
+    "2026-Q2": 15852
+   },
+   "ebitda_brl": {
+    "2025-Q1": 58389,
+    "2025-Q2": 50725,
+    "2025-Q3": 59518,
+    "2025-Q4": 51083,
+    "2026-Q1": 54165,
+    "2026-Q2": 80041
+   },
+   "producao_kboed": null,
+   "definicao": "EBITDA ajustado do segmento Exploração e Produção (release, R$ mi ÷ PTAX média); produção total da companhia (toda de E&P)",
+   "fonte": "Release 'Desempenho Financeiro' (1T25, 4T25, 2T26): 'EBITDA ajustado do segmento'"
+  },
+  "SHEL": {
+   "ebitda": {
+    "2025-Q1": 12122,
+    "2025-Q2": 10513,
+    "2025-Q3": 10814,
+    "2025-Q4": 10241,
+    "2026-Q1": 11376,
+    "2026-Q2": 13652
+   },
+   "producao_kboed": {
+    "2025-Q1": 2782,
+    "2025-Q2": 2645,
+    "2025-Q3": 2766,
+    "2025-Q4": 2840,
+    "2026-Q1": 2752,
+    "2026-Q2": 2455
+   },
+   "componentes": {
+    "integrated_gas": {
+     "2025-Q1": 4735,
+     "2025-Q2": 3875,
+     "2025-Q3": 4257,
+     "2025-Q4": 4127,
+     "2026-Q1": 4115,
+     "2026-Q2": 4761
+    },
+    "upstream": {
+     "2025-Q1": 7387,
+     "2025-Q2": 6638,
+     "2025-Q3": 6557,
+     "2025-Q4": 6114,
+     "2026-Q1": 7261,
+     "2026-Q2": 8891
+    }
+   },
+   "definicao": "Adjusted EBITDA de Integrated Gas + Upstream; produção disponível para venda dos dois segmentos (Integrated Gas inclui liquefação e trading de GNL)",
+   "fonte": "Shell Unaudited Results (2T25, 3T25, 4T25, 2T26): tabelas por segmento"
+  },
+  "EQNR": {
+   "ebitda": {
+    "2025-Q1": 10388,
+    "2025-Q2": 8502,
+    "2025-Q3": 8327,
+    "2025-Q4": 7967,
+    "2026-Q1": 11269,
+    "2026-Q2": 13041
+   },
+   "producao_kboed": null,
+   "componentes": {
+    "adjusted_operating_income_ep": {
+     "2025-Q1": 8495,
+     "2025-Q2": 6318,
+     "2025-Q3": 6051,
+     "2025-Q4": 5599,
+     "2026-Q1": 9057,
+     "2026-Q2": 10750
+    },
+    "adjusted_dda_ep": {
+     "2025-Q1": 1893,
+     "2025-Q2": 2184,
+     "2025-Q3": 2276,
+     "2025-Q4": 2368,
+     "2026-Q1": 2212,
+     "2026-Q2": 2291
+    }
+   },
+   "definicao": "Adjusted operating income + adjusted DD&A dos segmentos E&P Norway, E&P International e E&P USA; produção equity total (toda de E&P)",
+   "fonte": "Equinor 6-K (2T25, 4T25, 2T26): 'Items impacting net operating income' por segmento"
+  },
+  "XOM": {
+   "ebitda": {
+    "2025-Q1": 14837,
+    "2025-Q2": 13385,
+    "2025-Q3": 13674,
+    "2025-Q4": 11320,
+    "2026-Q1": 13953,
+    "2026-Q2": 17302
+   },
+   "producao_kboed": null,
+   "componentes": {
+    "lucro_antes_ir": {
+     "2025-Q1": 10067,
+     "2025-Q2": 8258,
+     "2025-Q3": 8547,
+     "2025-Q4": 4819,
+     "2026-Q1": 8244,
+     "2026-Q2": 11290
+    },
+    "juros": {
+     "2025-Q1": 43,
+     "2025-Q2": 38,
+     "2025-Q3": 49,
+     "2025-Q4": 38,
+     "2026-Q1": 1,
+     "2026-Q2": 28
+    },
+    "dda_incl_impairment": {
+     "2025-Q1": 4727,
+     "2025-Q2": 5089,
+     "2025-Q3": 5078,
+     "2025-Q4": 6463,
+     "2026-Q1": 5708,
+     "2026-Q2": 5984
+    }
+   },
+   "definicao": "Upstream EUA + exterior: lucro do segmento antes do IR + juros + depreciação, depleção e impairment (nota de segmentos do 10-Q/10-K, ASU 2023-07; 4T25 = ano − 9 meses); produção total (toda de upstream)",
+   "fonte": "ExxonMobil 10-Q (1T26, 3T25, 2T26) e 10-K 2025, Note 3 'Disclosures about Segments'"
+  },
+  "BP": {
+   "ebitda": {
+    "2025-Q1": 6898,
+    "2025-Q2": 7146,
+    "2025-Q3": 7185,
+    "2025-Q4": 6583,
+    "2026-Q1": 6514,
+    "2026-Q2": 9122
+   },
+   "producao_kboed": {
+    "2025-Q1": 2239,
+    "2025-Q2": 2300,
+    "2025-Q3": 2362,
+    "2025-Q4": 2343,
+    "2026-Q1": 2339,
+    "2026-Q2": 2201
+   },
+   "ressalva": true,
+   "definicao": "Adjusted EBITDA de gas & low carbon energy + oil production & operations; o primeiro inclui renováveis e trading de gás (por isso com ressalva)",
+   "fonte": "bp results (3Q25, 1Q26, 2Q26): 'Total adjusted EBITDA' e 'Total hydrocarbons (mboe/d)' por segmento"
+  }
+ },
+ "segmento_upstream_lacunas": {
+  "CVX": "a nota de segmentos do 10-Q não isola o lucro antes do IR do Upstream (eliminações entre segmentos na mesma coluna); fica fora",
+  "TTE": "o release só traz o resultado líquido ajustado por segmento (depois de impostos); sem EBITDA de E&P"
+ },
+ "pagamentos_arrendamento_lacunas": {
+  "TTE": "pagamentos de arrendamento não divulgados por trimestre nem em XBRL; fica fora"
+ }
+}

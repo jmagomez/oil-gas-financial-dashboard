@@ -1,0 +1,54 @@
+{
+ "versao_auditada": "1.2 (main em 02/10/2026)",
+ "versao_corrigida": "1.3 (revisto com fonte primária na 1.4)",
+ "vermelhos": [
+  {
+   "empresa": "EQNR",
+   "periodo": "2026-Q1",
+   "campo": "divida_liquida",
+   "regra": "R4 Desvio histórico",
+   "mensagem": "troca de sinal material 11.887 → -4.209",
+   "correcao": "v1.3 inverteu o sinal (+4.209), mas o módulo também estava errado: o 6-K do 1T26 dá 11.761 (v1.4)"
+  },
+  {
+   "empresa": "EQNR",
+   "periodo": "FY2025",
+   "campo": "divida_liquida",
+   "regra": "R8 Reconciliação",
+   "mensagem": "FY2025 -11.888 vs. 4T25 11.887 na mesma data-base",
+   "correcao": "sinal invertido corrigido; v1.4 confirma 11.888 no 6-K do 4T25"
+  },
+  {
+   "empresa": "BP",
+   "periodo": "FY2025",
+   "campo": "divida_liquida",
+   "regra": "R8 Reconciliação",
+   "mensagem": "FY2025 22.200 vs. 4T25 35.815 na mesma data-base",
+   "correcao": "levado à base padronizada (com arrendamentos): 35.815; v1.4 usa o release do 4T25: 36.753"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "2026-Q1",
+   "campo": "divida_liquida",
+   "regra": "R4 Desvio histórico",
+   "mensagem": "troca de sinal material 32.907 → -34.142",
+   "correcao": "sinal invertido corrigido na v1.3 (34.142, agregador); v1.4 usa o release: 31.540"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "2026-Q2",
+   "campo": "divida_liquida",
+   "regra": "R4 Desvio histórico",
+   "mensagem": "troca de sinal material -34.142 → 30.991",
+   "correcao": "efeito do 1T26 invertido; v1.4 usa o release: 28.614"
+  },
+  {
+   "empresa": "TTE",
+   "periodo": "FY2025",
+   "campo": "divida_liquida",
+   "regra": "R8 Reconciliação",
+   "mensagem": "FY2025 -31.499 vs. 4T25 32.907 na mesma data-base",
+   "correcao": "sinal invertido corrigido; v1.4 iguala ao release do 4T25 (28.782)"
+  }
+ ]
+}

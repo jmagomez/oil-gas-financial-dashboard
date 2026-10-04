@@ -1,0 +1,237 @@
+{
+ "empresa": "TTE",
+ "trimestres": {
+  "2025-Q1": {
+   "receita": 47899,
+   "receita_bruta_com_excise_taxes": 52254,
+   "excise_taxes": -4355,
+   "lucro_liquido": 3851,
+   "ebitda": 10170,
+   "ebitda_componentes": {
+    "consolidated_net_income": 3921,
+    "income_taxes": 2733,
+    "income_before_income_taxes": 6654,
+    "cost_of_net_debt": 435,
+    "dda_tangible_assets_mineral_interests_DRE": 2998,
+    "amortization_intangibles_(tabela adj. EBITDA)": 83
+   },
+   "ebitda_ajustado_empresa": 10504,
+   "fluxo_caixa_operacional": 2563,
+   "capex": -4222,
+   "fcf": -1659,
+   "variacao_capital_giro_DFC": -4232,
+   "divida_liquida": 28634,
+   "divida_componentes": {
+    "net_debt_oficial": 20101,
+    "lease_liabilities": 8533
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q25-results-press-release_2025.pdf",
+   "fonte_documento": "Press release 1Q25 (29/04/2025) + demonstrações IFRS anexas; conferido nos comparativos do release 1Q26",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa). Recalculado: IR do trimestre (2.733) está na DRE anexa ao release; EBITDA padronizado = 10.170 (substitui proxy 10.504)."
+  },
+  "2025-Q2": {
+   "receita": 44676,
+   "receita_bruta_com_excise_taxes": 49627,
+   "excise_taxes": -4951,
+   "lucro_liquido": 2687,
+   "ebitda": 8695,
+   "ebitda_componentes": {
+    "consolidated_net_income": 2746,
+    "income_taxes": 2106,
+    "income_before_income_taxes": 4852,
+    "cost_of_net_debt": 489,
+    "dda_tangible_assets_mineral_interests_DRE": 3258,
+    "amortization_intangibles_(tabela adj. EBITDA)": 96
+   },
+   "ebitda_ajustado_empresa": 9690,
+   "fluxo_caixa_operacional": 5960,
+   "capex": -4766,
+   "fcf": 1194,
+   "variacao_capital_giro_DFC": 49,
+   "divida_liquida": 34834,
+   "divida_componentes": {
+    "net_debt_oficial": 25927,
+    "lease_liabilities": 8907
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-3q25_2025_en.pdf",
+   "fonte_documento": "Comparativos 2Q25 no release 3Q25 e no release 2Q26 (DRE, DFC, reconciliação adj. EBITDA, dívida líquida em 30/06/2025); PDF próprio do 2Q25: https://totalenergies.com/system/files/documents/totalenergies_2Q25-results-press-release_2025_en.pdf (não aberto)",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa). Números de 2Q25 extraídos dos comparativos (releases 3Q25 e 2Q26), idênticos entre si; o PDF do 2Q25 não foi aberto."
+  },
+  "2025-Q3": {
+   "receita": 43844,
+   "receita_bruta_com_excise_taxes": 48691,
+   "excise_taxes": -4847,
+   "lucro_liquido": 3683,
+   "ebitda": 10112,
+   "ebitda_componentes": {
+    "consolidated_net_income": 3762,
+    "income_taxes": 2423,
+    "income_before_income_taxes": 6185,
+    "cost_of_net_debt": 543,
+    "dda_tangible_assets_mineral_interests_DRE": 3280,
+    "amortization_intangibles_(tabela adj. EBITDA)": 104
+   },
+   "ebitda_ajustado_empresa": 10295,
+   "fluxo_caixa_operacional": 8349,
+   "capex": -3812,
+   "fcf": 4537,
+   "variacao_capital_giro_DFC": 1600,
+   "divida_liquida": 33380,
+   "divida_componentes": {
+    "net_debt_oficial": 24553,
+    "lease_liabilities": 8827
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-3q25_2025_en.pdf",
+   "fonte_documento": "Press release 3Q25 (30/10/2025); conferido nos comparativos do release 4Q25",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa)."
+  },
+  "2025-Q4": {
+   "receita": 45925,
+   "receita_bruta_com_excise_taxes": 50624,
+   "excise_taxes": -4699,
+   "lucro_liquido": 2906,
+   "ebitda": 9233,
+   "ebitda_componentes": {
+    "consolidated_net_income": 2928,
+    "income_taxes": 1830,
+    "income_before_income_taxes": 4758,
+    "cost_of_net_debt": 600,
+    "dda_tangible_assets_mineral_interests_DRE": 3776,
+    "amortization_intangibles_(tabela adj. EBITDA)": 99
+   },
+   "ebitda_ajustado_empresa": 10066,
+   "fluxo_caixa_operacional": 10471,
+   "capex": -4153,
+   "fcf": 6318,
+   "variacao_capital_giro_DFC": 3867,
+   "divida_liquida": 28782,
+   "divida_componentes": {
+    "net_debt_oficial": 20215,
+    "lease_liabilities": 8567
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-q4-2025_2026_en.pdf",
+   "fonte_documento": "Press release 4Q25 e ano 2025 (fev/2026); conferido nos comparativos do release 1Q26",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa). Lucro IFRS inclui -0,9 bi de itens de ajuste (-0,7 bi impairments, eólica offshore; -0,2 bi efeito estoque)."
+  },
+  "2026-Q1": {
+   "receita": 49516,
+   "receita_bruta_com_excise_taxes": 54163,
+   "excise_taxes": -4647,
+   "lucro_liquido": 5810,
+   "ebitda": 13585,
+   "ebitda_componentes": {
+    "consolidated_net_income": 5932,
+    "income_taxes": 3788,
+    "income_before_income_taxes": 9720,
+    "cost_of_net_debt": 569,
+    "dda_tangible_assets_mineral_interests_DRE": 3206,
+    "amortization_intangibles_(tabela adj. EBITDA)": 90
+   },
+   "ebitda_ajustado_empresa": 12552,
+   "fluxo_caixa_operacional": 3361,
+   "capex": -4621,
+   "fcf": -1260,
+   "variacao_capital_giro_DFC": -6968,
+   "divida_liquida": 31540,
+   "divida_componentes": {
+    "net_debt_oficial": 23049,
+    "lease_liabilities": 8491
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "fonte_documento": "Press release 1Q26 (28-29/04/2026); conferido nos comparativos do release 2Q26",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa). DD&A da DFC (4.149) bem acima da DRE (3.206): inclui impairments fora da linha tangível (ex.: afiliadas/intangíveis); usamos a linha da DRE."
+  },
+  "2026-Q2": {
+   "receita": 57097,
+   "receita_bruta_com_excise_taxes": 61771,
+   "excise_taxes": -4674,
+   "lucro_liquido": 5438,
+   "ebitda": 12371,
+   "ebitda_componentes": {
+    "consolidated_net_income": 5475,
+    "income_taxes": 3154,
+    "income_before_income_taxes": 8629,
+    "cost_of_net_debt": 572,
+    "dda_tangible_assets_mineral_interests_DRE": 3075,
+    "amortization_intangibles_(tabela adj. EBITDA)": 95
+   },
+   "ebitda_ajustado_empresa": 13179,
+   "fluxo_caixa_operacional": 10858,
+   "capex": -4232,
+   "fcf": 6626,
+   "variacao_capital_giro_DFC": 1663,
+   "divida_liquida": 28614,
+   "divida_componentes": {
+    "net_debt_oficial": 19710,
+    "lease_liabilities": 8904
+   },
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "fonte_documento": "Press release 2Q26 e 1S26 (23/07/2026)",
+   "observacao": "receita = 'Revenues from sales' (DRE), LÍQUIDA de excise taxes; 'Sales' bruto inclui excise. capex = linha 'Intangible assets and property, plant and equipment additions' da DFC. EBITDA padronizado usa lucro consolidado (antes de minoritários) + IR + custo da dívida líquida + DD&A tangível da DRE + amortização de intangíveis (da reconciliação do adj. EBITDA, pois a DRE não a separa)."
+  }
+ },
+ "explicacoes": [
+  {
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "explicacao": "+100% é vs 4T25 (2.906→5.810); vs 1T25 é +51%. Brent subiu 27% (63,7→81,1 US$/b), não 23%. Lucro ajustado subiu só 41% (3,8→5,4 bi); o resto vem da inversão dos itens de ajuste: +0,4 bi no 1T26 (+1,4 bi efeito estoque/valor justo, −0,9 bi não recorrentes) vs −0,9 bi no 4T25 (−0,7 bi impairments eólica offshore, −0,2 bi estoque).",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "trecho": "Net income (TotalEnergies share) 1Q26 5.8 / 4Q25 2.9, +100% vs 4Q25; Brent 81.1 vs 63.7, +27% vs 4Q25; adjustment items: $1.4 billion of inventory valuation and fair value effects, ($0.9) billion of non-recurring items"
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido",
+   "explicacao": "Base de comparação deprimida por impairments.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-q4-2025_2026_en.pdf",
+   "trecho": "Adjustment items to net income totaled -$0.9 billion in the fourth quarter of 2025, consisting mainly of: -$0.7 billion in impairments, in particular for the offshore wind activity within the Integrated Power segment, -$0.2 billion from inventory valuation effects."
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "fcf",
+   "explicacao": "FCF alto (6.318) por liberação de capital de giro de +3.867 (DFC).",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-q4-2025_2026_en.pdf",
+   "trecho": "Operating cash flow amounted to $10,471 million in the fourth quarter of 2025, corresponding to cash flow from operations excluding working capital (CFFO) of $7,168 million and a $3.8 billion improvement in working capital."
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "fcf",
+   "explicacao": "FCF negativo (−1.260) por consumo de capital de giro de −6.968 na DFC; o release fala em +5,1 bi de capital de giro, metade sazonal e metade efeito da alta de preços nos estoques. Padrão sazonal se repete no 1T25 (−4.232).",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q26-results-press-release_2026.pdf",
+   "trecho": "cash flow growth driven by higher energy prices partly offset a $5.1 billion increase in working capital, half of it reflecting business seasonality and half of it linked to the impact of higher hydrocarbon prices"
+  },
+  {
+   "periodo": "2026-Q2",
+   "campo": "fcf",
+   "explicacao": "FCF volta a 6.626: CFFO de 9,8 bi e liberação de capital de giro (+1.663 na DFC; ~1,2 bi no conceito da empresa) com a queda de preços no fim do trimestre.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "trecho": "Cash flow from operating activities was $10,858 million in the second quarter of 2026, for a cash flow from operations excluding working capital (CFFO) of $9,804 million, taking into account the $1.2 billion decrease in working capital, mainly reflecting the impact of the decrease in hydrocarbon prices at the end of the quarter, particularly on inventories."
+  },
+  {
+   "periodo": "2025-Q1",
+   "campo": "fcf",
+   "explicacao": "FCF negativo por capital de giro.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_1q25-results-press-release_2025.pdf",
+   "trecho": "2025 first quarter cash flow from operating activities was $2,563 million versus CFFO of $6,992 million, and was impacted by increased working capital of $4.4 billion."
+  },
+  {
+   "periodo": "todos",
+   "campo": "divida_liquida",
+   "explicacao": "Yahoo diverge em 2T25–2T26 (+1,6 a +4,1 bi acima do primário: 36.614 vs 34.834; 35.073 vs 33.380; 32.907 vs 28.782; 34.142 vs 31.540; 30.991 vs 28.614). Provável que o Yahoo não deduza ativos financeiros correntes/não correntes de hedge da dívida (o net debt oficial deduz 'current/non-current financial assets'). Não confirmado.",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "trecho": "Net debt 19,710 (30/06/2026); Leases 8,904; deduções: current financial assets (3,720), non-current financial assets (1,601)"
+  },
+  {
+   "periodo": "todos",
+   "campo": "ebitda",
+   "explicacao": "Yahoo (9.028; 10.398; 8.963; 14.304; 12.543) não bate nem com o padronizado nem com o adj. EBITDA. O padronizado IFRS inclui efeitos de estoque e itens não recorrentes (ex.: 1T26 13.585 > adj. 12.552 pelo efeito estoque positivo; 2T26 12.371 < adj. 13.179).",
+   "fonte_url": "https://totalenergies.com/system/files/documents/totalenergies_pr-results-2q26_2026_en.pdf",
+   "trecho": "Adjusted EBITDA 13,179 (2Q26) / 12,552 (1Q26) / 9,690 (2Q25)"
+  }
+ ],
+ "pendencias": [
+  "PDF próprio do 2T25 não aberto (valores do 2T25 vêm de comparativos nos releases 3T25 e 2T26, consistentes entre si).",
+  "Amortização de intangíveis no EBITDA padronizado vem da reconciliação do adjusted EBITDA (base ajustada, sem impairments de intangíveis); a DRE não separa a linha.",
+  "Leitura dos PDFs foi via WebFetch (extração resumida); números cruzados entre releases consecutivos, mas não houve download do PDF bruto (proxy bloqueou curl em totalenergies.com e sec.gov).",
+  "Brent 1T26 vs 4T25: release diz +27%, não +23% como na pergunta."
+ ]
+}

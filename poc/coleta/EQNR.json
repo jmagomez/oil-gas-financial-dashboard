@@ -1,0 +1,230 @@
+{
+ "empresa": "EQNR",
+ "trimestres": {
+  "2025-Q2": {
+   "receita": 25145,
+   "receita_linha_revenues_sem_other_income": 25130,
+   "lucro_liquido": 1313,
+   "ebitda": 9143,
+   "ebitda_componentes": {
+    "net_operating_income": 5721,
+    "depreciation_amortisation_net_impairments": 3422
+   },
+   "fluxo_caixa_operacional": 2477,
+   "capex": -3401,
+   "fcf": -924,
+   "divida_liquida": 10546,
+   "divida_componentes": {
+    "finance_debt_nao_circulante": 22356,
+    "lease_liabilities_nao_circulante": 2148,
+    "finance_debt_circulante": 8644,
+    "lease_liabilities_circulante": 1197,
+    "divida_bruta_com_leases": 34345,
+    "cash_and_cash_equivalents": 9472,
+    "current_financial_investments": 14327,
+    "net_debt_to_capital_employed_publicado": {
+     "ajustado": "15,2% (vs 6,9% em 31/03/2025)"
+    },
+    "net_interest_bearing_debt_absoluto_publicado": null
+   },
+   "fonte_url": "https://ml-eu.globenewswire.com/Resource/Download/fd68c2ee-6540-41de-ae8e-c6ceaf33dbdb ; https://www.sec.gov/Archives/edgar/data/1140625/000114062526000025/equinorfinancialstatements.htm (comparativo Q2 2025 da DRE/FC)",
+   "fonte_documento": "Equinor Second quarter 2025 Financial Statements and Review (anexo do release GlobeNewswire 23/07/2025); DRE/FC confirmados no comparativo do 6-K Q2 2026",
+   "observacao": "Receita = 'Total revenues and other income' (25.145); Yahoo usou 'Revenues' (25.130). EBITDA primario 9.143 vs Yahoo 9.537 (Yahoo nao reconcilia com NOI+D&A). Capex = linha 'Capital expenditures and investments' (mesma linha que da 3.027 no 1T25). Divida liquida bate com Yahoo (10.546). Taxes paid no trimestre: 7.229."
+  },
+  "2025-Q3": {
+   "receita": 26049,
+   "receita_linha_revenues_sem_other_income": 26017,
+   "lucro_liquido": -210,
+   "ebitda": 8567,
+   "ebitda_componentes": {
+    "net_operating_income": 5270,
+    "depreciation_amortisation_net_impairments": 3297
+   },
+   "fluxo_caixa_operacional": 6346,
+   "capex": -3420,
+   "fcf": 2926,
+   "divida_liquida": 8564,
+   "divida_componentes": {
+    "finance_debt_nao_circulante": 22903,
+    "lease_liabilities_nao_circulante": 2168,
+    "finance_debt_circulante": 4762,
+    "lease_liabilities_circulante": 1121,
+    "divida_bruta_com_leases": 30954,
+    "cash_and_cash_equivalents": 8114,
+    "current_financial_investments": 14276,
+    "net_debt_to_capital_employed_publicado": {
+     "ajustado": "12,2%",
+     "antes_ajustes": "17,4% (extraido do 6-K Q3; confirmar)"
+    },
+    "net_interest_bearing_debt_absoluto_publicado": null
+   },
+   "fonte_url": "https://cdn.equinor.com/files/h61q9gi9/global/1076ae946124491794687a843c115299662e71e0.pdf?equinor-q3-2025-financial-statements-and-review.pdf= ; https://www.sec.gov/Archives/edgar/data/1140625/000114062525000114/eqnr-20250930.htm",
+   "fonte_documento": "Equinor 2025 Third quarter Financial statements and review (PDF equinor.com) e 6-K eqnr-20250930 (SEC)",
+   "observacao": "Receita primaria 26.049 (Total revenues and other income); Yahoo 26.017 = linha 'Revenues'. EBITDA primario 8.567 vs Yahoo 8.401. Divida liquida bate com Yahoo (8.564). Taxes paid 3.764."
+  },
+  "2025-Q4": {
+   "receita": 25346,
+   "receita_linha_revenues_sem_other_income": 25296,
+   "lucro_liquido": 1314,
+   "ebitda": 8777,
+   "ebitda_componentes": {
+    "net_operating_income": 5487,
+    "depreciation_amortisation_net_impairments": 3290
+   },
+   "fluxo_caixa_operacional": 2107,
+   "capex": -4146,
+   "fcf": -2039,
+   "divida_liquida": 11888,
+   "divida_componentes": {
+    "finance_debt_nao_circulante": 23763,
+    "lease_liabilities_nao_circulante": 2221,
+    "finance_debt_circulante": 4047,
+    "lease_liabilities_circulante": 1190,
+    "divida_bruta_com_leases": 31221,
+    "cash_and_cash_equivalents": 5036,
+    "current_financial_investments": 14297,
+    "net_debt_to_capital_employed_publicado": {
+     "ajustado": "17,8% (vs 12,2% em 30/09/2025)"
+    },
+    "net_interest_bearing_debt_absoluto_publicado": null
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm ; balanco 31/12/2025: https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm e https://www.sec.gov/Archives/edgar/data/1140625/000114062526000025/equinorfinancialstatements.htm (coluna comparativa)",
+   "fonte_documento": "Equinor Financial Statements and Review Q4 2025 (6-K, SEC); balanco de 31/12/2025 lido como comparativo nos 6-K do 1T26 e 2T26",
+   "observacao": "Receita primaria 25.346; Yahoo 25.297 ~ linha 'Revenues' (25.296). FCO primario 2.107 (Yahoo 2.106), logo FCF -2.039 (Yahoo -2.040). EBITDA primario 8.777 vs Yahoo 8.926. Taxes paid 6.240."
+  },
+  "2026-Q1": {
+   "receita": 27843,
+   "receita_linha_revenues_sem_other_income": 27816,
+   "lucro_liquido": 3106,
+   "ebitda": 11304,
+   "ebitda_componentes": {
+    "net_operating_income": 8784,
+    "depreciation_amortisation_net_impairments": 2520
+   },
+   "fluxo_caixa_operacional": 5213,
+   "capex": -3116,
+   "fcf": 2097,
+   "divida_liquida": 11761,
+   "divida_componentes": {
+    "finance_debt_nao_circulante": 22162,
+    "lease_liabilities_nao_circulante": 2774,
+    "finance_debt_circulante": 5542,
+    "lease_liabilities_circulante": 1379,
+    "divida_bruta_com_leases": 31857,
+    "cash_and_cash_equivalents": 5884,
+    "current_financial_investments": 14212,
+    "net_debt_to_capital_employed_publicado": {
+     "ajustado": "15,3% (vs 17,8% em 31/12/2025)"
+    },
+    "net_interest_bearing_debt_absoluto_publicado": null
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm ; https://ml-eu.globenewswire.com/Resource/Download/b3c8b1c7-f4d3-4a2b-afa3-453d9cf9c178",
+   "fonte_documento": "Equinor Financial Statements and Review Q1 2026 (6-K SEC) e PDF anexo ao release GlobeNewswire 06/05/2026 (mesmos valores nas duas fontes)",
+   "observacao": "DIVIDA LIQUIDA CORRETA = 11.761 (nao 4.209). Receita 27.843 = Total revenues and other income (Revenues = 27.816, derivado de H1 62.339 - Q2 34.523). EBITDA primario 11.304 vs Yahoo 11.313. Taxes paid 4.272. Distribuicoes de capital pagas 1.191 (920 dividendos + 271 recompras)."
+  },
+  "2026-Q2": {
+   "receita": 35177,
+   "receita_linha_revenues_sem_other_income": 34523,
+   "lucro_liquido": 4848,
+   "ebitda": 15712,
+   "ebitda_componentes": {
+    "net_operating_income": 12993,
+    "depreciation_amortisation_net_impairments": 2719
+   },
+   "fluxo_caixa_operacional": 9470,
+   "capex": -2872,
+   "fcf": 6598,
+   "divida_liquida": 8693,
+   "divida_componentes": {
+    "finance_debt_nao_circulante": 21594,
+    "lease_liabilities_nao_circulante": 2649,
+    "finance_debt_circulante": 6807,
+    "lease_liabilities_circulante": 1369,
+    "divida_bruta_com_leases": 32419,
+    "cash_and_cash_equivalents": 8062,
+    "current_financial_investments": 15664,
+    "net_debt_to_capital_employed_publicado": {
+     "ajustado": "10,4% (vs 17,8% em 31/12/2025)"
+    },
+    "net_interest_bearing_debt_absoluto_publicado": null
+   },
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000025/equinorfinancialstatements.htm",
+   "fonte_documento": "Equinor Financial Statements and Review Q2 2026 (6-K SEC)",
+   "observacao": "Receita primaria 35.177 (Total revenues and other income); Yahoo 34.523 = linha 'Revenues' (exclui other income 524 e equity accounted 130). EBITDA primario 15.712 vs Yahoo 16.184 (diferenca nao reconciliada pelo release). Divida liquida bate com Yahoo (8.693). Taxes paid 7.075."
+  }
+ },
+ "divida_fy2025": {
+  "valor": 11888,
+  "componentes": {
+   "finance_debt_nao_circulante": 23763,
+   "lease_liabilities_nao_circulante": 2221,
+   "finance_debt_circulante": 4047,
+   "lease_liabilities_circulante": 1190,
+   "divida_bruta_com_leases": 31221,
+   "cash_and_cash_equivalents": 5036,
+   "current_financial_investments": 14297,
+   "net_debt_to_capital_employed_adjusted_publicado": "17,8%"
+  },
+  "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm ; https://www.sec.gov/Archives/edgar/data/1140625/000114062526000025/equinorfinancialstatements.htm",
+  "observacao": "Base usa 11.887 no 4T25 e 11.888 no FY2025; primario = 11.888."
+ },
+ "confirmacao_1t26": "ERRADO. A divida liquida em 31/03/2026 e 11.761 (US$ mi), nao 4.209: divida bruta 31.857 (finance debt NC 22.162 + C 5.542 + leases NC 2.774 + C 1.379) - caixa 5.884 - aplicacoes financeiras correntes 14.212. Queda de apenas 127 vs 11.888 em 31/12/2025, coerente com FCF 2.097 menos distribuicoes 1.191. A Equinor reporta net debt to capital employed ajustado de 15,3% (vs 17,8%). Mesmos componentes no 6-K SEC e no PDF anexo ao release GlobeNewswire.",
+ "explicacoes": [
+  {
+   "periodo": "2025-Q2",
+   "campo": "fcf",
+   "explicacao": "FCF -924 (2.477 - 3.401) esta correto pelo primario; FCO baixo por pagamento de 7.229 de impostos no trimestre (duas parcelas NCS de 6,85 bi). Antes de impostos e capital de giro o caixa operacional foi 9,17 bi. O valor 6.014 nao tem respaldo como FCF do trimestre.",
+   "fonte_url": "https://www.globenewswire.com/news-release/2025/07/23/3119968/0/en/Equinor-second-quarter-2025-results.html",
+   "trecho": "paid two NCS tax instalments totalling USD 6.85 billion in the quarter ... Cash flow from operations after taxes paid* ended at USD 1.94 billion"
+  },
+  {
+   "periodo": "2025-Q2",
+   "campo": "divida_liquida",
+   "explicacao": "Salto da divida (4.920 -> 10.546) por impostos e distribuicoes de 6,5 bi; o indice ajustado da Equinor ainda inclui a parcela do Estado noruegues na recompra (4,26 bi paga em julho), por isso o ajustado nao reconcilia 1:1 com a definicao simples.",
+   "fonte_url": "https://www.globenewswire.com/news-release/2025/07/23/3119968/0/en/Equinor-second-quarter-2025-results.html",
+   "trecho": "the calculation of net debt ratio includes the effect of the Norwegian state's share of the share buy-back, at USD 4.26 billion paid in July"
+  },
+  {
+   "periodo": "2025-Q3",
+   "campo": "lucro_liquido",
+   "explicacao": "Prejuizo de -210 com NOI positivo (5.270): impairments liquidos de 754 (premissas de preco), aliquota efetiva de 104,4% (mix de jurisdicoes de alto imposto, NCS) e perdas em investimentos financeiros.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062525000114/eqnr-20250930.htm",
+   "trecho": "impacted by net impairments of USD 754 million, primarily due to updated forward-looking price assumptions ... effective reported tax rate ... 104.4% for the third quarter of 2025 ... mainly due to losses on financial investments"
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "lucro_liquido",
+   "explicacao": "Volta ao lucro (1.314) com impairments liquidos menores (626) e sem a combinacao de aliquota >100% do 3T. NOI 5.487 vs 5.270.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm",
+   "trecho": "Net impairments of USD 626 million in REN, E&P International and E&P Norway."
+  },
+  {
+   "periodo": "2025-Q4",
+   "campo": "fcf",
+   "explicacao": "FCF -2.039 porque o FCO caiu para 2.107 com 6.240 de impostos pagos (tres parcelas NCS) e capex subiu para 4.146.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000003/equinorfinancialstatements.htm",
+   "trecho": "Tax payments in the fourth quarter totalled USD 6,240 million, mainly representing three scheduled Norwegian corporation tax instalments related to 2025 earnings."
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "lucro_liquido",
+   "explicacao": "+136% e contra o 4T25 (3.106 vs 1.314); contra o 1T25 e +18%. Motivos: NOI maior (8.784 vs 5.487), impairments menores (D&A 2.520 vs 3.290) e ganho de ~933 mi em investimentos financeiros (valor justo da participacao na Orsted).",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm ; https://ml-eu.globenewswire.com/Resource/Download/b3c8b1c7-f4d3-4a2b-afa3-453d9cf9c178",
+   "trecho": "Net financial items benefited from positive fair value development on financial investments in the first quarter of 2026, contributing to strong net income for the period."
+  },
+  {
+   "periodo": "2026-Q1",
+   "campo": "divida_liquida",
+   "explicacao": "Divida liquida quase estavel (11.888 -> 11.761); indice cai por aumento de ativos liquidos e de patrimonio.",
+   "fonte_url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062526000023/equinorfinancialstatements.htm",
+   "trecho": "An increase in liquid assets in the quarter, combined with higher equity, reduced the net debt to capital employed adjusted* ratio at the end of March 2026 to 15.3%, from 17.8% at the end of December 2025."
+  }
+ ],
+ "pendencias": [
+  "Valor absoluto do 'net interest-bearing debt adjusted' e do capital employed publicados pela Equinor (tabela de APM) nao foi extraido de nenhum documento; so os indices (%) foram confirmados.",
+  "EBITDA do Yahoo nao reconcilia com NOI + D&A em nenhum trimestre (diferencas de -394 a +472); recomendado substituir pelos valores primarios.",
+  "Receita do Yahoo usa a linha 'Revenues' em 2T25, 3T25, 4T25 e 2T26, mas 'Total revenues and other income' no 1T26: inconsistente com a definicao do 1T25 (29.920 = Total revenues and other income).",
+  "Origem do 4.209 do 1T26 na base nao identificada (nao corresponde a nenhuma combinacao de linhas do balanco); substituir por 11.761.",
+  "Extracao feita via WebFetch (resumo por modelo); somas foram checadas (ex.: 1T25 29.768 reproduzido, H1 reconcilia), mas o trecho do 3T25 sobre o indice ('decrease in liquid assets') parece incoerente e nao foi usado."
+ ]
+}

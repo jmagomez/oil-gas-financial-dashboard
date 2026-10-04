@@ -1,0 +1,81 @@
+{
+ "fonte": "EIA via FRED — DCOILBRENTEU (Brent spot Europa, FOB, diário); média simples dos dias com cotação no trimestre",
+ "coletado_em": "2026-10-03",
+ "brent_medio_usd_bbl": {
+  "2024-Q4": 74.66,
+  "2025-Q1": 75.87,
+  "2025-Q2": 68.07,
+  "2025-Q3": 69.03,
+  "2025-Q4": 63.65,
+  "2026-Q1": 80.72,
+  "2026-Q2": 102.63
+ },
+ "ptax": {
+  "fonte": "Banco Central do Brasil — PTAX de venda (boletim de fechamento), média aritmética dos dias úteis do trimestre",
+  "url": "https://ptax.bcb.gov.br/ptax_internet/consultaBoletim.do?method=consultarBoletim&RadOpcao=1&ChkMoeda=61&DATAINI=<início>&DATAFIM=<fim>",
+  "arquivo_diario": "poc/ptax/raw.txt",
+  "coletado_em": "2026-10-02",
+  "uso": "Petrobras: fluxos pela média do trimestre; dívida líquida pela taxa de fechamento do último dia útil",
+  "trimestres": {
+   "2025-Q1": {
+    "media": 5.8522,
+    "fechamento": 5.7422,
+    "data_fechamento": "2025-03-31",
+    "dias_uteis": 61
+   },
+   "2025-Q2": {
+    "media": 5.6661,
+    "fechamento": 5.4571,
+    "data_fechamento": "2025-06-30",
+    "dias_uteis": 61
+   },
+   "2025-Q3": {
+    "media": 5.4488,
+    "fechamento": 5.3186,
+    "data_fechamento": "2025-09-30",
+    "dias_uteis": 66
+   },
+   "2025-Q4": {
+    "media": 5.3938,
+    "fechamento": 5.5024,
+    "data_fechamento": "2025-12-30",
+    "dias_uteis": 63
+   },
+   "2026-Q1": {
+    "media": 5.2591,
+    "fechamento": 5.2194,
+    "data_fechamento": "2026-03-31",
+    "dias_uteis": 61
+   },
+   "2026-Q2": {
+    "media": 5.0494,
+    "fechamento": 5.1766,
+    "data_fechamento": "2026-06-30",
+    "dias_uteis": 61
+   }
+  }
+ },
+ "url": "https://fred.stlouisfed.org/series/DCOILBRENTEU",
+ "brent_fmi_anterior": {
+  "serie": "POILBREUSDQ (FMI)",
+  "valores": {
+   "2025-Q1": 75.04,
+   "2025-Q2": 66.96,
+   "2025-Q3": 68.14,
+   "2025-Q4": 63.16,
+   "2026-Q1": 77.8,
+   "2026-Q2": 97.05
+  }
+ },
+ "brent_releases": {
+  "fonte": "Brent datado informado no release da Petrobras",
+  "valores": {
+   "2025-Q1": 75.66,
+   "2025-Q2": 67.82,
+   "2025-Q3": 69.07,
+   "2025-Q4": 63.69,
+   "2026-Q1": 80.61,
+   "2026-Q2": 104.52
+  }
+ }
+}
