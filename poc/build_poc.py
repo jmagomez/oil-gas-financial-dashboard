@@ -109,6 +109,17 @@ INDICADORES = [
     ("margem_ebitda_ajustada", "Margem EBITDA ajustada (definição da empresa)", "%", 1, 1,
      "EBITDA ajustado divulgado pela empresa ÷ receita (Petrobras: sem eventos exclusivos); não comparável entre empresas",
      "complementar"),
+    ("margem_ebitdaal", "Margem EBITDA após arrendamentos (EBITDAaL)", "%", 1, 1,
+     "(EBITDA − pagamentos de arrendamento do trimestre, conforme a DFC) ÷ receita; nas americanas (US GAAP) o custo do "
+     "arrendamento operacional já está no EBITDA e sai só o principal do arrendamento financeiro",
+     "complementar"),
+    ("nd_ex_arrend_ebitdaal", "Dívida líquida sem arrendamentos / EBITDAaL", "x", -1, 2,
+     "(Dívida líquida − passivo de arrendamento) ÷ EBITDAaL dos últimos 12 meses (×4 antes do 4T25): par coerente, "
+     "sem arrendamento no numerador nem no denominador",
+     "complementar"),
+    ("ebitda_upstream_boe", "EBITDA do upstream por boe", "US$/boe", 1, 1,
+     "EBITDA dos segmentos de exploração e produção (definição de cada empresa, ver fonte) ÷ (produção desses segmentos × dias)",
+     "complementar"),
 ]
 DECOMP = json.loads((POC / "decomposicao.json").read_text(encoding="utf-8")) if (POC / "decomposicao.json").exists() else {}
 IND = {i[0]: i for i in INDICADORES}
@@ -124,6 +135,9 @@ INSUMOS = {
     "ebitda_por_empregado": ["ebitda"],
     "nd_ex_arrend_ebitda": ["divida_liquida", "ebitda"],
     "margem_ebitda_ajustada": ["receita"],
+    "margem_ebitdaal": ["ebitda", "receita"],
+    "nd_ex_arrend_ebitdaal": ["divida_liquida", "ebitda"],
+    "ebitda_upstream_boe": [],
 }
 OBRIGATORIOS = ["receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional", "fcf", "capex",
                 "divida_liquida", "producao_kboed"]
@@ -393,6 +407,31 @@ def calcula(empresas, base, log):
             if rec and p in aj.get("valores", {}):
                 add(t, p, "margem_ebitda_ajustada", aj["valores"][p] / rec * 100, st("margem_ebitda_ajustada"),
                     aj.get("definicao", ""), "F-DECOMP")
+            # EBITDAaL: EBITDA menos os pagamentos de arrendamento do trimestre (DFC)
+            pag = DECOMP.get("pagamentos_arrendamento", {}).get(t, {})
+            if eb is not None and rec and p in pag.get("valores", {}):
+                st_m = st("margem_ebitdaal")
+                if pag.get("ressalva") and st_m == "verde":
+                    st_m = "amarelo"
+                add(t, p, "margem_ebitdaal", (eb - pag["valores"][p]) / rec * 100, st_m,
+                    pag.get("escopo", ""), "F-DECOMP")
+                jan_al = PERIODOS[i - 3:i + 1] if i >= 3 else []
+                if jan_al and all(R.get(x, {}).get("ebitda") is not None and x in pag["valores"] for x in jan_al):
+                    eal_12m, o_al = sum(R[x]["ebitda"] - pag["valores"][x] for x in jan_al), "TTM"
+                else:
+                    eal_12m, o_al = (eb - pag["valores"][p]) * 4, "EBITDAaL do trimestre ×4 (janela TTM indisponível)"
+                if nd is not None and eal_12m and p in arr.get("valores", {}):
+                    st_al = st("nd_ex_arrend_ebitdaal")
+                    if o_al != "TTM" or arr.get("anual") or pag.get("ressalva"):
+                        st_al = "amarelo" if st_al == "verde" else st_al
+                    add(t, p, "nd_ex_arrend_ebitdaal", (nd - arr["valores"][p]) / eal_12m, st_al,
+                        o_al if o_al != "TTM" else "", "F-DECOMP")
+            # EBITDA do upstream por boe: segmentos de E&P (sem refino, trading e químicos)
+            seg = DECOMP.get("segmento_upstream", {}).get(t, {})
+            prod_seg = (seg.get("producao_kboed") or {}).get(p) or r.get("producao_kboed")  # sem produção do segmento: toda a produção é de E&P
+            if p in seg.get("ebitda", {}) and prod_seg:
+                add(t, p, "ebitda_upstream_boe", seg["ebitda"][p] * 1000 / (prod_seg * DIAS[p]),
+                    "amarelo" if seg.get("ressalva") else "verde", seg.get("definicao", ""), "F-DECOMP")
             prod = r.get("producao_kboed")
             add(t, p, "ebitda_boe", eb * 1000 / (prod * DIAS[p]) if eb is not None and prod else None,
                 st("ebitda_boe"), "inclui downstream nas integradas", fonte)
