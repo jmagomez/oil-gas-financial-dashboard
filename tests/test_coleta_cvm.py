@@ -69,3 +69,17 @@ def test_ignora_exercicio_anterior_e_versao_antiga():
     ls = cvm.linhas(_zip())
     assert not any(l["desc"].startswith("receita (exercicio") for l in ls)
     assert all(l["valor"] != 999999 for l in ls)
+
+
+def test_titulos_de_longo_prazo_entram_nas_disponibilidades():
+    """No ITR real do 1T25 a Petrobras tem R$ 4.806 mi em 1.02.01.03 (custo amortizado); o release os desconta."""
+    extra = [_l("", "2025-03-31", "1.02.01", "Ativo Realizável a Longo Prazo", 60000),
+             _l("", "2025-03-31", "1.02.01.01", "Aplicações Financeiras Avaliadas a Valor Justo através do Resultado", 0),
+             _l("", "2025-03-31", "1.02.01.03", "Aplicações Financeiras Avaliadas ao Custo Amortizado", 4806)]
+    base = cvm.linhas(_zip())
+    b = io.BytesIO()
+    with zipfile.ZipFile(b, "w") as z:
+        z.writestr("itr_cia_aberta_BPA_con_2025.csv", ("\n".join([CAB] + extra)).encode("latin-1"))
+    v = cvm.trimestre(base + cvm.linhas(b.getvalue()), "2025-Q1")
+    assert v["titulos_brl"] == 8000 + 4806
+    assert v["divida_liquida_brl"] == 30000 + 160000 + 40000 + 139748 - 40000 - 8000 - 4806
