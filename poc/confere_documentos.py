@@ -16,6 +16,7 @@ Saída 1 se algum valor não for encontrado.
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
 import html
 import io
@@ -35,8 +36,12 @@ def baixa(url: str, cache: Path | None) -> bytes:
         f = cache / hashlib.sha1(url.encode()).hexdigest()
         if f.exists():
             return f.read_bytes()
-    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=120) as r:
+    host = url.split("/")[2]
+    with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip, deflate",
+                                                                     "Host": host}), timeout=120) as r:
         b = r.read()
+        if r.headers.get("Content-Encoding") == "gzip" or b[:2] == b"\x1f\x8b":
+            b = gzip.decompress(b)
     if cache:
         cache.mkdir(parents=True, exist_ok=True)
         f.write_bytes(b)
@@ -65,12 +70,15 @@ def presente(v: float, t: str) -> bool:
     return any(re.search(r"(^|[^0-9.,])" + re.escape(x) + r"($|[^0-9])", t) for x in variantes(v))
 
 
-def confere(plano: dict, obter) -> tuple[list[str], dict]:
+def confere(plano: dict, obter, tolerar_403: bool = False) -> tuple[list[str], dict]:
     falhas, cont = [], {}
     for doc in plano["documentos"]:
         try:
             t = texto(obter(doc["url"]))
         except Exception as e:  # rede, PDF corrompido
+            if tolerar_403 and getattr(e, "code", None) == 403:
+                print(f"AVISO: HTTP 403 em {doc['url']} — {len(doc['checagens'])} valores NÃO verificados nesta execução")
+                continue
             falhas.append(f"ERRO ao ler {doc['url']}: {e}")
             continue
         vals = {(c["periodo"], c["campo"]): c["valor"] for c in doc["checagens"]}
@@ -92,10 +100,12 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--plano", default=str(PLANO))
     ap.add_argument("--cache")
+    ap.add_argument("--tolerar-403", action="store_true",
+                    help="HTTP 403 (site que bloqueia IPs de nuvem) vira aviso; só divergência de número falha")
     a = ap.parse_args(argv)
     plano = json.loads(Path(a.plano).read_text(encoding="utf-8"))
     cache = Path(a.cache) if a.cache else None
-    falhas, cont = confere(plano, lambda u: baixa(u, cache))
+    falhas, cont = confere(plano, lambda u: baixa(u, cache), a.tolerar_403)
     for e, k in sorted(cont.items()):
         print(f"{e}: {k['no_texto']} no texto + {k['derivadas_ok']} derivadas de {k['checagens']}")
     print("\n".join(falhas) or "Todos os valores conferem com os documentos oficiais")

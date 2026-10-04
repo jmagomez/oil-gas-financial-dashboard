@@ -25,8 +25,10 @@ Uso:
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import sys
+import urllib.error
 import urllib.request
 from datetime import date
 from pathlib import Path
@@ -83,10 +85,15 @@ EMPRESAS = {
 # Entrada: companyfacts (JSON da SEC) -> linhas compactas
 # --------------------------------------------------------------------------- #
 def baixa(cik: str) -> dict:
+    # cabeçalhos pedidos pela SEC (Fair Access): identificação, gzip e Host
     req = urllib.request.Request(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
-                                 headers={"User-Agent": USER_AGENT, "Accept": "application/json"})
+                                 headers={"User-Agent": USER_AGENT, "Accept": "application/json",
+                                          "Accept-Encoding": "gzip, deflate", "Host": "data.sec.gov"})
     with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read().decode("utf-8"))
+        b = r.read()
+        if r.headers.get("Content-Encoding") == "gzip" or b[:2] == b"\x1f\x8b":
+            b = gzip.decompress(b)
+        return json.loads(b.decode("utf-8"))
 
 
 def linhas_de_companyfacts(cf: dict, conceitos: set[str]) -> list[dict]:
@@ -227,10 +234,19 @@ def main(argv=None) -> int:
     ap.add_argument("--offline", action="store_true", help="usa tests/fixtures/xbrl em vez da API")
     ap.add_argument("--verificar", action="store_true", help="compara com poc/coleta/<TICKER>.json; sai com 1 se divergir")
     ap.add_argument("--gravar", action="store_true", help="grava poc/coleta/<TICKER>_xbrl.json")
+    ap.add_argument("--tolerar-403", action="store_true",
+                    help="HTTP 403 da SEC vira aviso 'não verificado' (a SEC bloqueia alguns IPs de nuvem)")
     a = ap.parse_args(argv)
-    falhas = []
+    falhas, bloqueadas = [], []
     for t in EMPRESAS:
-        linhas = coleta(t, a.offline)
+        try:
+            linhas = coleta(t, a.offline)
+        except urllib.error.HTTPError as e:
+            if e.code == 403 and a.tolerar_403:
+                bloqueadas.append(t)
+                print(f"AVISO {t}: a SEC devolveu HTTP 403 a este servidor; {t} NÃO foi verificado nesta execução")
+                continue
+            raise
         calc = {p: trimestre(t, linhas, p) for p in periodos(a.ate)}
         for p, v in calc.items():
             print(t, p, {c: v[c] for c in CAMPOS})
@@ -241,7 +257,9 @@ def main(argv=None) -> int:
                 dict(empresa=t, fonte="SEC XBRL companyfacts", coletado_em=date.today().isoformat(),
                      trimestres=calc), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     if a.verificar:
-        print("\n".join(falhas) or "XBRL confere com a coleta dos releases (tolerância 0,5%)")
+        ok = [t for t in EMPRESAS if t not in bloqueadas]
+        print("\n".join(falhas) or (f"XBRL confere com a coleta dos releases (tolerância 0,5%): {', '.join(ok)}" if ok
+                                    else "Nenhuma empresa verificada: acesso à SEC bloqueado"))
     return 1 if falhas else 0
 
 
