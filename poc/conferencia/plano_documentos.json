@@ -367,296 +367,6 @@
    ]
   },
   {
-   "url": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
-   "checagens": [
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:receita",
-     "valor": 46627
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:lucro_liquido",
-     "valor": 1629
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:fluxo_caixa_operacional",
-     "valor": 6271
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:capex",
-     "valor": 3361
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:eb.profit_before_interest_and_taxation",
-     "valor": 4056
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:eb.depreciation_depletion_amortization",
-     "valor": 4641
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:eb.net_impairment_and_losses_on_sale",
-     "valor": 1157
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:dl.net_debt_oficial",
-     "valor": 26043
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:dl.arrendamentos",
-     "valor": 14636
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
-     "valor": 1030
-    },
-    {
-     "periodo": "2025-Q2",
-     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
-     "valor": 39649
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:receita",
-     "valor": 48420
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:lucro_liquido",
-     "valor": 1161
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:fluxo_caixa_operacional",
-     "valor": 7786
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:capex",
-     "valor": 3381
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:eb.profit_before_interest_and_taxation",
-     "valor": 4448
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:eb.depreciation_depletion_amortization",
-     "valor": 4472
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:eb.net_impairment_and_losses_on_sale",
-     "valor": 753
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:dl.net_debt_oficial",
-     "valor": 26054
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:dl.arrendamentos",
-     "valor": 14629
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
-     "valor": 1082
-    },
-    {
-     "periodo": "2025-Q3",
-     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
-     "valor": 39601
-    }
-   ]
-  },
-  {
-   "url": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
-   "checagens": [
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:receita",
-     "valor": 47383
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:lucro_liquido",
-     "valor": 3422
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:fluxo_caixa_operacional",
-     "valor": 7602
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:capex",
-     "valor": 4168
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:eb.profit_before_interest_and_taxation",
-     "valor": 261
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:eb.depreciation_depletion_amortization",
-     "valor": 4526
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:eb.net_impairment_and_losses_on_sale",
-     "valor": 3624
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:dl.net_debt_oficial",
-     "valor": 22182
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:dl.arrendamentos",
-     "valor": 14571
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
-     "valor": 1067
-    },
-    {
-     "periodo": "2025-Q4",
-     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
-     "valor": 35686
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:receita",
-     "valor": 52255
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:lucro_liquido",
-     "valor": 3842
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:fluxo_caixa_operacional",
-     "valor": 2860
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:capex",
-     "valor": 3290
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:eb.profit_before_interest_and_taxation",
-     "valor": 8486
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:eb.depreciation_depletion_amortization",
-     "valor": 4410
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:eb.net_impairment_and_losses_on_sale",
-     "valor": 589
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:dl.net_debt_oficial",
-     "valor": 25309
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:dl.arrendamentos",
-     "valor": 14357
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
-     "valor": 1072
-    },
-    {
-     "periodo": "2026-Q1",
-     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
-     "valor": 38594
-    }
-   ]
-  },
-  {
-   "url": "https://www.bp.com/api/files/6cqieuqhq4no/master/3m82HmOzrcUhzGfOQ2Uajc/9fbef18373195a44947e3a797d6cc0cf/bp-second-quarter-2026-results.pdf",
-   "checagens": [
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:receita",
-     "valor": 69105
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:lucro_liquido",
-     "valor": 3911
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:fluxo_caixa_operacional",
-     "valor": 10858
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:capex",
-     "valor": 3086
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:eb.profit_before_interest_and_taxation",
-     "valor": 8941
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:eb.depreciation_depletion_amortization",
-     "valor": 4149
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:eb.net_impairment_and_losses_on_sale",
-     "valor": 1100
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:dl.net_debt_oficial",
-     "valor": 22251
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:dl.arrendamentos",
-     "valor": 14356
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
-     "valor": 1040
-    },
-    {
-     "periodo": "2026-Q2",
-     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
-     "valor": 35567
-    }
-   ]
-  },
-  {
    "url": "https://www.sec.gov/Archives/edgar/data/1140625/000114062525000105/a01equinorquarterlyreport-.htm",
    "checagens": [
     {
@@ -1444,6 +1154,309 @@
      "periodo": "2026-Q2",
      "campo": "TTE:dl.lease_liabilities",
      "valor": 8904
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000016/bp-20260630.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:receita",
+     "valor": 46627
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:lucro_liquido",
+     "valor": 1629
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 6271
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:capex",
+     "valor": 3361
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 4056
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4641
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 1157
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 26043
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14636
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1030
+    },
+    {
+     "periodo": "2025-Q2",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 39649
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:receita",
+     "valor": 69105
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:lucro_liquido",
+     "valor": 3911
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 10858
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:capex",
+     "valor": 3086
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 8941
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4149
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 1100
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 22251
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14356
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1040
+    },
+    {
+     "periodo": "2026-Q2",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 35567
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380725000031/a30092025bp6kq3.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/1RyNNXgJpHepSCwj2YS2lX/d54f6e85fa222e8b274ac7240148bb60/bp-third-quarter-2025-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:receita",
+     "valor": 48420
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:lucro_liquido",
+     "valor": 1161
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 7786
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:capex",
+     "valor": 3381
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 4448
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4472
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 753
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 26054
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14629
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1082
+    },
+    {
+     "periodo": "2025-Q3",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 39601
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000002/a31122025bp6kq4.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:receita",
+     "valor": 47383
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:lucro_liquido",
+     "valor": 3422
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 7602
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:capex",
+     "valor": 4168
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 261
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4526
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 3624
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 22182
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14571
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1067
+    },
+    {
+     "periodo": "2025-Q4",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 35686
+    }
+   ]
+  },
+  {
+   "url": "https://www.sec.gov/Archives/edgar/data/313807/000031380726000010/a31032026bp6kq1.htm",
+   "url_original": "https://www.bp.com/api/files/6cqieuqhq4no/master/2H8Mqba3jEKsyc1YA4Ujwf/e979bdd8877727dbfa36431164d0ec66/bp-first-quarter-2026-results.pdf",
+   "nota": "6-K da bp na SEC (mesmo relatório publicado em bp.com, que bloqueia acesso automatizado de servidores: HTTP 403 no GitHub Actions)",
+   "checagens": [
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:receita",
+     "valor": 52255
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:lucro_liquido",
+     "valor": 3842
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:fluxo_caixa_operacional",
+     "valor": 2860
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:capex",
+     "valor": 3290
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.profit_before_interest_and_taxation",
+     "valor": 8486
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.depreciation_depletion_amortization",
+     "valor": 4410
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:eb.net_impairment_and_losses_on_sale",
+     "valor": 589
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_debt_oficial",
+     "valor": 25309
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.arrendamentos",
+     "valor": 14357
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_partner_receivable_leases_JO_info",
+     "valor": 1072
+    },
+    {
+     "periodo": "2026-Q1",
+     "campo": "BP:dl.net_debt_including_leases_oficial_bp_info",
+     "valor": 38594
     }
    ]
   }
