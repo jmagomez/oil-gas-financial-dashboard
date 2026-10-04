@@ -54,3 +54,16 @@ def test_plano_bate_com_a_coleta():
             if v is not None and abs(abs(v) - abs(c["valor"])) > 0.5:
                 dif.append((t, c["periodo"], campo, v, c["valor"]))
     assert not dif, dif
+
+
+def test_403_vira_aviso_so_com_tolerancia():
+    import urllib.error
+
+    def bloqueia(u):
+        raise urllib.error.HTTPError(u, 403, "Forbidden", {}, None)
+
+    p = plano(("SHEL:a", 65406, {}))
+    falhas, _ = cd.confere(p, bloqueia)
+    assert len(falhas) == 1 and "403" in falhas[0]
+    falhas, cont = cd.confere(p, bloqueia, tolerar_403=True)
+    assert falhas == [] and cont == {}
