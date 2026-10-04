@@ -32,13 +32,13 @@ jobs:
           python-version: "3.12"
       - run: pip install pdfminer.six
       - name: SEC XBRL (XOM, CVX)
-        run: set -o pipefail; python3 poc/coleta_sec_xbrl.py --verificar | tee xbrl.txt
+        run: set -o pipefail; python3 poc/coleta_sec_xbrl.py --verificar --tolerar-403 | tee xbrl.txt
       - name: CVM Dados Abertos (PBR)
         if: always()
         run: set -o pipefail; python3 poc/coleta_cvm.py --verificar | tee cvm.txt
       - name: Documentos oficiais (SHEL, BP, EQNR, TTE)
         if: always()
-        run: set -o pipefail; python3 poc/confere_documentos.py | tee documentos.txt
+        run: set -o pipefail; python3 poc/confere_documentos.py --tolerar-403 | tee documentos.txt
       - uses: actions/upload-artifact@v4
         if: always()
         with:
