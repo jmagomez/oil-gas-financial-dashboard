@@ -88,6 +88,9 @@ IND_MEDIDAS = [  # medida por indicador: (nome, codigo, formato)
     ("EBITDA TTM por empregado (US$ mil)", "ebitda_por_empregado", "#,0"),
     ("DL sem arrendamentos/EBITDA (x)", "nd_ex_arrend_ebitda", "#,0.00"),
     ("Margem EBITDA ajustada (%)", "margem_ebitda_ajustada", "#,0.0"),
+    ("Margem EBITDAaL (%)", "margem_ebitdaal", "#,0.0"),
+    ("DL sem arrendamentos/EBITDAaL (x)", "nd_ex_arrend_ebitdaal", "#,0.00"),
+    ("EBITDA upstream por boe (US$)", "ebitda_upstream_boe", "#,0.0"),
 ]
 
 
