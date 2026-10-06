@@ -29,6 +29,10 @@ URL_BASE = "https://raw.githubusercontent.com/jmagomez/oil-gas-financial-dashboa
 SCH = "https://developer.microsoft.com/json-schemas/fabric"
 NS = uuid.UUID("6f1c2a52-6a8e-4d0e-9a51-7b7f0c3a9e10")
 CORES = ["#0F8F63", "#2A78D6", "#B07800", "#4A3AA7", "#EB6834", "#C2457A", "#6B7C8C"]
+# cor fixa por empresa (mesma ordem de dim_empresa): a Petrobras é sempre verde, em qualquer gráfico e universo
+COR_EMPRESA = dict(zip(["PBR", "XOM", "SHEL", "EQNR", "CVX", "BP", "TTE"], CORES))
+UNI_POC = "PoC (PBR + 3 pares)"  # mesmo recorte padrão do painel HTML
+UNI_ESC = "Escala (+3: CVX, BP, TTE)"  # as 7 empresas: a Escala ACRESCENTA Chevron, BP e TotalEnergies à PoC
 
 
 def gid(*partes):
@@ -94,6 +98,16 @@ IND_MEDIDAS = [  # medida por indicador: (nome, codigo, formato)
 ]
 
 
+FORMATO_POR_INDICADOR = ('VAR c = SELECTEDVALUE ( dim_indicador[casas], 2 )\n'
+                         'RETURN "#,0" & IF ( c > 0, "." & REPT ( "0", c ), "" )')
+FORMATO_DELTA = ('VAR c = SELECTEDVALUE ( dim_indicador[casas], 2 )\n'
+                 'VAR f = "#,0" & IF ( c > 0, "." & REPT ( "0", c ), "" )\n'
+                 'RETURN "+" & f & ";-" & f & ";0"')
+FORMATO_DINAMICO = {"Valor Validado": FORMATO_POR_INDICADOR, "Valor Petrobras": FORMATO_POR_INDICADOR,
+                    "Mediana Pares": FORMATO_POR_INDICADOR, "Valor Médio": FORMATO_POR_INDICADOR,
+                    "Δ Petrobras vs. Mediana": FORMATO_DELTA}
+
+
 def medidas():
     m = [
         ("Valor Médio", "AVERAGE ( fato_indicador[valor] )", "#,0.##", "Base"),
@@ -129,16 +143,30 @@ def medidas():
         ("Alertas pendentes", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = FALSE () ) + 0", "#,0", "Qualidade"),
         ("Alertas justificados", "CALCULATE ( COUNTROWS ( qa_log ), qa_log[justificado] = TRUE () ) + 0", "#,0", "Qualidade"),
     ]
+    m.append(("Empresas no Universo", "COUNTROWS ( VALUES ( dim_empresa[empresa] ) )", "0", "Base"))
+    m.append(("Descrição do Universo",
+              'VAR n = [Empresas no Universo]\n'
+              'RETURN "Universo: " & n & " empresas · mediana de " & ( n - 1 ) & " pares · mesma fórmula para todas · ✕ fora de medianas e rankings"',
+              None, "Base"))
+    m.append(("Posição Petrobras (de N)",
+              "VAR r = [Posição Petrobras]\n"
+              "VAR n = COUNTROWS ( FILTER ( ALLSELECTED ( dim_empresa[empresa] ), NOT ISBLANK ( [Valor Validado] ) ) )\n"
+              'VAR d = SELECTEDVALUE ( dim_indicador[direcao] )\n'
+              'RETURN IF ( d = 0, "porte (sem ranking)", IF ( NOT ISBLANK ( r ), FORMAT ( r, "0" ) & "º de " & n ) )', None, "Petrobras"))
     m.append(("Cor Destaque", 'IF ( SELECTEDVALUE ( dim_empresa[empresa] ) = "PBR", "#0F8F63", "#9AA9B6" )', None, "Formatação"))
     for nome, cod, fmt in IND_MEDIDAS:
         m.append((nome, f'CALCULATE ( [Valor Validado], dim_indicador[indicador] = "{cod}" )', fmt, "Indicadores"))
         m.append((f"PBR · {nome}", f'CALCULATE ( [Valor Petrobras], dim_indicador[indicador] = "{cod}" )', fmt, "Petrobras"))
         m.append((f"Mediana · {nome}", f'CALCULATE ( [Mediana Pares], dim_indicador[indicador] = "{cod}" )', fmt, "Mediana dos pares"))
+        m.append((f"Posição · {nome}", f'CALCULATE ( [Posição Petrobras (de N)], dim_indicador[indicador] = "{cod}" )', None, "Petrobras"))
     out = []
     for nome, expr, fmt, pasta in m:
         d = {"name": nome, "expression": expr.split("\n") if "\n" in expr else expr, "displayFolder": pasta,
              "lineageTag": gid("medida", nome)}
-        if fmt:
+        if nome in FORMATO_DINAMICO:
+            # casas decimais de dim_indicador: 1,16x e 0,30x (não "0,3"), 17,0 (não "17"), 50.687 empregados
+            d["formatStringDefinition"] = {"expression": FORMATO_DINAMICO[nome]}
+        elif fmt:
             d["formatString"] = fmt
         out.append(d)
     return out
@@ -171,6 +199,40 @@ def m_web(tabela, arquivo, cols):
             "    Tipado"]
 
 
+def universos():
+    """Linhas da tabela-ponte universo × empresa.
+
+    O slicer "Universo" filtra dim_empresa por esta ponte (relação bidirecional). Antes, o slicer usava uma coluna
+    de dim_empresa (PoC ou Escala): escolher "Escala (+3)" TROCAVA as 4 empresas da PoC por Chevron, BP e TotalEnergies,
+    e a Petrobras sumia dos cartões (achado em 06/10/2026). Agora a Escala contém as 7 empresas.
+    """
+    emp = sorted(csv.DictReader(open(POC / "dim_empresa.csv", encoding="utf-8")), key=lambda r: int(r["ordem"]))
+    na_poc = [r["empresa"] for r in emp if str(r["na_poc"]).strip().lower() in ("true", "1", "sim")]
+    return [(UNI_POC, e, 1) for e in na_poc] + [(UNI_ESC, r["empresa"], 2) for r in emp]
+
+
+def tabela_universo(embutido):
+    linhas = ", ".join('{ "%s", "%s", %d }' % u for u in universos())
+    expr = ["let",
+            f"    Fonte = #table ( type table [ universo = text, empresa = text, ordem = Int64.Type ], {{ {linhas} }} )",
+            "in",
+            "    Fonte"]
+    cols = [("universo", "string", False, None), ("empresa", "string", True, None), ("ordem", "int64", True, "0")]
+    colunas = []
+    for c, tipo, oculta, fmt in cols:
+        d = {"name": c, "dataType": tipo, "sourceColumn": c, "lineageTag": gid("col", "dim_universo", c), "summarizeBy": "none"}
+        if oculta:
+            d["isHidden"] = True
+        if fmt:
+            d["formatString"] = fmt
+        if c == "universo":
+            d["sortByColumn"] = "ordem"
+        colunas.append(d)
+    return {"name": "dim_universo", "lineageTag": gid("tab", "dim_universo"), "columns": colunas,
+            "partitions": [{"name": "dim_universo", "mode": "import", "source": {"type": "m", "expression": expr}}],
+            "annotations": [{"name": "PBI_ResultType", "value": "Table"}]}
+
+
 def modelo(embutido):
     tabelas = []
     for t, (arq, cols) in TABELAS.items():
@@ -198,25 +260,27 @@ def modelo(embutido):
     colisao = [md["name"] for tb in tabelas for md in tb.get("measures", []) if md["name"].lower() in nomes_col]
     if colisao:
         raise SystemExit(f"Medidas com nome igual a coluna: {colisao}")
+    tabelas.append(tabela_universo(embutido))
     rel = [("fato_indicador", "empresa", "dim_empresa", "empresa"), ("fato_indicador", "periodo", "dim_periodo", "periodo"),
            ("fato_indicador", "indicador", "dim_indicador", "indicador"), ("fato_indicador", "fonte", "dim_fonte", "id"),
-           ("qa_log", "empresa", "dim_empresa", "empresa")]
+           ("qa_log", "empresa", "dim_empresa", "empresa"), ("dim_universo", "empresa", "dim_empresa", "empresa")]
     model = {
         "culture": "pt-BR",
         "dataAccessOptions": {"legacyRedirects": True, "returnErrorValuesAsNull": True},
         "defaultPowerBIDataSourceVersion": "powerBI_V3",
         "sourceQueryCulture": "pt-BR",
         "tables": tabelas,
-        "relationships": [{"name": gid("rel", *r), "fromTable": r[0], "fromColumn": r[1], "toTable": r[2], "toColumn": r[3]} for r in rel],
+        "relationships": [dict({"name": gid("rel", *r), "fromTable": r[0], "fromColumn": r[1], "toTable": r[2], "toColumn": r[3]},
+                               **({"crossFilteringBehavior": "bothDirections"} if r[0] == "dim_universo" else {})) for r in rel],
         "annotations": [{"name": "__PBI_TimeIntelligenceEnabled", "value": "0"},
-                        {"name": "PBI_QueryOrder", "value": json.dumps((["UrlBase"] if not embutido else []) + list(TABELAS))}],
+                        {"name": "PBI_QueryOrder", "value": json.dumps((["UrlBase"] if not embutido else []) + list(TABELAS) + ["dim_universo"])}],
     }
     if not embutido:
         model["expressions"] = [{
             "name": "UrlBase", "kind": "m", "lineageTag": gid("expr", "UrlBase"),
             "expression": f'"{URL_BASE}" meta [IsParameterQuery = true, Type = "Text", IsParameterQueryRequired = true]',
             "annotations": [{"name": "PBI_ResultType", "value": "Text"}]}]
-    return {"compatibilityLevel": 1567, "model": model}
+    return {"compatibilityLevel": 1601, "model": model}  # 1601+: formato dinâmico (formatStringDefinition)
 
 
 # --------------------------------------------------------------------------- #
@@ -290,7 +354,7 @@ class Pagina:
                                                            "fontSize": f"{tamanho}pt", "color": cor}}]}]
         return self.add(nome, "textbox", x, y, w, h, objetos={"general": [{"properties": {"paragraphs": par}}]})
 
-    def slicer(self, nome, campo, x, y, w, h, titulo, dropdown=True, unico=False, padrao=None):
+    def slicer(self, nome, campo, x, y, w, h, titulo, dropdown=True, unico=False, padrao=None, sincroniza=None):
         # cabeçalho do slicer oculto: o título do contêiner já nomeia o campo e o cabeçalho cortava a lista suspensa
         obj = {"data": [{"properties": {"mode": lit("Dropdown" if dropdown else "Basic")}}],
                "header": [{"properties": {"show": lit(False)}}]}
@@ -303,7 +367,15 @@ class Pagina:
                    "Where": [{"Condition": {"In": {"Expressions": [{"Column": {"Expression": {"SourceRef": {"Source": "s"}}, "Property": prop}}],
                                                    "Values": [[lit(padrao)["expr"]]]}}}]}
             obj["general"] = [{"properties": {"filter": {"filter": flt}}}]
-        return self.add(nome, "slicer", x, y, w, h, {"Values": [campo]}, titulo, obj)
+        vid = self.add(nome, "slicer", x, y, w, h, {"Values": [campo]}, titulo, obj)
+        if sincroniza:
+            # mesmo universo/período em todas as páginas: escolher "Escala" numa aba vale para as outras
+            self.visuais[-1]["visual"]["syncGroup"] = {"groupName": sincroniza, "fieldChanges": True, "filterChanges": True}
+        return vid
+
+    def subtitulo(self, x, y, w, h=28):
+        # linha de contexto dinâmica: diz quantas empresas estão no universo e sobre quantos pares é a mediana
+        return self.add("st", "multiRowCard", x, y, w, h, {"Values": [(med("Descrição do Universo"), "Universo")]}, None, LINHA_TEXTO)
 
     def sem_filtro(self, origem, *alvos):
         for a in alvos:
@@ -320,6 +392,20 @@ def cor_por_medida(medida):
                            "selector": {"data": [{"dataViewWildcard": {"matchingOption": 1}}]}}]}
 
 
+def seletor_empresa(cod):
+    return {"data": [{"scopeId": {"Comparison": {"ComparisonKind": 0, "Left": col("dim_empresa", "empresa"),
+                                                  "Right": {"Literal": {"Value": f"'{cod}'"}}}}}]}
+
+
+def cores_por_empresa():
+    # séries de linha com cor fixa por empresa; a Petrobras com traço mais grosso para se destacar entre 7 séries
+    return {"dataPoint": [{"properties": {"fill": {"solid": {"color": lit(cor)}}}, "selector": seletor_empresa(e)}
+                          for e, cor in COR_EMPRESA.items()],
+            "lineStyles": [{"properties": {"strokeWidth": lit(2)}},
+                           {"properties": {"strokeWidth": lit(4)}, "selector": seletor_empresa("PBR")}],
+            "legend": [{"properties": {"show": lit(True), "position": lit("Top")}}]}
+
+
 def junta(*objs):
     out = {}
     for o in objs:
@@ -332,9 +418,15 @@ SEM_TOTAIS = {"subTotals": [{"properties": {"rowSubtotals": lit(False), "columnS
 TABELA_SEM_TOTAL = {"total": [{"properties": {"totals": lit(False)}}]}
 CARTAO_NUM_INTEIRO = {"labels": [{"properties": {"labelDisplayUnits": lit(1)}}]}
 ROTULOS = {"labels": [{"properties": {"show": lit(True)}}]}
-GRADE = {k: [{"properties": {"fontSize": lit(11)}}] for k in ("values", "columnHeaders", "rowHeaders")}
+GRADE = {k: [{"properties": {"fontSize": lit(12)}}] for k in ("values", "columnHeaders", "rowHeaders")}
 GRADE_TAB = {k: [{"properties": {"fontSize": lit(10)}}] for k in ("values", "columnHeaders")}
-CARTAO_DUPLO = {"dataLabels": [{"properties": {"fontSize": lit(14)}}], "categoryLabels": [{"properties": {"fontSize": lit(8)}}],
+_CINZA = {"solid": {"color": lit("#46566A")}}
+# multiRowCard mostra o 1º valor como título do cartão: formata título e rótulo iguais ao subtítulo das páginas
+LINHA_TEXTO = {"categoryLabels": [{"properties": {"show": lit(False)}}], "card": [{"properties": {"barShow": lit(False)}}],
+               "cardTitle": [{"properties": {"fontSize": lit(10), "color": _CINZA}}],
+               "dataLabels": [{"properties": {"fontSize": lit(10), "color": _CINZA}}]}
+BARRAS_7 = {"categoryAxis": [{"properties": {"innerPadding": {"expr": {"Literal": {"Value": "15L"}}}}}]}
+CARTAO_DUPLO = {"dataLabels": [{"properties": {"fontSize": lit(12)}}], "categoryLabels": [{"properties": {"fontSize": lit(8)}}],
                 "card": [{"properties": {"barShow": lit(False)}}]}
 
 
@@ -343,32 +435,32 @@ def ultimo_periodo():
     return max(linhas, key=lambda r: int(r["ordem"]))["rotulo"]
 
 
-UNI_POC = "PoC (PBR + 3 pares)"  # mesmo recorte padrão do painel HTML
 
 
 def paginas():
     ULT = ultimo_periodo()
     E, P, IN = col("dim_empresa", "empresa"), col("dim_periodo", "rotulo"), col("dim_indicador", "nome")
-    U = col("dim_empresa", "universo")
+    U = col("dim_universo", "universo")
+    TT = [(med("Selo QA"), "Selo de qualidade")]
     ps = []
 
     # 1 — Visão executiva
     p = Pagina("visao", "Visão executiva")
     p.texto("t", "Petrobras vs. pares — visão executiva do trimestre", 20, 12, 820, 44)
-    p.texto("st", "Fontes públicas · indicadores recalculados com a mesma fórmula · valores em análise (✕) ficam fora de medianas e rankings",
-            20, 52, 900, 26, tamanho=10, negrito=False, cor="#46566A")
-    sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 850, 12, 200, 60, "Universo", padrao=UNI_POC)
+    p.subtitulo(20, 52, 820)
+    sp = p.slicer("sp", P, 1060, 12, 200, 60, "Período", unico=True, padrao=ULT, sincroniza="Periodo")
+    p.slicer("su", U, 850, 12, 200, 60, "Universo", unico=True, padrao=UNI_POC, sincroniza="Universo")
     cards = []
     for k, (nome, _, _) in enumerate(IND_MEDIDAS[:6]):
-        cards.append(p.add(f"c{k}", "multiRowCard", 20 + k * 208, 82, 200, 136,
-                           {"Values": [(med(f"PBR · {nome}"), "Petrobras"), (med(f"Mediana · {nome}"), "Mediana dos pares")]}, nome, CARTAO_DUPLO))
+        cards.append(p.add(f"c{k}", "multiRowCard", 20 + k * 208, 80, 200, 144,
+                           {"Values": [(med(f"PBR · {nome}"), "Petrobras"), (med(f"Mediana · {nome}"), "Mediana dos pares"),
+                                       (med(f"Posição · {nome}"), "Posição da Petrobras")]}, nome, CARTAO_DUPLO))
     for cod, (nome, _, _), x, w in [("b1", IND_MEDIDAS[0], 20, 410), ("b2", IND_MEDIDAS[3], 440, 410), ("b3", IND_MEDIDAS[2], 860, 400)]:
-        p.add(cod, "clusteredBarChart", x, 224, w, 226, {"Category": [(E, "Empresa")], "Y": [med(nome)]},
+        p.add(cod, "clusteredBarChart", x, 228, w, 226, {"Category": [(E, "Empresa")], "Y": [med(nome)], "Tooltips": TT},
               {"b1": "Margem EBITDA (%) por empresa", "b2": "Dívida líquida / EBITDA TTM (x)", "b3": "Fluxo de caixa livre (US$ bi)"}[cod],
-              junta(cor_por_medida("Cor Destaque"), ROTULOS), ordem=(med(nome), "Descending"))
+              junta(cor_por_medida("Cor Destaque"), ROTULOS, BARRAS_7), ordem=(med(nome), "Descending"))
     l1 = p.add("l1", "lineChart", 20, 458, 830, 252, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [med("Margem EBITDA (%)")]},
-               "Evolução da margem EBITDA (%) — série completa")
+               "Evolução da margem EBITDA (%) — série completa", cores_por_empresa())
     l2 = p.add("l2", "clusteredColumnChart", 860, 458, 400, 252, {"Category": [(P, "Trimestre")], "Y": [med("Brent Médio (US$/bbl)")]},
                "Contexto: Brent médio (US$/bbl)", junta(cor_fixa("#6B7C8C"), ROTULOS))
     p.sem_filtro(sp, l1, l2)
@@ -378,12 +470,13 @@ def paginas():
     p = Pagina("comparacao", "Comparação e evolução")
     p.texto("t", "Comparação e evolução histórica", 20, 12, 700, 44)
     p.slicer("si", IN, 640, 12, 260, 60, "Indicador", unico=True, padrao="Margem EBITDA")
-    sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 1080, 12, 180, 60, "Universo", padrao=UNI_POC)
-    p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")]},
-              "Valor por empresa no período", junta(cor_por_medida("Cor Destaque"), ROTULOS), ordem=(med("Valor Validado"), "Descending"))
+    sp = p.slicer("sp", P, 910, 12, 160, 60, "Período", unico=True, padrao=ULT, sincroniza="Periodo")
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo", unico=True, padrao=UNI_POC, sincroniza="Universo")
+    p.subtitulo(20, 52, 610)
+    p.add("b", "clusteredBarChart", 20, 86, 620, 300, {"Category": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")], "Tooltips": TT},
+              "Valor por empresa no período", junta(cor_por_medida("Cor Destaque"), ROTULOS, BARRAS_7), ordem=(med("Valor Validado"), "Descending"))
     ln = p.add("l", "lineChart", 650, 86, 610, 300, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")]},
-              "Evolução trimestral")
+              "Evolução trimestral", cores_por_empresa())
     m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [(col("dim_empresa", "nome"), "Empresa")], "Columns": [(P, "Trimestre")],
                                                        "Values": [(med("Valor Validado"), "Valor")]},
               "Série trimestral (valor validado)", junta(SEM_TOTAIS, GRADE))
@@ -393,20 +486,22 @@ def paginas():
     # 3 — Matriz de leitura
     p = Pagina("matriz", "Matriz de leitura")
     p.texto("t", "Leitura dos indicadores — matriz do trimestre", 20, 12, 800, 44)
-    p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True, padrao=ULT)
-    p.slicer("su", U, 1080, 12, 180, 60, "Universo", padrao=UNI_POC)
+    p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True, padrao=ULT, sincroniza="Periodo")
+    p.slicer("su", U, 1080, 12, 180, 60, "Universo", unico=True, padrao=UNI_POC, sincroniza="Universo")
+    p.subtitulo(20, 52, 860)
     p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [(IN, "Indicador")], "Columns": [(E, "Empresa")], "Values": [(med("Valor Validado"), "Valor")]},
           "Indicador × empresa (valores validados)", junta(SEM_TOTAIS, GRADE))
-    p.add("d", "tableEx", 20, 426, 820, 280, {"Values": [(IN, "Indicador"), (col("dim_indicador", "unidade"), "Unidade"),
+    p.add("d", "tableEx", 20, 426, 600, 280, {"Values": [(IN, "Indicador"), (col("dim_indicador", "unidade"), "Unidade"),
                                                          (col("dim_indicador", "formula"), "Fórmula")]}, "Definições", GRADE_TAB)
-    p.add("pp", "tableEx", 850, 426, 410, 280, {"Values": [(IN, "Indicador"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
-                                                            (med("Posição Petrobras"), "Posição")]}, "Petrobras vs. mediana dos pares", junta(TABELA_SEM_TOTAL, GRADE_TAB))
+    p.add("pp", "tableEx", 630, 426, 630, 280, {"Values": [(IN, "Indicador"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
+                                                            (med("Δ Petrobras vs. Mediana"), "Δ vs. mediana"),
+                                                            (med("Posição Petrobras (de N)"), "Posição")]}, "Petrobras vs. mediana dos pares", junta(TABELA_SEM_TOTAL, GRADE_TAB))
     ps.append(p)
 
     # 4 — Qualidade
     p = Pagina("qualidade", "Qualidade e rastreabilidade")
     p.texto("t", "Qualidade e rastreabilidade dos dados", 20, 12, 800, 44)
-    p.slicer("su", U, 850, 12, 200, 60, "Universo", padrao=UNI_POC)
+    p.slicer("su", U, 850, 12, 200, 60, "Universo", unico=True, padrao=UNI_POC, sincroniza="Universo")
     p.slicer("se", E, 1060, 12, 200, 60, "Empresa")
     for k, (n, t) in enumerate([("% Validado", "Valores validados sem ressalva"), ("Valores com ressalva", "Valores com ressalva (▲)"),
                                 ("Valores em análise", "Valores em análise (✕)"), ("Alertas pendentes", "Alertas pendentes de leitura")]):
@@ -477,7 +572,6 @@ def escreve(dest: Path, embutido: bool):
     j(sm / "definition.pbism", {"$schema": f"{SCH}/item/semanticModel/definitionProperties/1.0.0/schema.json", "version": "1.0", "settings": {}})
     mdl = modelo(embutido)
     # colunas derivadas em Power Query (texto amigável para slicers e tabelas)
-    deriva(mdl, "dim_empresa", "universo", 'if [na_poc] then "PoC (PBR + 3 pares)" else "Escala (+3)"')
     deriva(mdl, "qa_log", "situacao", 'if [justificado] then (if [leitura] <> null and [leitura] <> "" then "explicado pelo release" else "justificado pelo contexto") else "pendente de leitura"')
     deriva(mdl, "qa_log", "trimestre",
            'if Text.Contains ( [periodo], "-Q" ) then Text.End ( [periodo], 1 ) & "T" & Text.Middle ( [periodo], 2, 2 ) else [periodo]')
