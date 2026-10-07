@@ -152,12 +152,13 @@ def medidas():
               "VAR r = [Posição Petrobras]\n"
               "VAR n = COUNTROWS ( FILTER ( ALLSELECTED ( dim_empresa[empresa] ), NOT ISBLANK ( [Valor Validado] ) ) )\n"
               'VAR d = SELECTEDVALUE ( dim_indicador[direcao] )\n'
-              'RETURN IF ( d = 0, "porte (sem ranking)", IF ( NOT ISBLANK ( r ), FORMAT ( r, "0" ) & "º de " & n ) )', None, "Petrobras"))
+              'RETURN IF ( NOT ISBLANK ( d ) && d = 0, "porte (sem ranking)", IF ( NOT ISBLANK ( r ), FORMAT ( r, "0" ) & "º de " & n ) )', None, "Petrobras"))
     m.append(("Cor Destaque", 'IF ( SELECTEDVALUE ( dim_empresa[empresa] ) = "PBR", "#0F8F63", "#9AA9B6" )', None, "Formatação"))
     for nome, cod, fmt in IND_MEDIDAS:
         m.append((nome, f'CALCULATE ( [Valor Validado], dim_indicador[indicador] = "{cod}" )', fmt, "Indicadores"))
         m.append((f"PBR · {nome}", f'CALCULATE ( [Valor Petrobras], dim_indicador[indicador] = "{cod}" )', fmt, "Petrobras"))
         m.append((f"Mediana · {nome}", f'CALCULATE ( [Mediana Pares], dim_indicador[indicador] = "{cod}" )', fmt, "Mediana dos pares"))
+        m.append((f"Selo · {nome}", f'CALCULATE ( [Selo QA], dim_indicador[indicador] = "{cod}" )', None, "Qualidade"))
         m.append((f"Posição · {nome}", f'CALCULATE ( [Posição Petrobras (de N)], dim_indicador[indicador] = "{cod}" )', None, "Petrobras"))
     out = []
     for nome, expr, fmt, pasta in m:
@@ -419,13 +420,16 @@ TABELA_SEM_TOTAL = {"total": [{"properties": {"totals": lit(False)}}]}
 CARTAO_NUM_INTEIRO = {"labels": [{"properties": {"labelDisplayUnits": lit(1)}}]}
 ROTULOS = {"labels": [{"properties": {"show": lit(True)}}]}
 GRADE = {k: [{"properties": {"fontSize": lit(12)}}] for k in ("values", "columnHeaders", "rowHeaders")}
+GRADE_MATRIZ = {k: [{"properties": {"fontSize": lit(11)}}] for k in ("values", "columnHeaders", "rowHeaders")}
 GRADE_TAB = {k: [{"properties": {"fontSize": lit(10)}}] for k in ("values", "columnHeaders")}
 _CINZA = {"solid": {"color": lit("#46566A")}}
 # multiRowCard mostra o 1º valor como título do cartão: formata título e rótulo iguais ao subtítulo das páginas
 LINHA_TEXTO = {"categoryLabels": [{"properties": {"show": lit(False)}}], "card": [{"properties": {"barShow": lit(False)}}],
                "cardTitle": [{"properties": {"fontSize": lit(10), "color": _CINZA}}],
                "dataLabels": [{"properties": {"fontSize": lit(10), "color": _CINZA}}]}
-BARRAS_7 = {"categoryAxis": [{"properties": {"innerPadding": {"expr": {"Literal": {"Value": "15L"}}}}}]}
+# 7 empresas sem barra de rolagem: menos espaço entre barras e sem títulos de eixo (o título do gráfico já diz o que é)
+BARRAS_7 = {"categoryAxis": [{"properties": {"innerPadding": {"expr": {"Literal": {"Value": "15L"}}}, "showAxisTitle": lit(False)}}],
+            "valueAxis": [{"properties": {"showAxisTitle": lit(False)}}]}
 CARTAO_DUPLO = {"dataLabels": [{"properties": {"fontSize": lit(12)}}], "categoryLabels": [{"properties": {"fontSize": lit(8)}}],
                 "card": [{"properties": {"barShow": lit(False)}}]}
 
@@ -456,12 +460,14 @@ def paginas():
                            {"Values": [(med(f"PBR · {nome}"), "Petrobras"), (med(f"Mediana · {nome}"), "Mediana dos pares"),
                                        (med(f"Posição · {nome}"), "Posição da Petrobras")]}, nome, CARTAO_DUPLO))
     for cod, (nome, _, _), x, w in [("b1", IND_MEDIDAS[0], 20, 410), ("b2", IND_MEDIDAS[3], 440, 410), ("b3", IND_MEDIDAS[2], 860, 400)]:
-        p.add(cod, "clusteredBarChart", x, 228, w, 226, {"Category": [(E, "Empresa")], "Y": [med(nome)], "Tooltips": TT},
+        # selo do próprio indicador no tooltip ([Selo QA] sozinho olharia todos os indicadores da empresa)
+        p.add(cod, "clusteredBarChart", x, 228, w, 256, {"Category": [(E, "Empresa")], "Y": [med(nome)],
+                                                          "Tooltips": [(med(f"Selo · {nome}"), "Selo de qualidade")]},
               {"b1": "Margem EBITDA (%) por empresa", "b2": "Dívida líquida / EBITDA TTM (x)", "b3": "Fluxo de caixa livre (US$ bi)"}[cod],
               junta(cor_por_medida("Cor Destaque"), ROTULOS, BARRAS_7), ordem=(med(nome), "Descending"))
-    l1 = p.add("l1", "lineChart", 20, 458, 830, 252, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [med("Margem EBITDA (%)")]},
+    l1 = p.add("l1", "lineChart", 20, 490, 830, 222, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [med("Margem EBITDA (%)")]},
                "Evolução da margem EBITDA (%) — série completa", cores_por_empresa())
-    l2 = p.add("l2", "clusteredColumnChart", 860, 458, 400, 252, {"Category": [(P, "Trimestre")], "Y": [med("Brent Médio (US$/bbl)")]},
+    l2 = p.add("l2", "clusteredColumnChart", 860, 490, 400, 222, {"Category": [(P, "Trimestre")], "Y": [med("Brent Médio (US$/bbl)")]},
                "Contexto: Brent médio (US$/bbl)", junta(cor_fixa("#6B7C8C"), ROTULOS))
     p.sem_filtro(sp, l1, l2)
     ps.append(p)
@@ -477,10 +483,13 @@ def paginas():
               "Valor por empresa no período", junta(cor_por_medida("Cor Destaque"), ROTULOS, BARRAS_7), ordem=(med("Valor Validado"), "Descending"))
     ln = p.add("l", "lineChart", 650, 86, 610, 300, {"Category": [(P, "Trimestre")], "Series": [(E, "Empresa")], "Y": [(med("Valor Validado"), "Valor")]},
               "Evolução trimestral", cores_por_empresa())
-    m = p.add("m", "pivotTable", 20, 396, 1240, 310, {"Rows": [(col("dim_empresa", "nome"), "Empresa")], "Columns": [(P, "Trimestre")],
+    m = p.add("m", "pivotTable", 20, 396, 620, 310, {"Rows": [(col("dim_empresa", "nome"), "Empresa")], "Columns": [(P, "Trimestre")],
                                                        "Values": [(med("Valor Validado"), "Valor")]},
               "Série trimestral (valor validado)", junta(SEM_TOTAIS, GRADE))
-    p.sem_filtro(sp, ln, m)
+    pm = p.add("pm", "tableEx", 650, 396, 610, 310, {"Values": [(P, "Trimestre"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana dos pares"),
+                                                              (med("Δ Petrobras vs. Mediana"), "Δ vs. mediana"), (med("Posição Petrobras (de N)"), "Posição")]},
+              "Petrobras vs. mediana dos pares, trimestre a trimestre", junta(TABELA_SEM_TOTAL, GRADE_TAB), ordem=(P, "Ascending"))
+    p.sem_filtro(sp, ln, m, pm)
     ps.append(p)
 
     # 3 — Matriz de leitura
@@ -489,11 +498,11 @@ def paginas():
     p.slicer("sp", P, 900, 12, 170, 60, "Período", unico=True, padrao=ULT, sincroniza="Periodo")
     p.slicer("su", U, 1080, 12, 180, 60, "Universo", unico=True, padrao=UNI_POC, sincroniza="Universo")
     p.subtitulo(20, 52, 860)
-    p.add("m", "pivotTable", 20, 86, 1240, 330, {"Rows": [(IN, "Indicador")], "Columns": [(E, "Empresa")], "Values": [(med("Valor Validado"), "Valor")]},
-          "Indicador × empresa (valores validados)", junta(SEM_TOTAIS, GRADE))
-    p.add("d", "tableEx", 20, 426, 600, 280, {"Values": [(IN, "Indicador"), (col("dim_indicador", "unidade"), "Unidade"),
+    p.add("m", "pivotTable", 20, 86, 1240, 344, {"Rows": [(IN, "Indicador")], "Columns": [(E, "Empresa")], "Values": [(med("Valor Validado"), "Valor")]},
+          "Indicador × empresa (valores validados)", junta(SEM_TOTAIS, GRADE_MATRIZ))
+    p.add("d", "tableEx", 20, 438, 600, 270, {"Values": [(IN, "Indicador"), (col("dim_indicador", "unidade"), "Unidade"),
                                                          (col("dim_indicador", "formula"), "Fórmula")]}, "Definições", GRADE_TAB)
-    p.add("pp", "tableEx", 630, 426, 630, 280, {"Values": [(IN, "Indicador"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
+    p.add("pp", "tableEx", 630, 438, 630, 270, {"Values": [(IN, "Indicador"), (med("Valor Petrobras"), "Petrobras"), (med("Mediana Pares"), "Mediana pares"),
                                                             (med("Δ Petrobras vs. Mediana"), "Δ vs. mediana"),
                                                             (med("Posição Petrobras (de N)"), "Posição")]}, "Petrobras vs. mediana dos pares", junta(TABELA_SEM_TOTAL, GRADE_TAB))
     ps.append(p)
