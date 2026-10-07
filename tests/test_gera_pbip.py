@@ -45,3 +45,13 @@ def test_linhas_tem_cor_fixa_para_as_sete_empresas():
         cods = {s["selector"]["data"][0]["scopeId"]["Comparison"]["Right"]["Literal"]["Value"].strip("'")
                 for s in v["visual"]["objects"]["dataPoint"]}
         assert cods == {"PBR", "XOM", "SHEL", "EQNR", "CVX", "BP", "TTE"}
+
+
+def test_tooltip_das_barras_usa_o_selo_do_proprio_indicador():
+    ps = g.paginas()
+    visao = next(p for p in ps if p.nome == "visao")
+    barras = [v for v in visao.visuais if v["visual"]["visualType"] == "clusteredBarChart"]
+    assert len(barras) == 3
+    for v in barras:
+        tt = v["visual"]["query"]["queryState"]["Tooltips"]["projections"][0]["field"]["Measure"]["Property"]
+        assert tt.startswith("Selo · ")
