@@ -481,7 +481,7 @@ footer a:hover{text-decoration:underline;}
   <div class="section-head">
     <div>
       <h2>Séries históricas</h2>
-      <p>Evolução anual dos indicadores preenchidos no campo <code>historico</code> do JSON.</p>
+      <p>Evolução trimestre a trimestre, incluindo os indicadores derivados calculados para cada período — margem, conversão de caixa e intensidade de capex, não só os valores absolutos.</p>
     </div>
     <select class="ctl" id="selHist"></select>
   </div>
@@ -773,8 +773,10 @@ const SECOES = [
 
 function renderMeta(){
   const ref = DATA.referencia;
-  const d = ref.data_consulta.split('-').reverse().join('/');
-  document.getElementById('badgeData').textContent = 'Dados em ' + d;
+  // data_consulta e a coleta ORIGINAL dos fundamentos e nao acompanha as
+  // atualizacoes; usar ela no badge afirmava uma data ja falsa por meses.
+  const d = (ref.atualizado_em || ref.data_consulta).split('-').reverse().join('/');
+  document.getElementById('badgeData').textContent = 'Atualizado em ' + d;
   document.getElementById('badgeVersao').textContent = 'v' + (ref.versao_dados || '—');
   const nDeriv = Object.values(METRICAS).filter(m => m.derivado).length;
   document.getElementById('badgeCobertura').textContent =
@@ -1286,7 +1288,16 @@ function renderHeat(){
 /* ==========================================================================
    Séries históricas (opcional)
    ========================================================================== */
-const HIST_METRICAS = ['receita','lucro_liquido','ebitda','fluxo_caixa_operacional','fcf','capex','divida_liquida','producao_kboed'];
+const HIST_PRIMARIAS = ['receita','lucro_liquido','ebitda','fluxo_caixa_operacional','fcf','capex','divida_liquida','producao_kboed'];
+/* Os derivados do histórico vêm do build (meta_build.derivados_historico), não
+   de lista fixa aqui: um derivado novo no histórico aparece no seletor sem
+   precisar tocar neste arquivo. Antes o histórico oferecia só campos primários,
+   então o leitor via o nível de hoje e nunca a tendência de margem ou de
+   conversão de caixa — a leitura que, num setor cíclico, separa oscilação de
+   preço de erosão estrutural. */
+const HIST_METRICAS = HIST_PRIMARIAS.concat(
+  (DATA.meta_build.derivados_historico || []).filter(k => METRICAS[k] && !HIST_PRIMARIAS.includes(k))
+);
 
 function renderHistorico(){
   const sec = document.getElementById('historico');
@@ -1306,7 +1317,9 @@ function renderHistorico(){
 
   const vis = empresasVisiveis().filter(e => (e.historico || []).length);
   const periodos = [...new Set(vis.flatMap(e => e.historico.map(h => h.periodo)))].sort();
-  document.getElementById('histTitulo').textContent = METRICAS[STATE.hist].label + ' — evolução anual';
+  document.getElementById('histTitulo').textContent =
+    METRICAS[STATE.hist].label + ' — evolução trimestral' +
+    (METRICAS[STATE.hist].derivado ? ' · derivado de cada trimestre' : '');
   if(!chartsOk) return;
 
   make('chHist', {
@@ -1317,7 +1330,11 @@ function renderHistorico(){
         label:e.ticker,
         data: periodos.map(per => {
           const h = e.historico.find(x => x.periodo === per);
-          return h ? (h[STATE.hist] ?? null) : null;
+          if(!h) return null;
+          const v = h[STATE.hist];
+          if(v !== undefined && v !== null) return v;
+          const dv = h.derivados;
+          return (dv && dv[STATE.hist] !== undefined) ? dv[STATE.hist] : null;
         }),
         borderColor: COLORS[e.ticker],
         backgroundColor: hex2rgba(COLORS[e.ticker], .1),
@@ -1440,13 +1457,14 @@ const FORMULAS = [
   ['Dividendos estimados', 'market cap × dividend yield'],
   ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos estimados'],
   ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1 — aqui o ×4 é proposital: mede o ritmo do trimestre isolado'],
-  ['Scores do radar', 'normalização min-max 0–100 entre as sete empresas'],
+  ['ROE e ROA', 'no trimestre: lucro dos últimos 12 meses ÷ patrimônio (ou ativos) do fim do período. No ano fiscal vêm da fonte padronizada, em base própria — <b>as duas colunas não são comparáveis entre si</b>'],
+  ['Scores do radar', 'normalização min-max 0–100 sobre as sete empresas, fixa no build. Mostra posição relativa, não magnitude: o melhor é sempre 100 e o pior sempre 0, com dispersão de 2x ou de 5x'],
 ];
 
 function renderFooter(){
   const ref = DATA.referencia;
-  let html = `<h4>Metodologia</h4>Consulta em ${ref.data_consulta}. Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${ref.periodo_trimestral}. Fonte principal: ${ref.fonte_principal}.`;
-  if(ref.atualizado_em) html += ` Última revisão dos dados: ${ref.atualizado_em} (versão ${ref.versao_dados}).`;
+  let html = `<h4>Metodologia</h4>Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${ref.periodo_trimestral}. Fonte principal: ${ref.fonte_principal}.`;
+  html += ` Fundamentos coletados em ${ref.data_consulta} e revisados a cada balanço; dados de mercado atualizados em ${ref.atualizado_em} (versão ${ref.versao_dados}).`;
 
   html += '<h4>Indicadores derivados</h4><div class="formula-grid">';
   FORMULAS.forEach(([n, f]) => html += `<div>${n}: <code>${f}</code></div>`);
