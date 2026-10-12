@@ -44,11 +44,18 @@ FATOR_ANUAL = {"fy2025": 1, "q_recente": 4}
 
 
 def dias_do_trimestre(rotulo: str) -> int:
-    """Dias corridos do trimestre a partir de um rótulo como "Q1 2026"."""
-    m = re.search(r"Q([1-4])\s*(\d{4})", str(rotulo or ""))
+    """Dias corridos do trimestre a partir do rótulo.
+
+    Aceita as duas formas que o arquivo usa: "Q1 2026" em q_recente.trimestre
+    e "2026-Q1" em historico.periodo. Sem isso os indicadores por boe do
+    histórico cairiam no padrão de 90 dias e sairiam até 2% errados.
+    """
+    texto = str(rotulo or "")
+    m = re.search(r"Q([1-4])\s*(\d{4})", texto) or re.search(r"(?<!\d)(\d{4})-Q([1-4])", texto)
     if not m:
         return DIAS_PERIODO["q_recente"]
-    tri, ano = int(m.group(1)), int(m.group(2))
+    a, b = m.group(1), m.group(2)
+    tri, ano = (int(a), int(b)) if len(a) == 1 else (int(b), int(a))
     meses = range(3 * tri - 2, 3 * tri + 1)
     return sum(calendar.monthrange(ano, mes)[1] for mes in meses)
 
@@ -227,6 +234,41 @@ def derivar_periodo(empresa, period_key, ttm=None):
     }
 
 
+# Indicadores derivaveis de um trimestre isolado -- razoes entre campos do
+# proprio periodo. Nao entram aqui os que exigem estoque de balanco ou janela
+# de 12 meses (ND/EBITDA, FCF yield): com 4 trimestres de historico, o TTM movel
+# so existiria para o ultimo deles, e uma serie com 1 de 4 pontos nao e serie.
+def derivar_historico(empresa):
+    """Camada derivada para cada trimestre do histórico.
+
+    O histórico guardava apenas campos primários, então margem, conversão de
+    caixa e intensidade de capex existiam só para o período corrente: o leitor
+    via o NÍVEL de hoje e nunca a TENDÊNCIA. Para um setor cíclico essa é a
+    leitura que separa oscilação de preço de erosão estrutural -- nos dados do
+    2T26, a margem EBITDA da ExxonMobil cai de 21,3% para 14,5% em quatro
+    trimestres enquanto o capex/FCO sobe de 54% para 74%.
+
+    Tudo sai dos campos que já estão no arquivo; nada é estimado.
+    """
+    for h in empresa.get("historico") or []:
+        receita = h.get("receita")
+        ebitda = h.get("ebitda")
+        fcf = h.get("fcf")
+        fco = h.get("fluxo_caixa_operacional")
+        capex = h.get("capex")
+        prod = h.get("producao_kboed")
+        dias = dias_do_trimestre(h.get("periodo"))
+        boe = None if prod is None else prod * 1000.0 * dias
+        h["derivados"] = {
+            "margem_ebitda_pct": arred(pct(ebitda, receita)),
+            "margem_liquida_pct": arred(pct(h.get("lucro_liquido"), receita)),
+            "conversao_fcf_pct": arred(pct(fcf, ebitda)),
+            "capex_fco_pct": arred(pct(None if capex is None else abs(capex), fco)),
+            "receita_por_boe_usd": arred(div(None if receita is None else receita * 1e6, boe)),
+            "ebitda_por_boe_usd": arred(div(None if ebitda is None else ebitda * 1e6, boe)),
+        }
+
+
 def derivar_empresa(empresa):
     """Indicadores derivados no nível da empresa (comparação entre períodos)."""
     fy, q = empresa["fy2025"], empresa["q_recente"]
@@ -327,6 +369,7 @@ def enriquecer(data):
             consolidar_margem(e[period_key])
         e["derivados"] = derivar_empresa(e)
         e.setdefault("historico", [])
+        derivar_historico(e)
     calcular_perfil(data["empresas"])
     data["meta_build"] = {
         "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
@@ -334,6 +377,10 @@ def enriquecer(data):
         "fator_anualizacao": FATOR_ANUAL,
         "tem_historico": any(e.get("historico") for e in data["empresas"]),
         "empresas_com_ttm": sum(1 for e in data["empresas"] if e.get("ttm")),
+        "derivados_historico": sorted(
+            {k for e in data["empresas"] for h in (e.get("historico") or [])
+             for k in (h.get("derivados") or {})}
+        ),
     }
     return data
 
