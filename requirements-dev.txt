@@ -1,6 +1,6 @@
 # Ferramentas de desenvolvimento (lint, format, testes)
 ruff>=0.6
-pytest>=8.0
+pytest>=9.1.1
 # pandas: os testes de update_fundamentals montam DataFrames iguais aos que o
 # yfinance devolve. Sem ela aqui, esses testes seriam pulados no CI e a
 # traducao das demonstracoes ficaria sem cobertura onde ela mais quebra.
