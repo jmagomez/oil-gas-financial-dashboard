@@ -28,18 +28,44 @@ from datetime import date
 from typing import Any
 
 RE_TICKER = re.compile(r'"ticker":\s*"([A-Z.]+)"')
+RE_INICIO_EMPRESAS = re.compile(r'"empresas":\s*\[')
 RE_ATUALIZADO_EM = re.compile(r'("atualizado_em":\s*")\d{4}-\d{2}-\d{2}(")')
 
 
 def posicoes_dos_tickers(bruto: str) -> list[tuple[str, int]]:
-    """Posição (fim do casamento) de cada ocorrência de "ticker" no texto, em ordem.
+    """Posição (fim do casamento) de cada "ticker" DENTRO de "empresas", em ordem.
 
-    Levanta ValueError se nenhum ticker for encontrado — sinal de que o
-    arquivo mudou de formato, e melhor falhar alto do que reescrever vazio.
+    Duas salvaguardas, e as duas existem pelo mesmo motivo: o resultado desta
+    função é o pareamento ticker→bloco que as duas rotinas de escrita usam para
+    decidir ONDE gravar. Se a lista sair deslocada, cada empresa recebe o bloco
+    da seguinte — e isso não quebra nada visível: o arquivo continua JSON
+    válido, nenhum campo some, e só os números ficam trocados entre companhias.
+
+    1. A busca começa no início de `"empresas"`, não do arquivo. Qualquer chave
+       `"ticker"` em `referencia` (um registro de exceções, um mapa de ADS, uma
+       nota estruturada) entraria na lista antes das empresas e deslocaria tudo.
+    2. A sequência encontrada no texto é conferida contra a estrutura do JSON.
+       Qualquer `"ticker"` extra DENTRO de uma empresa (em `proveniencia`, por
+       exemplo) desloca do mesmo jeito, e o recorte sozinho não pegaria.
+
+    Levanta ValueError nos dois casos — reescrever com pareamento duvidoso é
+    pior do que não reescrever.
     """
-    posicoes = [(m.group(1), m.end()) for m in RE_TICKER.finditer(bruto)]
+    inicio = RE_INICIO_EMPRESAS.search(bruto)
+    if inicio is None:
+        raise ValueError('chave "empresas" nao encontrada no JSON; formato inesperado')
+
+    posicoes = [(m.group(1), m.end()) for m in RE_TICKER.finditer(bruto, inicio.end())]
     if not posicoes:
         raise ValueError("nenhum ticker encontrado no JSON; formato inesperado")
+
+    esperados = [e["ticker"] for e in json.loads(bruto)["empresas"]]
+    if [t for t, _ in posicoes] != esperados:
+        raise ValueError(
+            f'sequencia de "ticker" no texto {[t for t, _ in posicoes]} nao bate com as '
+            f"empresas do JSON {esperados}: o pareamento ticker->bloco ficaria deslocado "
+            "e trocaria dados entre empresas"
+        )
     return posicoes
 
 
