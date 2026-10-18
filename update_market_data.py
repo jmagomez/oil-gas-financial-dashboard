@@ -38,6 +38,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import escrita_cirurgica as ec
+
 RAIZ = Path(__file__).resolve().parent
 JSON_DADOS = RAIZ / "indicadores_oleo_gas.json"
 
@@ -309,21 +311,15 @@ def _formata_numero(campo: str, valor: float | int) -> str:
 
 
 def serializa_mercado(bloco: dict[str, float | int]) -> str:
-    partes = [f'"{c}": {_formata_numero(c, bloco[c])}' for c in ORDEM_MERCADO if c in bloco]
-    # Preserva eventuais chaves extras que nao estejam na ordem canonica.
-    partes += [f'"{c}": {json.dumps(v, ensure_ascii=False)}' for c, v in bloco.items() if c not in ORDEM_MERCADO]
-    return "{" + ", ".join(partes) + "}"
+    return ec.serializa_bloco_canonico(bloco, ORDEM_MERCADO, formata=_formata_numero)
 
 
 _RE_MERCADO = re.compile(r'("mercado":\s*)\{[^{}]*\}')
-_RE_TICKER = re.compile(r'"ticker":\s*"([A-Z.]+)"')
 
 
 def reescreve_json(bruto: str, finais: dict[str, dict[str, float | int]]) -> str:
     """Substitui apenas as linhas "mercado" de cada empresa, na ordem do arquivo."""
-    posicoes = [(m.group(1), m.end()) for m in _RE_TICKER.finditer(bruto)]
-    if not posicoes:
-        raise ValueError("nenhum ticker encontrado no JSON; formato inesperado")
+    posicoes = ec.posicoes_dos_tickers(bruto)
 
     saida = bruto
     # De tras para frente: assim os offsets ja calculados nao se deslocam.
@@ -339,12 +335,9 @@ def reescreve_json(bruto: str, finais: dict[str, dict[str, float | int]]) -> str
 
 def atualiza_datas(bruto: str, hoje: date) -> str:
     """Sincroniza a data de revisao e a nota que cita o snapshot de mercado."""
-    iso, br = hoje.isoformat(), hoje.strftime("%d/%m/%Y")
-    bruto = re.sub(r'("atualizado_em":\s*")\d{4}-\d{2}-\d{2}(")', rf"\g<1>{iso}\g<2>", bruto)
-    bruto = re.sub(
-        r"(snapshot' de mercado em )\d{2}/\d{2}/\d{4}", rf"\g<1>{br}", bruto
-    )
-    return bruto
+    bruto = ec.atualiza_campo_data(bruto, hoje)
+    br = hoje.strftime("%d/%m/%Y")
+    return re.sub(r"(snapshot' de mercado em )\d{2}/\d{2}/\d{4}", rf"\g<1>{br}", bruto)
 
 
 # ---------------------------------------------------------------------------
