@@ -20,7 +20,6 @@ sys.path.insert(0, str(RAIZ))
 
 import update_market_data as umd  # noqa: E402
 
-
 SNAPSHOT = RAIZ / "tests" / "fixtures" / "indicadores_snapshot.json"
 
 
@@ -172,7 +171,7 @@ def test_reescrita_muda_so_a_linha_de_mercado(dados, bruto):
     novo = umd.reescreve_json(bruto, finais)
     difs = [
         (a, b)
-        for a, b in zip(bruto.splitlines(), novo.splitlines())
+        for a, b in zip(bruto.splitlines(), novo.splitlines(), strict=True)
         if a != b
     ]
     assert len(difs) == 1
@@ -184,7 +183,7 @@ def test_reescrita_preserva_todos_os_dados_fundamentais(dados, bruto):
     cot = {e["ticker"]: _cotacao(preco_acao=e["mercado"]["preco_acao"] * 1.1) for e in dados["empresas"]}
     finais, _ = umd.aplica_cotacoes(dados, cot)
     novo = json.loads(umd.reescreve_json(bruto, finais))
-    for antes, depois in zip(dados["empresas"], novo["empresas"]):
+    for antes, depois in zip(dados["empresas"], novo["empresas"], strict=True):
         assert antes["fy2025"] == depois["fy2025"]
         assert antes["q_recente"] == depois["q_recente"]
         assert antes["fontes"] == depois["fontes"]
@@ -206,7 +205,7 @@ def test_serializacao_reproduz_a_linha_original_byte_a_byte(dados, bruto):
     """
     originais = re.findall(r'"mercado": (\{[^{}]*\})', bruto)
     assert len(originais) == len(dados["empresas"])
-    for empresa, texto in zip(dados["empresas"], originais):
+    for empresa, texto in zip(dados["empresas"], originais, strict=True):
         assert umd.serializa_mercado(empresa["mercado"]) == texto
 
 
@@ -265,8 +264,9 @@ def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
     }
     saida = umd.reescreve_json(vivo, finais)
     difs = [
-        l for l in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
-        if l.startswith(("-", "+")) and not l.startswith(("---", "+++"))
+        linha
+        for linha in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
+        if linha.startswith(("-", "+")) and not linha.startswith(("---", "+++"))
     ]
     # Uma linha removida e uma adicionada: so o bloco "mercado" do XOM.
     assert len(difs) == 2, f"formato do arquivo vivo mudou: {len(difs)} linhas afetadas"
