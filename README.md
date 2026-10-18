@@ -19,6 +19,7 @@ Os dados de mercado (cotação, market cap, P/E, dividend yield e EV/EBITDA) sã
 - `build_dashboard.py` — calcula os derivados, valida os números e gera o HTML e o CSV.
 - `update_market_data.py` — rotina que atualiza só os dados de mercado (ver abaixo).
 - `update_fundamentals.py` — rotina que rotaciona o trimestre quando sai um balanço novo.
+- `escrita_cirurgica.py` — primitivas de escrita compartilhadas pelas duas rotinas acima: achar cada ticker no JSON, serializar um bloco em uma linha na ordem canônica, sincronizar `atualizado_em`. Existe para que o diff de uma atualização continue pequeno (algumas linhas, não o arquivo inteiro reformatado).
 - `build_email.py` — corpo do e-mail diário com o retrato do fechamento.
 - `requirements-market.txt` — dependência das rotinas de dados (`yfinance`).
 - `tests/` — suíte `pytest`: fórmulas derivadas, base de 12 meses, histórico derivado, rotinas de mercado e de fundamentos, corpo do e-mail e camada de acessibilidade.

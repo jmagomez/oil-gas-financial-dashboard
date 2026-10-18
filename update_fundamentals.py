@@ -46,6 +46,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import escrita_cirurgica as ec
+
 RAIZ = Path(__file__).resolve().parent
 JSON_DADOS = RAIZ / "indicadores_oleo_gas.json"
 
@@ -581,14 +583,7 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 def serializa_bloco(bloco: dict[str, Any], ordem: list[str]) -> str:
     """Um dict de escalares em uma linha, na ordem canonica do arquivo."""
-    partes = [f'"{c}": {json.dumps(bloco[c], ensure_ascii=False)}' for c in ordem if c in bloco]
-    # Preserva eventuais chaves extras que nao estejam na ordem canonica.
-    partes += [
-        f'"{c}": {json.dumps(v, ensure_ascii=False)}'
-        for c, v in bloco.items()
-        if c not in ordem
-    ]
-    return "{" + ", ".join(partes) + "}"
+    return ec.serializa_bloco_canonico(bloco, ordem)
 
 
 def serializa_historico(itens: list[dict[str, Any]], recuo: str) -> str:
@@ -599,7 +594,6 @@ def serializa_historico(itens: list[dict[str, Any]], recuo: str) -> str:
     return "[\n" + ",\n".join(linhas) + f"\n{recuo}]"
 
 
-_RE_TICKER = re.compile(r'"ticker":\s*"([A-Z.]+)"')
 _RE_Q_RECENTE = re.compile(r'("q_recente":\s*)\{[^{}]*\}')
 # O bloco opcional de proveniencia e escrito sempre em UMA linha, o que permite
 # reconhece-lo (e substitui-lo em execucoes seguintes) sem regex recursiva.
@@ -635,20 +629,13 @@ def atualiza_referencia(bruto: str, trimestre: str, hoje: date) -> str:
             bruto,
             count=1,
         )
-    return re.sub(
-        r'("atualizado_em":\s*")\d{4}-\d{2}-\d{2}(")',
-        rf"\g<1>{hoje.isoformat()}\g<2>",
-        bruto,
-        count=1,
-    )
+    return ec.atualiza_campo_data(bruto, hoje)
 
 
 def reescreve_json(bruto: str, saida: dict[str, Any], tickers_novos: set[str], hoje: date) -> str:
     """Aplica so os blocos que mudaram, preservando o resto byte a byte."""
     por_ticker = {e["ticker"]: e for e in saida["empresas"]}
-    posicoes = [(m.group(1), m.end()) for m in _RE_TICKER.finditer(bruto)]
-    if not posicoes:
-        raise ValueError("nenhum ticker encontrado no JSON; formato inesperado")
+    posicoes = ec.posicoes_dos_tickers(bruto)
 
     texto = bruto
     # De tras para frente: assim os offsets ja calculados nao se deslocam.
