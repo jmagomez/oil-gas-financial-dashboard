@@ -9,12 +9,11 @@ sem depender de nenhum dos dois regimes de dado.
 
 from __future__ import annotations
 
-import sys
+import json
 from datetime import date
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ))
 
 import escrita_cirurgica as ec  # noqa: E402
 
@@ -22,19 +21,66 @@ import escrita_cirurgica as ec  # noqa: E402
 # ---------------------------------------------------------------------------
 # posicoes_dos_tickers
 # ---------------------------------------------------------------------------
+def _doc(referencia: str = "", empresas: str = '{"ticker": "XOM"}, {"ticker": "CVX"}') -> str:
+    """Documento mínimo com a mesma forma do arquivo vivo.
+
+    A primitiva confere o texto contra a estrutura, então precisa de um JSON de
+    verdade — é essa conferência que impede o pareamento deslocado.
+    """
+    return '{\n  "referencia": {' + referencia + '},\n  "empresas": [' + empresas + "]\n}"
+
+
 def test_encontra_cada_ticker_na_ordem_do_arquivo():
-    texto = '{"ticker": "XOM"}\n{"ticker": "CVX"}\n'
-    posicoes = ec.posicoes_dos_tickers(texto)
+    posicoes = ec.posicoes_dos_tickers(_doc())
     assert [t for t, _ in posicoes] == ["XOM", "CVX"]
 
 
 def test_sem_ticker_no_texto_levanta_valueerror():
     try:
-        ec.posicoes_dos_tickers("{}")
+        ec.posicoes_dos_tickers(_doc(empresas=""))
     except ValueError as exc:
         assert "ticker" in str(exc)
     else:
         raise AssertionError("deveria ter levantado ValueError")
+
+
+def test_sem_chave_empresas_levanta_valueerror():
+    try:
+        ec.posicoes_dos_tickers('{"referencia": {"ticker": "XOM"}}')
+    except ValueError as exc:
+        assert "empresas" in str(exc)
+    else:
+        raise AssertionError("deveria ter levantado ValueError")
+
+
+def test_ticker_em_referencia_nao_desloca_o_pareamento():
+    """Regressão: a busca varria o arquivo inteiro.
+
+    Qualquer chave "ticker" em `referencia` — um registro de exceções, um mapa
+    de ADS, uma nota estruturada — entrava na lista ANTES das empresas e
+    deslocava tudo: cada empresa passava a receber o bloco da seguinte. Não
+    quebrava nada visível (JSON válido, nenhum campo sumia), só trocava os
+    números entre companhias.
+    """
+    posicoes = ec.posicoes_dos_tickers(_doc(referencia='"pendencias": [{"ticker": "BP"}]'))
+    assert [t for t, _ in posicoes] == ["XOM", "CVX"]
+
+
+def test_ticker_extra_dentro_de_uma_empresa_e_recusado():
+    """O recorte em "empresas" sozinho não pega este caso — a conferência pega."""
+    texto = _doc(empresas='{"ticker": "XOM", "nome": "x"}, {"ticker": "CVX"}')
+    texto = texto.replace('"nome": "x"', '"ticker": "XOM"', 1)
+    try:
+        ec.posicoes_dos_tickers(texto)
+    except ValueError as exc:
+        assert "deslocado" in str(exc)
+    else:
+        raise AssertionError("pareamento deslocado deveria ter sido recusado")
+
+
+def test_arquivo_vivo_passa_na_conferencia():
+    vivo = (RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
+    assert len(ec.posicoes_dos_tickers(vivo)) == len(json.loads(vivo)["empresas"])
 
 
 # ---------------------------------------------------------------------------
