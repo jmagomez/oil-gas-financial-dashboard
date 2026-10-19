@@ -10,3 +10,8 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# Raiz no sys.path: os modulos do projeto vivem na raiz, nao num pacote
+# instalavel. Antes cada arquivo de teste fazia seu proprio
+# sys.path.insert -- dez copias da mesma linha, e uma a menos no
+# arquivo que esquecesse.
+pythonpath = ["."]

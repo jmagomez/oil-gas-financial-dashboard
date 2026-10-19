@@ -9,17 +9,14 @@ from __future__ import annotations
 import difflib
 import json
 import re
-import sys
 from datetime import date
 from pathlib import Path
 
 import pytest
 
 RAIZ = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ))
 
 import update_market_data as umd  # noqa: E402
-
 
 SNAPSHOT = RAIZ / "tests" / "fixtures" / "indicadores_snapshot.json"
 
@@ -81,11 +78,11 @@ def test_booleano_nao_e_confundido_com_numero():
 @pytest.mark.parametrize(
     "campo,valor,anterior",
     [
-        ("preco_acao", 0.0, 148.36),          # zero disfarcado de preco
-        ("market_cap", 12.0, 614_870),        # unidade errada (nao convertida)
-        ("pe", 5_000.0, 24.98),               # fora de faixa
-        ("dividend_yield_pct", 40.0, 2.78),   # fracao/percentual trocados
-        ("ev_ebitda", -3.0, 11.68),           # negativo
+        ("preco_acao", 0.0, 148.36),  # zero disfarcado de preco
+        ("market_cap", 12.0, 614_870),  # unidade errada (nao convertida)
+        ("pe", 5_000.0, 24.98),  # fora de faixa
+        ("dividend_yield_pct", 40.0, 2.78),  # fracao/percentual trocados
+        ("ev_ebitda", -3.0, 11.68),  # negativo
     ],
 )
 def test_valores_absurdos_sao_rejeitados(campo, valor, anterior):
@@ -128,8 +125,8 @@ def test_campo_invalido_mantem_valor_anterior(dados):
     pe_novo = round(antes["pe"] * 1.02, 2)
     cot = {"XOM": _cotacao(preco_acao=0.0, pe=pe_novo)}
     finais, rel = umd.aplica_cotacoes(dados, cot)
-    assert finais["XOM"]["preco_acao"] == antes["preco_acao"]   # preservado
-    assert finais["XOM"]["pe"] == pe_novo                       # atualizado
+    assert finais["XOM"]["preco_acao"] == antes["preco_acao"]  # preservado
+    assert finais["XOM"]["pe"] == pe_novo  # atualizado
     assert any(r["campo"] == "preco_acao" for r in rel.rejeicoes)
 
 
@@ -170,18 +167,17 @@ def test_market_cap_e_arredondado_para_inteiro(dados):
 def test_reescrita_muda_so_a_linha_de_mercado(dados, bruto):
     finais, _ = umd.aplica_cotacoes(dados, {"XOM": _cotacao(preco_acao=150.0)})
     novo = umd.reescreve_json(bruto, finais)
-    difs = [
-        (a, b)
-        for a, b in zip(bruto.splitlines(), novo.splitlines())
-        if a != b
-    ]
+    difs = [(a, b) for a, b in zip(bruto.splitlines(), novo.splitlines()) if a != b]
     assert len(difs) == 1
     assert '"mercado"' in difs[0][0]
     assert len(bruto.splitlines()) == len(novo.splitlines())
 
 
 def test_reescrita_preserva_todos_os_dados_fundamentais(dados, bruto):
-    cot = {e["ticker"]: _cotacao(preco_acao=e["mercado"]["preco_acao"] * 1.1) for e in dados["empresas"]}
+    cot = {
+        e["ticker"]: _cotacao(preco_acao=e["mercado"]["preco_acao"] * 1.1)
+        for e in dados["empresas"]
+    }
     finais, _ = umd.aplica_cotacoes(dados, cot)
     novo = json.loads(umd.reescreve_json(bruto, finais))
     for antes, depois in zip(dados["empresas"], novo["empresas"]):
@@ -211,8 +207,14 @@ def test_serializacao_reproduz_a_linha_original_byte_a_byte(dados, bruto):
 
 
 def test_serializacao_nao_perde_chave_desconhecida():
-    bloco = {"market_cap": 1000, "pe": 10.0, "ev_ebitda": 5.0, "dividend_yield_pct": 1.0,
-             "preco_acao": 20.0, "campo_novo": "x"}
+    bloco = {
+        "market_cap": 1000,
+        "pe": 10.0,
+        "ev_ebitda": 5.0,
+        "dividend_yield_pct": 1.0,
+        "preco_acao": 20.0,
+        "campo_novo": "x",
+    }
     assert '"campo_novo": "x"' in umd.serializa_mercado(bloco)
 
 
@@ -260,13 +262,57 @@ def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
     """
     vivo = (RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
     finais = {
-        "XOM": {"market_cap": 1, "pe": 1.0, "ev_ebitda": 1.0,
-                "dividend_yield_pct": 1.0, "preco_acao": 1.0}
+        "XOM": {
+            "market_cap": 1,
+            "pe": 1.0,
+            "ev_ebitda": 1.0,
+            "dividend_yield_pct": 1.0,
+            "preco_acao": 1.0,
+        }
     }
     saida = umd.reescreve_json(vivo, finais)
     difs = [
-        l for l in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
+        l
+        for l in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
         if l.startswith(("-", "+")) and not l.startswith(("---", "+++"))
     ]
     # Uma linha removida e uma adicionada: so o bloco "mercado" do XOM.
     assert len(difs) == 2, f"formato do arquivo vivo mudou: {len(difs)} linhas afetadas"
+
+
+# ---------------------------------------------------------------------------
+# Rede de seguranca pos-escrita: bloco TROCADO entre empresas
+# ---------------------------------------------------------------------------
+def test_rede_de_seguranca_pega_bloco_de_mercado_trocado(tmp_path, monkeypatch):
+    """Troca de blocos entre empresas passa por todas as outras conferencias.
+
+    As checagens de campo nao-mercado comparam fy2025, q_recente, historico,
+    nome, pais e ticker -- todas batem numa troca. O arquivo continua JSON
+    valido e nenhum campo some. So a conferencia do proprio bloco "mercado"
+    contra o calculado para AQUELA empresa pega o caso.
+    """
+    alvo = tmp_path / "d.json"
+    alvo.write_text(
+        (RAIZ / "indicadores_oleo_gas.json").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    base = {
+        e["ticker"]: dict(e["mercado"])
+        for e in json.loads(alvo.read_text(encoding="utf-8"))["empresas"]
+    }
+
+    cotacoes = {t: {**v, "preco_acao": round(v["preco_acao"] * 1.01, 2)} for t, v in base.items()}
+    monkeypatch.setattr(umd, "busca_cotacoes", lambda _tickers: cotacoes)
+
+    # A reescrita grava o bloco do vizinho em cada empresa -- exatamente o
+    # efeito de um pareamento ticker->bloco deslocado.
+    tickers = list(base)
+    original = umd.reescreve_json
+
+    def reescreve_trocando(bruto, finais):
+        rodado = {t: finais[tickers[(i + 1) % len(tickers)]] for i, t in enumerate(tickers)}
+        return original(bruto, rodado)
+
+    monkeypatch.setattr(umd, "reescreve_json", reescreve_trocando)
+
+    with pytest.raises(AssertionError, match="bloco de mercado gravado"):
+        umd.main(["--json", str(alvo)])

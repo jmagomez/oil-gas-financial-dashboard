@@ -397,6 +397,17 @@ def main(argv: list[str] | None = None) -> int:
         for chave in ("fy2025", "q_recente", "historico", "fontes", "nome", "pais", "ticker"):
             if antes.get(chave) != depois.get(chave):
                 raise AssertionError(f"reescrita alterou campo nao-mercado em {antes['ticker']}: {chave}")
+        # A conferencia que faltava, e a unica que pega bloco TROCADO de empresa.
+        # As de cima garantem que nada fora de "mercado" mudou; nenhuma garantia
+        # que o "mercado" gravado em cada empresa e o calculado para ELA. Numa
+        # troca entre companhias todos os campos nao-mercado batem, o arquivo
+        # continua JSON valido, e o erro so aparece quando um analista estranha
+        # o multiplo de alguem.
+        if depois.get("mercado") != finais.get(depois.get("ticker")):
+            raise AssertionError(
+                f"bloco de mercado gravado em {depois.get('ticker')} nao e o calculado para "
+                f"essa empresa: {depois.get('mercado')} != {finais.get(depois.get('ticker'))}"
+            )
 
     if args.dry_run:
         print("\n--dry-run: arquivo NAO foi escrito.")
