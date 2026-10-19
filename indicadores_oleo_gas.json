@@ -10,17 +10,17 @@
       "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total.",
       "BP FY2025: lucro líquido atribuível aos acionistas próximo de zero (US$ 55 milhões) por itens não-recorrentes; margem líquida quase nula no ano.",
       "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
-      "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
+      "ROE e ROA do trimestre são derivados aqui (lucro dos últimos 12 meses ÷ patrimônio ou ativos do fim do período) e não são números oficiais divulgados pelas empresas; os do ano fiscal vêm da fonte padronizada, em base própria — as duas colunas não são comparáveis entre si.",
       "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
-      "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 17/10/2026, iguais para as colunas FY2025 e Q1 2026.",
+      "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 17/10/2026 — o mesmo valor aparece na coluna do ano fiscal e na do trimestre, porque são dados de mercado e não de período contábil.",
       "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
-      "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
+      "Para comparar o trimestre com o ano fiscal, o dashboard usa base de 12 meses (soma dos quatro últimos trimestres). O trimestre × 4 só entra quando a janela de 12 meses não está completa, e nesse caso é sinalizado: num setor cíclico a extrapolação distorce sempre na direção que faz a empresa parecer melhor.",
       "Produção da Equinor em FY2025 não estava disponível de forma consistente na fonte padronizada; os indicadores por boe do ano fiscal usam a produção do trimestre mais recente como proxy nesse caso.",
       "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%."
     ],
     "versao_dados": "1.2",
     "atualizado_em": "2026-10-17",
-    "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
+    "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por trimestre: {\"periodo\":\"2026-Q1\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
   },
   "empresas": [
     {
