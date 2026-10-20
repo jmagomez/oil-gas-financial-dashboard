@@ -34,7 +34,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: pip
 
       - name: Instala dependencias
@@ -77,6 +77,8 @@ jobs:
           git commit -F - <<'MSG'
           dados: atualiza fundamentos
           MSG
+          # Caso alguem tenha empurrado algo na main enquanto o job rodava.
+          git pull --rebase --autostash
           git push
 
       - name: Publica o resumo do run
