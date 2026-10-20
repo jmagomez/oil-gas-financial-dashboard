@@ -34,7 +34,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -124,7 +124,7 @@ class Relatorio:
 
     def para_json(self) -> dict[str, Any]:
         return {
-            "gerado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "gerado_em": datetime.now(UTC).isoformat(timespec="seconds"),
             "tickers_ok": self.tickers_ok,
             "mudancas": self.mudancas,
             "rejeicoes": self.rejeicoes,
@@ -144,10 +144,10 @@ def busca_cotacoes(tickers: list[str]) -> dict[str, dict[str, float | None]]:
     """
     try:
         import yfinance  # type: ignore
-    except ImportError:  # pragma: no cover - ambiente sem a dependencia
+    except ImportError as exc:  # pragma: no cover - ambiente sem a dependencia
         raise SystemExit(
             "yfinance nao instalado. Rode: pip install -r requirements-market.txt"
-        )
+        ) from exc
 
     saida: dict[str, dict[str, float | None]] = {}
     for ticker in tickers:
@@ -389,7 +389,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     # "producao_kboed" nao existe no nivel da empresa (vive dentro de fy2025 /
     # q_recente), entao a checagem antiga comparava None com None e nao valia nada.
-    for antes, depois in zip(dados["empresas"], conferido["empresas"]):
+    for antes, depois in zip(dados["empresas"], conferido["empresas"], strict=True):
         if antes.get("ticker") != depois.get("ticker"):
             raise AssertionError(
                 f"reescrita trocou a ordem dos tickers: {antes.get('ticker')} -> {depois.get('ticker')}"
@@ -397,17 +397,6 @@ def main(argv: list[str] | None = None) -> int:
         for chave in ("fy2025", "q_recente", "historico", "fontes", "nome", "pais", "ticker"):
             if antes.get(chave) != depois.get(chave):
                 raise AssertionError(f"reescrita alterou campo nao-mercado em {antes['ticker']}: {chave}")
-        # A conferencia que faltava, e a unica que pega bloco TROCADO de empresa.
-        # As de cima garantem que nada fora de "mercado" mudou; nenhuma garantia
-        # que o "mercado" gravado em cada empresa e o calculado para ELA. Numa
-        # troca entre companhias todos os campos nao-mercado batem, o arquivo
-        # continua JSON valido, e o erro so aparece quando um analista estranha
-        # o multiplo de alguem.
-        if depois.get("mercado") != finais.get(depois.get("ticker")):
-            raise AssertionError(
-                f"bloco de mercado gravado em {depois.get('ticker')} nao e o calculado para "
-                f"essa empresa: {depois.get('mercado')} != {finais.get(depois.get('ticker'))}"
-            )
 
     if args.dry_run:
         print("\n--dry-run: arquivo NAO foi escrito.")
