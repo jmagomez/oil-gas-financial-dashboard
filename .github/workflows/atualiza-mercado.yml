@@ -47,9 +47,13 @@ jobs:
 
       - name: Atualiza cotacao, market cap, P/E, dividend yield e EV/EBITDA
         run: |
+          # pipefail: sem ele um erro na rotina sairia como sucesso atraves do
+          # pipe para o tee. Mesmo cuidado de atualiza-fundamentos.yml.
+          set -o pipefail
           python3 update_market_data.py \
             --relatorio "$RUNNER_TEMP/relatorio-mercado.json" \
-            ${{ inputs.dry_run && '--dry-run' || '' }}
+            ${{ inputs.dry_run && '--dry-run' || '' }} \
+            | tee "$RUNNER_TEMP/saida-mercado.txt"
 
       - name: Regenera HTML e CSV
         run: python3 build_dashboard.py
@@ -77,22 +81,17 @@ jobs:
             exit 0
           fi
 
-          RESUMO=$(python3 - "$RUNNER_TEMP/relatorio-mercado.json" <<'PY'
-          import json, sys
-
-          rel = json.load(open(sys.argv[1], encoding="utf-8"))
-          linhas = []
-          for m in sorted(rel["mudancas"], key=lambda x: (x["ticker"], x["campo"])):
-              var = f" ({m['var_pct']:+.2f}%)" if m["var_pct"] is not None else ""
-              linhas.append(f"{m['ticker']} {m['campo']}: {m['antes']} -> {m['depois']}{var}")
-          for r in rel["rejeicoes"]:
-              linhas.append(f"[rejeitado] {r['ticker']} {r['campo']}={r['valor']}: {r['motivo']}")
-          for f in rel["falhas"]:
-              linhas.append(f"[sem dado] {f['ticker']}: {f['motivo']}")
-          print("\n".join(linhas))
-          PY
-          )
-
+          # O corpo do commit e a propria saida da rotina, capturada com tee no
+          # passo acima -- mesmo padrao de atualiza-fundamentos.yml.
+          #
+          # Antes havia aqui um heredoc Python que reconstruia esse resumo a
+          # partir do relatorio JSON, repetindo a ordenacao, o formato do
+          # percentual e os tres lacos de Relatorio.resumo(). Era uma segunda
+          # implementacao, sem teste nenhum, rodando DEPOIS do arquivo ja
+          # escrito: qualquer renomeacao em para_json() passava verde na suite
+          # e estourava aqui, com o dado gravado e nao commitado.
+          # tail -n +2 descarta so a linha "Consultando N tickers: ...".
+          RESUMO=$(tail -n +2 "$RUNNER_TEMP/saida-mercado.txt")
           git commit -m "dados: atualiza mercado ($(date -u +%d/%m/%Y))" -m "$RESUMO"
           # Caso alguem tenha empurrado algo na main enquanto o job rodava.
           git pull --rebase --autostash
