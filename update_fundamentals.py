@@ -3,7 +3,7 @@
 
 Irmao de update_market_data.py, para o outro regime de dado:
 
-    update_market_data.py  -> preco, market cap, P/E, yield   (muda todo pregao)
+    update_market_data.py  -> preco, market cap, P/E, dividend yield   (muda todo pregao)
     update_fundamentals.py -> receita, EBITDA, caixa, divida  (muda a cada balanco)
 
 O que faz quando uma empresa divulga um trimestre novo:
@@ -40,9 +40,8 @@ import argparse
 import calendar
 import json
 import re
-import sys
 from dataclasses import dataclass, field
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
@@ -195,7 +194,7 @@ class Relatorio:
                 )
         else:
             linhas.append("Nenhum trimestre novo divulgado.")
-        for rotulo, itens, titulo in (
+        for _rotulo, itens, titulo in (
             ("rejeicoes", self.rejeicoes, "campo(s) rejeitado(s)"),
             ("divergencias", self.divergencias, "divergencia(s) com o dado curado"),
             ("falhas", self.falhas, "empresa(s) sem dado"),
@@ -209,7 +208,7 @@ class Relatorio:
 
     def para_json(self) -> dict[str, Any]:
         return {
-            "gerado_em": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "gerado_em": datetime.now(UTC).isoformat(timespec="seconds"),
             "novos": self.novos,
             "sem_novidade": self.sem_novidade,
             "divergencias": self.divergencias,
@@ -229,8 +228,10 @@ def busca_fundamentos(tickers: list[str]) -> dict[str, dict[str, Any]]:
     """
     try:
         import yfinance  # type: ignore
-    except ImportError:  # pragma: no cover - ambiente sem a dependencia
-        raise SystemExit("yfinance nao instalado. Rode: pip install -r requirements-market.txt")
+    except ImportError as exc:  # pragma: no cover - ambiente sem a dependencia
+        raise SystemExit(
+            "yfinance nao instalado. Rode: pip install -r requirements-market.txt"
+        ) from exc
 
     saida: dict[str, dict[str, Any]] = {}
     for ticker in tickers:

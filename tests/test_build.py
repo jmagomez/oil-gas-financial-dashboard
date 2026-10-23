@@ -179,7 +179,7 @@ def test_csv_gerado_tem_cabecalho_e_derivados():
     # 7 empresas x 2 períodos + cabeçalho
     assert len(linhas) == 15
     idx = bd.CSV_HEADER.index("nd_ebitda_x")
-    assert any(l[idx] not in ("", None) for l in linhas[1:])
+    assert any(linha[idx] not in ("", None) for linha in linhas[1:])
 
 
 def test_historico_e_opcional_e_normalizado(dados):

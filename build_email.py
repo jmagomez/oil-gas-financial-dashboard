@@ -141,7 +141,7 @@ def bloco_tabela(data, variacoes):
     for c, _, casas, origem in CAMPOS:
         if c not in COM_MEDIANA:
             medianas.append(
-                f"<td style='padding:7px 10px;text-align:right;color:#999'>—</td>"
+                "<td style='padding:7px 10px;text-align:right;color:#999'>—</td>"
             )
             continue
         vals = [valor_do_campo(e, c, origem) for e in empresas]
@@ -202,7 +202,7 @@ def montar(relatorio, data, pages_url=""):
     # afirmando no e-mail uma referencia que ja nao era verdade.
     periodo = ref.get("periodo_trimestral", "—")
     atualizado = ref.get("atualizado_em", "—")
-    gerado = relatorio.get("gerado_em", dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"))
+    gerado = relatorio.get("gerado_em", dt.datetime.now(dt.UTC).isoformat(timespec="seconds"))
     link = (
         f"<p style='margin-top:16px'><a href='{html.escape(pages_url)}' style='color:#1a56db'>"
         "Abrir dashboard completo</a></p>"
