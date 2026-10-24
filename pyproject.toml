@@ -1,11 +1,24 @@
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-extend-exclude = ["data", "docs", "output"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
-ignore = ["E501"]
+ignore = [
+  "E501",   # comprimento de linha: o formatter decide
+  "UP017",  # datetime.UTC exige 3.11+; timezone.utc roda em qualquer um dos dois
+]
+
+# Divida localizada, nao ambiente. `ruff check` e bloqueante no CI (um gate que
+# vive vermelho e um gate que todo mundo aprende a ignorar), e estes sao os
+# avisos que restavam nas tres rotinas de coleta quando ele passou a bloquear.
+# A lista e finita e fechavel: ao mexer num desses arquivos, limpe a regra dele
+# e apague a linha daqui. Nao acrescente arquivo novo a esta secao.
+[tool.ruff.lint.per-file-ignores]
+"build_email.py" = ["F541"]                        # f-string sem placeholder
+"update_fundamentals.py" = ["F401", "B007", "B904"]  # import sys ocioso, loop var, raise from
+"update_market_data.py" = ["B904", "B905"]           # raise from, zip sem strict=
+"tests/test_update_fundamentals.py" = ["I001"]        # ordem dos imports
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

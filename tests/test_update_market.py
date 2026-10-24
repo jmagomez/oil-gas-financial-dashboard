@@ -101,6 +101,18 @@ def test_variacao_normal_de_mercado_e_aceita():
     assert ok
 
 
+def test_forcar_destrava_movimento_real():
+    """--forcar existe para o dia em que o salto e' real (split ja refletido)."""
+    ok, _ = umd.valida("preco_acao", 200.0, 100.0, forcar=True)
+    assert ok
+
+
+def test_forcar_nao_desliga_a_faixa_de_plausibilidade():
+    """--forcar libera o limite de variacao, nao aceita numero absurdo."""
+    ok, motivo = umd.valida("preco_acao", 99_999_999.0, 100.0, forcar=True)
+    assert not ok and "faixa" in motivo
+
+
 def test_none_e_rejeitado_sem_motivo_de_alarme():
     ok, motivo = umd.valida("pe", None, 24.98)
     assert not ok and "ausente" in motivo
@@ -167,7 +179,7 @@ def test_market_cap_e_arredondado_para_inteiro(dados):
 def test_reescrita_muda_so_a_linha_de_mercado(dados, bruto):
     finais, _ = umd.aplica_cotacoes(dados, {"XOM": _cotacao(preco_acao=150.0)})
     novo = umd.reescreve_json(bruto, finais)
-    difs = [(a, b) for a, b in zip(bruto.splitlines(), novo.splitlines()) if a != b]
+    difs = [(a, b) for a, b in zip(bruto.splitlines(), novo.splitlines(), strict=True) if a != b]
     assert len(difs) == 1
     assert '"mercado"' in difs[0][0]
     assert len(bruto.splitlines()) == len(novo.splitlines())
@@ -180,7 +192,7 @@ def test_reescrita_preserva_todos_os_dados_fundamentais(dados, bruto):
     }
     finais, _ = umd.aplica_cotacoes(dados, cot)
     novo = json.loads(umd.reescreve_json(bruto, finais))
-    for antes, depois in zip(dados["empresas"], novo["empresas"]):
+    for antes, depois in zip(dados["empresas"], novo["empresas"], strict=True):
         assert antes["fy2025"] == depois["fy2025"]
         assert antes["q_recente"] == depois["q_recente"]
         assert antes["fontes"] == depois["fontes"]
@@ -202,7 +214,7 @@ def test_serializacao_reproduz_a_linha_original_byte_a_byte(dados, bruto):
     """
     originais = re.findall(r'"mercado": (\{[^{}]*\})', bruto)
     assert len(originais) == len(dados["empresas"])
-    for empresa, texto in zip(dados["empresas"], originais):
+    for empresa, texto in zip(dados["empresas"], originais, strict=True):
         assert umd.serializa_mercado(empresa["mercado"]) == texto
 
 
@@ -272,9 +284,9 @@ def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
     }
     saida = umd.reescreve_json(vivo, finais)
     difs = [
-        l
-        for l in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
-        if l.startswith(("-", "+")) and not l.startswith(("---", "+++"))
+        ln
+        for ln in difflib.unified_diff(vivo.splitlines(), saida.splitlines(), lineterm="", n=0)
+        if ln.startswith(("-", "+")) and not ln.startswith(("---", "+++"))
     ]
     # Uma linha removida e uma adicionada: so o bloco "mercado" do XOM.
     assert len(difs) == 2, f"formato do arquivo vivo mudou: {len(difs)} linhas afetadas"

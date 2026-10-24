@@ -8,13 +8,11 @@ tendência que separa oscilação de preço de erosão estrutural.
 Nada aqui é estimado: todos os indicadores saem de razões entre campos do
 próprio trimestre.
 """
-import sys
 from pathlib import Path
 
 import pytest
 
 RAIZ = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(RAIZ))
 
 import build_dashboard as bd  # noqa: E402
 
@@ -43,6 +41,7 @@ def _empresa(historico):
     ("Q2 2026", 91), ("2026-Q2", 91),
     ("Q3 2025", 92), ("2025-Q3", 92),
     ("Q4 2025", 92), ("2025-Q4", 92),
+    ("Q1 2024", 91), ("2024-Q1", 91),   # bissexto: fevereiro com 29
 ])
 def test_dias_aceita_os_dois_formatos_de_rotulo(rotulo, esperado):
     """Sem isto o historico caia no padrao de 90 dias e os US$/boe saiam errados."""
