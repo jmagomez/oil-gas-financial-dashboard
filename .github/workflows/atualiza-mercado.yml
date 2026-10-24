@@ -34,16 +34,19 @@ jobs:
     env:
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
       PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
-      RELATORIO: ${{ runner.temp }}/relatorio-mercado.json
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/prepara-ambiente
         with:
           coleta: "true"
 
+      # O caminho do relatorio usa $RUNNER_TEMP, a variavel de shell, e nao o
+      # contexto ${{ runner.temp }}: o contexto `runner` nao existe no env de
+      # job, so dentro dos steps -- por isso nao da para extrai-lo para uma
+      # variavel la em cima.
       - name: Atualiza cotacao, market cap, P/E, dividend yield e EV/EBITDA
         run: |
-          python3 update_market_data.py --relatorio "$RELATORIO" \
+          python3 update_market_data.py --relatorio "$RUNNER_TEMP/relatorio-mercado.json" \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
       - name: Resume o que mudou
@@ -52,7 +55,7 @@ jobs:
           set -euo pipefail
           {
             echo "texto<<FIM"
-            python3 - "$RELATORIO" <<'PY'
+            python3 - "$RUNNER_TEMP/relatorio-mercado.json" <<'PY'
           import json, sys
 
           rel = json.load(open(sys.argv[1], encoding="utf-8"))
@@ -76,7 +79,7 @@ jobs:
           corpo: ${{ steps.resumo.outputs.texto }}
 
       - name: Gera o corpo do e-mail
-        run: python3 build_email.py --relatorio "$RELATORIO" --pages-url "$PAGES_URL"
+        run: python3 build_email.py --relatorio "$RUNNER_TEMP/relatorio-mercado.json" --pages-url "$PAGES_URL"
 
       - name: Envia o e-mail
         if: ${{ !inputs.dry_run && env.MAIL_USERNAME != '' }}
