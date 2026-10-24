@@ -591,7 +591,6 @@ const METRICAS = {
   dividend_yield_pct: {label:'Dividend yield',                grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, get:(e)=>e.mercado.dividend_yield_pct, melhor:'alto'},
   fcf_yield_pct:      {label:'FCF yield',                     grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.fcf_yield_pct, melhor:'alto'},
   cobertura_dividendo_x:{label:'Cobertura do dividendo (FCF)',grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.cobertura_dividendo_x, melhor:'alto'},
-  payout_fcf_pct:     {label:'Payout sobre FCF',              grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:1, derivado:true, get:(e,p)=>p.derivados.payout_fcf_pct, melhor:'baixo'},
   preco_acao:         {label:'Preço da ação',                 grupo:'Mercado',     tipo:'usd',   fluxo:false, dec:2, get:(e)=>e.mercado.preco_acao, melhor:'alto'},
 };
 
@@ -1455,7 +1454,7 @@ const FORMULAS = [
   ['EV por boe/d', 'EV ÷ produção diária'],
   ['FCF yield', 'FCF dos últimos 12 meses (TTM) ÷ market cap'],
   ['Dividendos estimados', 'market cap × dividend yield'],
-  ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos estimados'],
+  ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos estimados. O payout sobre FCF é <b>100 ÷ cobertura</b> e não aparece como indicador próprio — seria a mesma informação em duas colunas'],
   ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1 — aqui o ×4 é proposital: mede o ritmo do trimestre isolado'],
   ['ROE e ROA', 'no trimestre: lucro dos últimos 12 meses ÷ patrimônio (ou ativos) do fim do período. No ano fiscal vêm da fonte padronizada, em base própria — <b>as duas colunas não são comparáveis entre si</b>'],
   ['Scores do radar', 'normalização min-max 0–100 sobre as sete empresas, fixa no build. Mostra posição relativa, não magnitude: o melhor é sempre 100 e o pior sempre 0, com dispersão de 2x ou de 5x'],

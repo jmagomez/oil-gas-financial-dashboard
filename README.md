@@ -1,6 +1,6 @@
 # Dashboard Financeiro — Óleo & Gás
 
-Dashboard comparativo de **28 indicadores** financeiros, operacionais e de valuation — 17 primários e 11 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
+Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 17 primários e 10 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
 
 Períodos cobertos: ano fiscal **FY2025** (encerrado em 31/12/2025) e o trimestre mais recente divulgado, **Q2 2026** (encerrado em 30/06/2026), com os quatro trimestres anteriores na série histórica. Os fundamentos foram coletados em 20/07/2026 e revisados a cada balanço; a data do último snapshot de mercado está no rodapé do dashboard.
 
@@ -22,6 +22,8 @@ Os dados de mercado (cotação, market cap, P/E, dividend yield e EV/EBITDA) sã
 - `escrita_cirurgica.py` — primitivas de escrita compartilhadas pelas duas rotinas acima: achar cada ticker no JSON, serializar um bloco em uma linha na ordem canônica, sincronizar `atualizado_em`. Existe para que o diff de uma atualização continue pequeno (algumas linhas, não o arquivo inteiro reformatado).
 - `build_email.py` — corpo do e-mail diário com o retrato do fechamento.
 - `requirements-market.txt` — dependência das rotinas de dados (`yfinance`).
+- `CLAUDE.md` — briefing operacional para quem **edita** o código ou os dados: convenções, regras de negócio e a mecânica das rotinas. Este README cobre o que o dashboard mostra; o `CLAUDE.md` cobre como ele é mantido.
+- `.github/actions/` — dois composite actions (`prepara-ambiente`, `publica-artefatos`) que concentram o gate `build → teste → commit` usado pelos três workflows que escrevem nos artefatos gerados.
 - `tests/` — suíte `pytest`: fórmulas derivadas, base de 12 meses, histórico derivado, rotinas de mercado e de fundamentos, corpo do e-mail e camada de acessibilidade.
 
 ## Como atualizar os dados
@@ -36,9 +38,7 @@ Os dados têm dois regimes, e é essa separação que sustenta a automação:
 
 ### Mercado — automático
 
-O workflow `.github/workflows/atualiza-mercado.yml` roda de segunda a sexta às 22:00 UTC (depois do fechamento de NY), busca os dados no Yahoo Finance, regenera HTML e CSV, roda os testes e só então commita. Para rodar na mão: aba **Actions → Atualiza dados de mercado → Run workflow** (tem a opção *dry run*, que mostra o que mudaria sem commitar).
-
-Localmente:
+O workflow `.github/workflows/atualiza-mercado.yml` roda de segunda a sexta às 22:00 UTC (depois do fechamento de NY), busca os dados no Yahoo Finance, regenera HTML e CSV, roda os testes e só então commita. Para rodar na mão: aba **Actions → Atualiza dados de mercado → Run workflow**, que tem a opção *dry run*.
 
 ```bash
 pip install -r requirements-market.txt
@@ -46,31 +46,18 @@ python3 update_market_data.py --dry-run     # simula
 python3 update_market_data.py               # atualiza o JSON
 ```
 
-A rotina é deliberadamente desconfiada da fonte:
-
-- **Faixas de plausibilidade** por campo — um P/E de 5.000 ou um yield de 40% é descartado.
-- **Limite de variação** por atualização (40% para preço e market cap, 70% para múltiplos). Um desdobramento de ações ou uma troca de símbolo produz um número que é válido isoladamente mas pula de patamar; o valor antigo é mantido e a rejeição fica registrada.
-- **Fail-safe campo a campo** — o que não passa na validação não sobrescreve nada. Se um ticker não responde, o bloco inteiro dele fica intacto. A rotina só falha (e deixa o workflow vermelho) se *nenhum* ticker responder, o que indica que a fonte caiu ou mudou de formato.
-- **Escrita cirúrgica** — o JSON é curado à mão, com objetos compactos de uma linha. Em vez de reserializar o arquivo (o que trocaria todas as linhas), a rotina substitui só os blocos `mercado` que mudaram: um commit diário mexe em ~8 linhas e o histórico continua legível.
-- **Conferência pós-escrita** — o resultado é reparseado e comparado com o original para garantir que nenhum campo fundamental foi tocado.
-
-Cada execução guarda um relatório JSON como artefato do Actions (30 dias) com tudo que mudou, foi rejeitado ou falhou. O resumo também vai no corpo da mensagem de commit.
-
-> O dividend yield merece nota: o `yfinance` já devolveu esse campo como fração (`0.0278`) em algumas versões e como percentual (`2.78`) em outras — um erro silencioso de 100×. A rotina prefere calcular o yield a partir do dividendo anual e do preço, que não tem ambiguidade de unidade, e só recorre ao campo pronto como último recurso, desambiguando por magnitude.
+A rotina é deliberadamente desconfiada da fonte: valor fora de faixa de plausibilidade ou com salto de patamar não sobrescreve nada, o valor curado é mantido e a rejeição fica registrada no relatório da execução (artefato do Actions, 30 dias). Ela só falha de verdade se *nenhum* ticker responder. **A mecânica — quais faixas, quais limites, por que a escrita no JSON é cirúrgica e como o dividend yield é desambiguado — está em [`CLAUDE.md`](CLAUDE.md).**
 
 ### Fundamentos — rotina mensal, revisão à mão
 
-O workflow `atualiza-fundamentos.yml` roda no dia 5 de cada mês e **só age em trimestre novo**: se a fonte devolve o mesmo trimestre que já está no arquivo, nada é tocado — dado curado não é sobrescrito em silêncio, e divergência acima de 5% vira aviso no relatório. O disparo manual vem com *simular* marcado por padrão.
-
-Antes de gravar, a rotina confere **coerência entre as demonstrações** (FCF = FCO + capex, EBITDA ≤ receita, margem batendo com lucro/receita), não só faixa por campo: um número plausível no campo errado passa em validação de faixa mas não em identidade contábil. Coerência quebrada descarta a empresa inteira — meio balanço errado é pior que nenhum.
+O workflow `atualiza-fundamentos.yml` roda no dia 5 de cada mês e **só age em trimestre novo**: se a fonte devolve o mesmo trimestre que já está no arquivo, nada é tocado, e divergência acima de 5% vira aviso. Antes de gravar, confere **coerência entre as demonstrações** (FCF = FCO + capex, EBITDA ≤ receita, margem batendo com lucro/receita), não só faixa por campo — um número plausível no campo errado passa na faixa mas não na identidade contábil. O disparo manual vem com *simular* marcado por padrão.
 
 Para editar à mão:
 
 1. Edite `indicadores_oleo_gas.json` (único arquivo de dados a editar manualmente).
-2. Rode `python3 build_dashboard.py`.
-3. Confira os avisos de validação impressos no terminal.
-4. Rode `python3 -m pytest tests -q`.
-5. Faça commit — o workflow `build-dashboard.yml` regenera HTML e CSV, e o GitHub Pages republica o site a partir da `main`.
+2. Rode `python3 build_dashboard.py` e confira os avisos de validação impressos.
+3. Rode `python3 -m pytest`.
+4. Faça commit — `build-dashboard.yml` regenera HTML e CSV, e o GitHub Pages republica a partir da `main`.
 
 ## O que o dashboard faz
 
@@ -80,7 +67,7 @@ Para editar à mão:
 
 | Seção | Conteúdo |
 |---|---|
-| Explorador de indicadores | Qualquer um dos 28 indicadores em colunas, barras horizontais ou participação, com leitura automática do melhor/pior/média |
+| Explorador de indicadores | Qualquer um dos 27 indicadores em colunas, barras horizontais ou participação, com leitura automática do melhor/pior/média |
 | Resultado e geração de caixa | Receita, lucro líquido, EBITDA e FCF — ano fiscal vs. trimestre |
 | Ponte de caixa | Waterfall da receita ao caixa livre por empresa, com o percentual da receita retido em cada etapa |
 | Balanço e rentabilidade | Dívida líquida, ND/EBITDA, ROE vs. ROA, margem líquida vs. margem EBITDA |
@@ -109,12 +96,12 @@ Para editar à mão:
 | Enterprise value | market cap + dívida líquida | Valor da firma, neutro à estrutura de capital |
 | EV por boe/d | EV ÷ produção diária | Quanto o mercado paga pela capacidade instalada |
 | FCF yield | FCF dos últimos 12 meses (TTM) ÷ market cap | Retorno de caixa implícito no preço |
-| Cobertura do dividendo | FCF dos últimos 12 meses (TTM) ÷ (market cap × dividend yield) | Se o dividendo cabe no caixa gerado |
+| Cobertura do dividendo | FCF dos últimos 12 meses (TTM) ÷ (market cap × dividend yield) | Se o dividendo cabe no caixa gerado. O payout sobre FCF é `100 ÷ cobertura` e não existe como indicador próprio — seria a mesma informação em duas colunas |
 | Run-rate do trimestre | (trimestre × 4 ÷ ano fiscal) − 1 | Aceleração ou desaceleração vs. o ano fiscal |
 
 ### Base de 12 meses, não trimestre × 4
 
-Os indicadores que dividem um fluxo por um estoque ou por market cap (ND/EBITDA, FCF yield, cobertura de dividendo, payout) usam a **soma dos quatro últimos trimestres**. Multiplicar um trimestre por 4 extrapola aquele trimestre para o ano inteiro, e num setor cujo resultado acompanha o preço da commodity isso distorce muito: medido nos dados do 2T26 — um trimestre de pico —, o ×4 inflava o FCF yield entre 54% e 176% e subestimava a alavancagem entre 8% e 40%, sempre na direção que faz a empresa parecer melhor.
+Os indicadores que dividem um fluxo por um estoque ou por market cap (ND/EBITDA, FCF yield, cobertura de dividendo) usam a **soma dos quatro últimos trimestres**. Multiplicar um trimestre por 4 extrapola aquele trimestre para o ano inteiro, e num setor cujo resultado acompanha o preço da commodity isso distorce muito: medido nos dados do 2T26 — um trimestre de pico —, o ×4 inflava o FCF yield entre 54% e 176% e subestimava a alavancagem entre 8% e 40%, sempre na direção que faz a empresa parecer melhor.
 
 O ×4 sobrevive em dois lugares, de propósito: como **fallback declarado** quando a empresa não tem os quatro trimestres (o payload registra em `base_12m_ebitda` qual base gerou cada número, e o rótulo do gráfico avisa), e no **run-rate**, onde o ×4 *é* a definição do indicador.
 
@@ -150,7 +137,7 @@ Campos ausentes viram `null` e são pulados nas linhas. Métricas com cobertura 
 
 `build_dashboard.py` avisa (sem bloquear) sobre: lucro maior que receita, EBITDA fora de escala, margem EBITDA acima de 100%, ND/EBITDA acima de 4x, FCF que não cobre o dividendo estimado, produção ausente (uso de proxy), P/E negativo, empresa sem fontes e item de histórico sem `periodo`.
 
-A suíte `pytest` cobre: fórmulas derivadas contra cálculos manuais, a base de 12 meses e seu fallback, os derivados do histórico, a rotina de mercado sem tocar a rede (unidades, rejeição de absurdos, fail-safe por campo e por ticker, escrita cirúrgica), a rotina de fundamentos contra números conferidos à mão, o corpo do e-mail e a camada de acessibilidade.
+A suíte `pytest` cobre as fórmulas derivadas contra cálculos manuais, a base de 12 meses e seu fallback, os derivados do histórico, as duas rotinas de coleta sem tocar a rede, o corpo do e-mail e a camada de acessibilidade. Cada defeito já corrigido tem um teste que o nomeia.
 
 Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapshot congelado — não o arquivo vivo. Assertar sobre o arquivo vivo faria a própria atualização dos dados quebrar a suíte, e a trava "roda os testes antes de commitar" passaria a impedir para sempre o commit que ela deveria proteger. O contrato de **formato** do arquivo vivo continua testado, em `test_update_market.test_formato_do_arquivo_vivo_suporta_escrita_cirurgica`.
 
