@@ -1,0 +1,29 @@
+name: Prepara o ambiente Python
+description: >
+  Python + dependencias, numa versao so. Antes cada workflow declarava a sua:
+  atualiza-fundamentos rodava 3.11 e os outros dois 3.12, para o mesmo codigo e
+  o mesmo pyproject (que declara target-version = py312).
+
+inputs:
+  coleta:
+    description: "true tambem instala yfinance (requirements-market.txt)."
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+        cache: pip
+
+    - shell: bash
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip
+        if [ "${{ inputs.coleta }}" = "true" ]; then
+          pip install -r requirements-market.txt -r requirements-dev.txt
+        else
+          pip install -r requirements-dev.txt
+        fi

@@ -1,0 +1,58 @@
+name: Regenera e publica os artefatos
+description: >
+  Gate unico de publicacao: regenera HTML/CSV a partir do JSON, roda a suite e
+  so entao comita. Os tres workflows que escrevem nos artefatos gerados
+  (atualiza-mercado, atualiza-fundamentos, build-dashboard) passam por aqui.
+
+  Existe porque o bloco estava escrito tres vezes e ja havia divergido: um dos
+  workflows rodava Python 3.11 e os outros dois 3.12 para o mesmo codigo, e so
+  um fazia `git pull --rebase` antes do push -- os outros dois perdiam corrida
+  de push em silencio. Versao, ordem dos passos e tratamento de corrida agora
+  moram num lugar so.
+
+inputs:
+  mensagem:
+    description: "Titulo do commit. Vazio = nao comita (so build + teste)."
+    required: false
+    default: ""
+  corpo:
+    description: "Corpo do commit (opcional)."
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Regenera HTML + CSV a partir do JSON
+      shell: bash
+      run: python3 build_dashboard.py
+
+    # Roda DEPOIS do build: parte da suite confere os artefatos gerados, nao so
+    # as funcoes. Nada e commitado se algo aqui quebrar.
+    - name: Testes
+      shell: bash
+      run: python3 -m pytest
+
+    - name: Comita se algo mudou
+      if: inputs.mensagem != ''
+      shell: bash
+      env:
+        MENSAGEM: ${{ inputs.mensagem }}
+        CORPO: ${{ inputs.corpo }}
+      run: |
+        set -euo pipefail
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add indicadores_oleo_gas.json dashboard_oleo_gas.html indicadores_oleo_gas.csv
+        if git diff --cached --quiet; then
+          echo "Nada mudou -- nenhum commit."
+          exit 0
+        fi
+        if [ -n "$CORPO" ]; then
+          git commit -m "$MENSAGEM" -m "$CORPO"
+        else
+          git commit -m "$MENSAGEM"
+        fi
+        # Caso alguem tenha empurrado algo na main enquanto o job rodava.
+        git pull --rebase --autostash
+        git push
