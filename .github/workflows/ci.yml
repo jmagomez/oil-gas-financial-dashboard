@@ -1,19 +1,27 @@
-# Adicionar como .github/workflows/ci.yml
-# Serve para: oil-gas-financial-dashboard, vendas-liquidos, projeto_bloomberg, resumo-focus-public
 name: CI
+
+# Lint, formatacao e a suite completa.
+#
+# Nao dispara nos caminhos que acionam build-dashboard.yml (o JSON, o template,
+# o build script e os assets): aquele workflow ja roda a mesma suite, e como ele
+# e quem comita os artefatos regenerados, a suite dele e a que precisa ser o
+# gate. As duas juntas rodavam os mesmos ~180 testes em paralelo, duas vezes,
+# em todo push que tocasse o JSON.
 
 on:
   push:
     branches: [main]
     paths-ignore:
-      - "data/**"
-      - "docs/**"
-      - "output/**"
+      - indicadores_oleo_gas.json
+      - dashboard_template.html
+      - build_dashboard.py
+      - assets_a11y.css
+      - assets_a11y.js
+      # Gerados: chegam por commit de bot, nunca sozinhos.
+      - dashboard_oleo_gas.html
+      - indicadores_oleo_gas.csv
+      - "**/*.md"
   pull_request:
-    paths-ignore:
-      - "data/**"
-      - "docs/**"
-      - "output/**"
 
 permissions:
   contents: read
@@ -23,20 +31,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/prepara-ambiente
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Instalar dependencias
-        run: |
-          [ -f requirements.txt ] && pip install -r requirements.txt || true
-          pip install -r requirements-dev.txt
-
-      - name: Lint (ruff) — informativo
-        continue-on-error: true
+      # Bloqueante: as regras selecionadas no pyproject estao em zero. Um gate
+      # que vive vermelho e um gate que todo mundo aprende a ignorar.
+      - name: Lint (ruff)
         run: ruff check --output-format=github .
 
+      # Informativo de proposito: `ruff format` reescreveria 11 arquivos cuja
+      # formatacao compacta e deliberada (ver a linha do CSV em
+      # build_dashboard.py). Adotar o formatter e uma decisao em aberto, nao
+      # divida a pagar num PR de conteudo.
       - name: Formatacao (ruff) — informativo
         continue-on-error: true
         run: ruff format --check .
