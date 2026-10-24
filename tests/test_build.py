@@ -2,12 +2,10 @@
 import csv
 import json
 import pathlib
-import sys
 
 import pytest
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT))
 
 import build_dashboard as bd  # noqa: E402
 
@@ -18,6 +16,24 @@ def dados():
     return bd.enriquecer(raw)
 
 
+def empresa_sintetica(receita, lucro, margem):
+    """Uma empresa minima e completa, para os casos que o snapshot nao cobre."""
+    periodo = {
+        "receita": receita, "lucro_liquido": lucro, "ebitda": receita * 0.2,
+        "margem_liquida_pct": margem, "fluxo_caixa_operacional": 10.0, "fcf": 5.0,
+        "capex": -5.0, "divida_liquida": 10.0, "divida_patrimonio_pct": 10.0,
+        "roe_pct": 1.0, "roa_pct": 1.0, "producao_kboed": 100.0,
+        "trimestre": "Q1 2026", "periodo": "FY2025",
+    }
+    return {
+        "ticker": "TST", "nome": "Teste", "pais": "X",
+        "fy2025": dict(periodo), "q_recente": dict(periodo),
+        "mercado": {"market_cap": 1000.0, "pe": 10.0, "ev_ebitda": 5.0,
+                    "dividend_yield_pct": 2.0, "preco_acao": 50.0},
+        "fontes": ["teste"],
+    }
+
+
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
@@ -26,6 +42,11 @@ def test_div_protege_denominador_zero_e_none():
     assert bd.div(None, 5) is None
     assert bd.div(10, None) is None
     assert bd.div(10, 4) == 2.5
+
+
+def test_dias_do_ano_conta_o_bissexto():
+    assert bd.dias_do_ano("FY2024") == 366
+    assert bd.dias_do_ano("FY2025") == 365
 
 
 def test_pct_converte_para_percentual():
@@ -45,10 +66,18 @@ def test_todas_empresas_ganham_derivados(dados):
 
 
 def test_json_primario_nao_e_alterado_no_disco():
-    """A camada derivada vive só em memória — o arquivo de dados continua limpo."""
-    raw = json.loads((ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    """A camada derivada vive só em memória — o arquivo de dados continua limpo.
+
+    Confere as duas coisas: que nenhum derivado está gravado no arquivo, e que
+    rodar `enriquecer` não escreve nada nele (a troca da margem exibida por
+    `consolidar_margem` acontece no payload, não na fonte).
+    """
+    bruto = (ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
+    raw = json.loads(bruto)
     assert "derivados" not in raw["empresas"][0]["fy2025"]
     assert "meta_build" not in raw
+    bd.enriquecer(json.loads(bruto))
+    assert (ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8") == bruto
 
 
 # --------------------------------------------------------------------------- #
@@ -90,10 +119,54 @@ def test_receita_por_boe_em_ordem_de_grandeza_plausivel(dados):
 
 
 def test_producao_ausente_usa_proxy_do_trimestre(dados):
+    """Sem producao no ano fiscal, o CSV mostrava a coluna VAZIA ao lado de um
+    US$/boe calculado com o proxy do trimestre — quem lesse nao tinha como saber.
+    """
     eqnr = next(e for e in dados["empresas"] if e["ticker"] == "EQNR")
+    d = eqnr["fy2025"]["derivados"]
     assert eqnr["fy2025"]["producao_kboed"] is None
-    assert eqnr["fy2025"]["derivados"]["producao_proxy"] is True
-    assert eqnr["fy2025"]["derivados"]["receita_por_boe_usd"] is not None
+    assert d["producao_proxy"] is True
+    assert d["producao_usada_kboed"] == eqnr["q_recente"]["producao_kboed"]
+    assert d["receita_por_boe_usd"] is not None
+
+
+def test_sem_producao_em_lugar_nenhum_nao_inventa_por_boe():
+    e = empresa_sintetica(1000.0, 100.0, 10.0)
+    e["fy2025"]["producao_kboed"] = None
+    e["q_recente"]["producao_kboed"] = None
+    d = bd.enriquecer({"empresas": [e]})["empresas"][0]["fy2025"]["derivados"]
+    assert d["producao_proxy"] is False
+    assert d["producao_usada_kboed"] is None
+    assert d["receita_por_boe_usd"] is None
+
+
+# --------------------------------------------------------------------------- #
+# Margem exibida: lucro ATRIBUIVEL / receita, nao a margem da fonte
+# --------------------------------------------------------------------------- #
+def test_margem_exibida_e_a_recalculada():
+    """Caso BP FY2025, conferido no 6-K da propria BP (US$ milhoes):
+
+        receita 189.335 | profit for the period 1.295 | nao-controladores 1.240
+        | atribuivel aos acionistas 55
+
+    1.295/189.335 = 0,68% (o que a fonte trazia);  55/189.335 = 0,03%.
+    """
+    p = bd.enriquecer({"empresas": [empresa_sintetica(189335.0, 55.0, 0.68)]})
+    p = p["empresas"][0]["fy2025"]
+    assert p["margem_liquida_pct"] == pytest.approx(0.03, abs=0.005)
+    assert p["margem_liquida_fonte_pct"] == 0.68
+
+
+def test_divergencia_de_margem_e_reportada_sem_descartar_a_fonte():
+    data = bd.enriquecer({"empresas": [empresa_sintetica(189335.0, 55.0, 0.68)]})
+    problemas = bd.validate(data)
+    assert any("margem da fonte" in p and "nao-controladores" in p for p in problemas)
+
+
+def test_margem_ja_coerente_fica_intacta_e_sem_aviso():
+    data = bd.enriquecer({"empresas": [empresa_sintetica(1000.0, 100.0, 10.0)]})
+    assert data["empresas"][0]["fy2025"]["margem_liquida_pct"] == pytest.approx(10.0)
+    assert not any("margem da fonte" in x for x in bd.validate(data))
 
 
 def test_fcf_yield_usa_fcf_anualizado(dados):
@@ -103,25 +176,41 @@ def test_fcf_yield_usa_fcf_anualizado(dados):
     assert q["derivados"]["fcf_yield_pct"] == esperado
 
 
-def test_cobertura_de_dividendo_e_payout_sao_inversos(dados):
+def test_payout_sobre_fcf_nao_volta_como_indicador_proprio(dados):
+    """Guard: payout_fcf_pct era 100 / cobertura_dividendo_x, exatamente.
+
+    Os dois eram publicados lado a lado — duas colunas da tabela, duas do CSV e
+    dois lugares na contagem de indicadores do badge para uma informacao so.
+    Ficou a cobertura, que e a leitura padrao de credito (quantas vezes o caixa
+    cobre o compromisso). Se o payout voltar, que volte por uma razao nova, nao
+    por recalculo acidental da mesma razao.
+    """
     for e in dados["empresas"]:
-        d = e["fy2025"]["derivados"]
-        cob, pay = d["cobertura_dividendo_x"], d["payout_fcf_pct"]
-        if cob and pay:
-            assert abs(cob * pay / 100 - 1) < 0.02, e["ticker"]
+        for per in ("fy2025", "q_recente"):
+            assert "payout_fcf_pct" not in e[per]["derivados"], e["ticker"]
+    assert "payout_fcf_pct" not in bd.CSV_HEADER
 
 
 def test_run_rate_zero_quando_trimestre_e_um_quarto_do_ano():
-    empresa = {
-        "fy2025": {"receita": 400, "ebitda": 100, "lucro_liquido": 40, "fcf": 20,
-                   "divida_liquida": 10, "margem_liquida_pct": 10},
-        "q_recente": {"receita": 100, "ebitda": 25, "lucro_liquido": 10, "fcf": 5,
-                      "divida_liquida": 10, "margem_liquida_pct": 10},
-    }
-    d = bd.derivar_empresa(empresa)
-    assert d["run_rate_receita_pct"] == 0
+    d = bd.derivar_empresa({"fy2025": {"ebitda": 100}, "q_recente": {"ebitda": 25}})
     assert d["run_rate_ebitda_pct"] == 0
-    assert d["delta_divida_liquida"] == 0
+
+
+def test_run_rate_e_o_unico_derivado_de_empresa():
+    """Guard: receita, lucro e FCF tinham run-rate calculado e nunca exibido.
+
+    So o EBITDA chega a tela (cartao de KPI). Se outro run-rate voltar, deve
+    voltar junto com o lugar onde e lido.
+    """
+    d = bd.derivar_empresa({"fy2025": {"ebitda": 100}, "q_recente": {"ebitda": 40}})
+    assert set(d) == {"run_rate_ebitda_pct"}
+    assert d["run_rate_ebitda_pct"] == 60.0
+
+
+def test_run_rate_sem_ano_fiscal_fica_nulo_em_vez_de_estourar():
+    assert bd.derivar_empresa({"fy2025": {"ebitda": 0}, "q_recente": {"ebitda": 9}})[
+        "run_rate_ebitda_pct"] is None
+    assert bd.derivar_empresa({"fy2025": {}, "q_recente": {}})["run_rate_ebitda_pct"] is None
 
 
 def test_scores_do_radar_ficam_entre_0_e_100_com_extremos(dados):
@@ -179,7 +268,7 @@ def test_csv_gerado_tem_cabecalho_e_derivados():
     # 7 empresas x 2 períodos + cabeçalho
     assert len(linhas) == 15
     idx = bd.CSV_HEADER.index("nd_ebitda_x")
-    assert any(l[idx] not in ("", None) for l in linhas[1:])
+    assert any(ln[idx] not in ("", None) for ln in linhas[1:])
 
 
 def test_historico_e_opcional_e_normalizado(dados):

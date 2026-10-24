@@ -75,7 +75,7 @@ CSV_HEADER = [
     # --- derivados ---
     "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
     "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_por_boed_usd",
-    "fcf_yield_pct", "cobertura_dividendo_x", "payout_fcf_pct",
+    "fcf_yield_pct", "cobertura_dividendo_x",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
 ]
@@ -143,8 +143,8 @@ def derivar_periodo(empresa, period_key, ttm=None):
     """Indicadores derivados de um período (fy2025 ou q_recente).
 
     No trimestre, os indicadores que dividem fluxo por estoque ou por market cap
-    (ND/EBITDA, FCF yield, cobertura de dividendo, payout) usam o TTM quando ele
-    existe -- ver `calcular_ttm`. O ano fiscal ja e um periodo de 12 meses e nao
+    (ND/EBITDA, FCF yield, cobertura de dividendo) usam o TTM quando ele existe
+    -- ver `calcular_ttm`. O ano fiscal ja e um periodo de 12 meses e nao
     precisa de ajuste.
     """
     p = empresa[period_key]
@@ -201,8 +201,6 @@ def derivar_periodo(empresa, period_key, ttm=None):
         # `consolidar_margem` para o porquê de ela substituir a da fonte.
         "margem_liquida_calc_pct": arred(pct(p.get("lucro_liquido"), receita)),
         "margem_ebitda_pct": arred(pct(ebitda, receita)),
-        "ebitda_anualizado": arred(ebitda_anual, 0),
-        "fcf_anualizado": arred(fcf_anual, 0),
         # Qual base de 12 meses alimentou os ratios: "ttm", "x4" ou "fy".
         "base_12m_ebitda": base_ebitda,
         "base_12m_fcf": base_fcf,
@@ -228,9 +226,11 @@ def derivar_periodo(empresa, period_key, ttm=None):
         # Retorno de caixa implícito sobre o valor de mercado.
         "fcf_yield_pct": arred(pct(fcf_anual, market_cap)),
         "dividendos_estimados": arred(dividendos, 0),
-        # Quantas vezes o FCF cobre o dividendo estimado (>1 = dividendo pago com caixa próprio).
+        # Quantas vezes o FCF cobre o dividendo estimado (>1 = dividendo pago com
+        # caixa próprio). Não existe um "payout sobre FCF" ao lado porque ele seria
+        # 100 ÷ cobertura: a mesma informação ocupando uma segunda coluna da tabela,
+        # uma segunda coluna do CSV e um segundo lugar na contagem de indicadores.
         "cobertura_dividendo_x": arred(div(fcf_anual, dividendos)),
-        "payout_fcf_pct": arred(pct(dividendos, fcf_anual)),
     }
 
 
@@ -270,33 +270,22 @@ def derivar_historico(empresa):
 
 
 def derivar_empresa(empresa):
-    """Indicadores derivados no nível da empresa (comparação entre períodos)."""
-    fy, q = empresa["fy2025"], empresa["q_recente"]
+    """Run-rate do trimestre contra o ano fiscal, em %.
 
-    def run_rate(campo):
-        """Trimestre anualizado vs. ano fiscal, em %."""
-        anual = fy.get(campo)
-        trimestral = q.get(campo)
-        if anual in (None, 0) or trimestral is None:
-            return None
-        return arred((trimestral * 4 / anual - 1) * 100.0)
+    O ×4 aqui é proposital, e é a única sobrevivência dele no arquivo: a leitura
+    que se quer é "o ritmo deste trimestre isolado, mantido, dá quanto contra o
+    ano fechado?". Para margens e múltiplos, que dividem fluxo por estoque ou
+    por valor de mercado, a base é TTM — ver `calcular_ttm`.
 
-    return {
-        "run_rate_receita_pct": run_rate("receita"),
-        "run_rate_ebitda_pct": run_rate("ebitda"),
-        "run_rate_lucro_pct": run_rate("lucro_liquido"),
-        "run_rate_fcf_pct": run_rate("fcf"),
-        "delta_divida_liquida": (
-            None
-            if (q.get("divida_liquida") is None or fy.get("divida_liquida") is None)
-            else arred(q["divida_liquida"] - fy["divida_liquida"], 0)
-        ),
-        "delta_margem_liquida_pp": (
-            None
-            if (q.get("margem_liquida_pct") is None or fy.get("margem_liquida_pct") is None)
-            else arred(q["margem_liquida_pct"] - fy["margem_liquida_pct"])
-        ),
-    }
+    Só o EBITDA tem run-rate porque só ele é exibido (cartão de KPI). Receita,
+    lucro e FCF tinham o cálculo idêntico e nenhum consumidor, e os dois deltas
+    contra o ano fiscal também não chegavam nem à tela nem ao CSV.
+    """
+    anual = empresa["fy2025"].get("ebitda")
+    trimestral = empresa["q_recente"].get("ebitda")
+    if anual in (None, 0) or trimestral is None:
+        return {"run_rate_ebitda_pct": None}
+    return {"run_rate_ebitda_pct": arred((trimestral * 4 / anual - 1) * 100.0)}
 
 
 def consolidar_margem(p):
@@ -470,7 +459,7 @@ def build_csv(data):
                 e["mercado"]["dividend_yield_pct"], e["mercado"]["preco_acao"],
                 d["margem_ebitda_pct"], d["nd_ebitda_x"], d["conversao_fcf_pct"], d["capex_fco_pct"],
                 d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_por_boed_usd"],
-                d["fcf_yield_pct"], d["cobertura_dividendo_x"], d["payout_fcf_pct"],
+                d["fcf_yield_pct"], d["cobertura_dividendo_x"],
                 "sim" if d["producao_proxy"] else "nao",
             ])
     # lineterminator="\n": o padrão do módulo csv é \r\n, o que deixava o
