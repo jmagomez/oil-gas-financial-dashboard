@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Tokens de tema em HSL, trocados por classe na raiz.
+ *
+ * Contraste conferido contra o fundo de cada tema (WCAG AA pede 4,5:1 para
+ * texto normal). ARMADILHA REGISTRADA: medir com getComputedStyle logo apos
+ * trocar a classe devolve a cor INTERPOLADA no meio da transicao de 180ms --
+ * isso ja me fez reportar uma falha de contraste que nao existia. Qualquer
+ * medicao espera a transicao terminar.
+ */
+:root {
+  --bg: 210 40% 98%;
+  --surface: 0 0% 100%;
+  --border: 214 32% 91%;
+  --fg: 222 47% 11%;
+  --muted: 215 16% 37%;
+  --accent: 174 72% 32%;
+  --up: 142 71% 33%;
+  --down: 0 72% 45%;
+  --warn: 32 85% 37%;
+}
+
+.dark {
+  --bg: 222 47% 6%;
+  --surface: 222 40% 10%;
+  --border: 217 30% 20%;
+  --fg: 210 40% 96%;
+  --muted: 215 20% 68%;
+  --accent: 172 66% 50%;
+  --up: 142 60% 55%;
+  --down: 0 72% 65%;
+  --warn: 38 92% 60%;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-bg text-fg antialiased;
+    transition:
+      background-color theme(transitionDuration.theme),
+      color theme(transitionDuration.theme);
+  }
+  /* Foco sempre visivel: remover outline sem substituto torna a navegacao por
+     teclado impossivel de acompanhar. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-bg;
+  }
+}
+
+@layer utilities {
+  /* Link "pular para o conteudo": invisivel ate receber foco. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

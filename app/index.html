@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>Dashboard Óleo &amp; Gás — comparativo de sete petroleiras</title>
+    <meta
+      name="description"
+      content="Comparativo de indicadores financeiros, operacionais e de valuation das sete maiores petroleiras ocidentais."
+    />
+    <script>
+      // BLOQUEANTE de proposito: aplica o tema antes da primeira pintura.
+      // Em <body> ou em useEffect, a pagina pisca no tema errado.
+      (function () {
+        try {
+          var salvo = localStorage.getItem('tema');
+          var escuro = salvo
+            ? salvo === 'escuro'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (escuro) document.documentElement.classList.add('dark');
+        } catch (e) {
+          /* localStorage bloqueado: segue no tema claro */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
