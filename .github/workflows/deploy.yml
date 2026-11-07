@@ -1,0 +1,63 @@
+name: Deploy do dashboard (GitHub Pages)
+
+# A origem do Pages e "GitHub Actions", nao mais um branch. Isso significa que
+# NADA vai ao ar sem passar por aqui -- inclusive o dashboard_oleo_gas.html
+# gerado pelo pipeline Python, que este workflow copia para a raiz do site.
+# Remover essa copia derruba o dashboard que esta no ar.
+#
+# Estado atual: publica apenas a raiz. A camada React em app/ ainda nao tem
+# entry, tsconfig nem testes, entao os passos de gate dela (typecheck, lint,
+# format:check, testes, build, validate:data) entram NO MESMO COMMIT em que o
+# app passar a existir -- e nao antes. Workflow que roda um gate sobre codigo
+# inexistente falha e, aqui, falhar significa site sem publicador.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Uma publicacao por vez, e sem cancelar a que esta em andamento: cancelar no
+# meio do upload do artefato deixa o Pages servindo meio deploy.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Monta o site
+        run: |
+          set -euo pipefail
+          mkdir -p site
+          cp index.html dashboard_oleo_gas.html site/
+          cp indicadores_oleo_gas.json indicadores_oleo_gas.csv site/
+          # Guarda-chuva contra o erro mais caro possivel neste workflow:
+          # publicar um artefato sem o dashboard. Falhar aqui mantem no ar o
+          # ultimo deploy bom; publicar vazio nao tem volta.
+          test -s site/dashboard_oleo_gas.html
+          test -s site/index.html
+          test -s site/indicadores_oleo_gas.json
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
