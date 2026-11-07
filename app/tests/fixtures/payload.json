@@ -1,0 +1,392 @@
+{
+  "referencia": {
+    "data_consulta": "2026-07-20",
+    "moeda": "USD (milhões, exceto onde indicado)",
+    "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
+    "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
+    "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
+    "notas": [
+      "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
+      "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total."
+    ],
+    "versao_dados": "1.2",
+    "atualizado_em": "2026-11-07",
+    "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
+  },
+  "empresas": [
+    {
+      "ticker": "XOM",
+      "nome": "ExxonMobil",
+      "pais": "EUA",
+      "fy2025": {
+        "receita": 323910,
+        "lucro_liquido": 29760,
+        "ebitda": 59530,
+        "margem_liquida_pct": 9.19,
+        "fluxo_caixa_operacional": 51970,
+        "fcf": 23610,
+        "capex": -28360,
+        "divida_liquida": 32860,
+        "divida_patrimonio_pct": 16.3,
+        "roe_pct": 11.1,
+        "roa_pct": 6.6,
+        "producao_kboed": 4740
+      },
+      "q_recente": {
+        "trimestre": "Q2 2026",
+        "receita": 114529,
+        "lucro_liquido": 14525,
+        "ebitda": 28340,
+        "margem_liquida_pct": 12.68,
+        "fluxo_caixa_operacional": 23555,
+        "fcf": 17028,
+        "capex": -6527,
+        "divida_liquida": 31780,
+        "divida_patrimonio_pct": 16.3,
+        "roe_pct": 12.63,
+        "roa_pct": 7.05,
+        "producao_kboed": 4514
+      },
+      "mercado": {
+        "market_cap": 676621,
+        "pe": 17.06,
+        "ev_ebitda": 8.94,
+        "dividend_yield_pct": 2.48,
+        "preco_acao": 165.87
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 79477,
+          "lucro_liquido": 7082,
+          "ebitda": 16951,
+          "fluxo_caixa_operacional": 11550,
+          "fcf": 5267,
+          "capex": -6283,
+          "divida_liquida": 24637,
+          "producao_kboed": 4630
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 83331,
+          "lucro_liquido": 7548,
+          "ebitda": 17497,
+          "fluxo_caixa_operacional": 14788,
+          "fcf": 6061,
+          "capex": -8727,
+          "divida_liquida": 28222,
+          "producao_kboed": 4769
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 80039,
+          "lucro_liquido": 6501,
+          "ebitda": 15909,
+          "fluxo_caixa_operacional": 12679,
+          "fcf": 5229,
+          "capex": -7450,
+          "divida_liquida": 32856,
+          "producao_kboed": 4988
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 83160,
+          "lucro_liquido": 4470,
+          "ebitda": 12060,
+          "fluxo_caixa_operacional": 8710,
+          "fcf": 2240,
+          "capex": -6470,
+          "divida_liquida": 39230,
+          "producao_kboed": 4590
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-08-13",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "release 2T26 (4,514 Mboe/d); historico 2025 do ATTACHMENT III dos releases trimestrais"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/xom/financials/",
+        "https://stockanalysis.com/stocks/xom/financials/balance-sheet/",
+        "https://stockanalysis.com/stocks/xom/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/xom/statistics/",
+        "https://stockanalysis.com/stocks/xom/financials/metrics/"
+      ]
+    },
+    {
+      "ticker": "BP",
+      "nome": "BP",
+      "pais": "Reino Unido",
+      "fy2025": {
+        "receita": 189335,
+        "lucro_liquido": 55,
+        "ebitda": 28237,
+        "margem_liquida_pct": 0.68,
+        "fluxo_caixa_operacional": 24493,
+        "fcf": 11272,
+        "capex": -13221,
+        "divida_liquida": 22200,
+        "divida_patrimonio_pct": 98,
+        "roe_pct": 0.1,
+        "roa_pct": 0.02,
+        "producao_kboed": 2310
+      },
+      "q_recente": {
+        "trimestre": "Q3 2026",
+        "receita": 68399,
+        "lucro_liquido": 4696,
+        "ebitda": 14086,
+        "margem_liquida_pct": 6.87,
+        "fluxo_caixa_operacional": 14829,
+        "fcf": 11865,
+        "capex": -2964,
+        "divida_liquida": 26563,
+        "divida_patrimonio_pct": 112.0,
+        "roe_pct": 14.52,
+        "roa_pct": 2.97,
+        "producao_kboed": 2201
+      },
+      "mercado": {
+        "market_cap": 114694,
+        "pe": 21.72,
+        "ev_ebitda": 4.9,
+        "dividend_yield_pct": 4.71,
+        "preco_acao": 44.53
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 46627,
+          "lucro_liquido": 1629,
+          "ebitda": 8835,
+          "fluxo_caixa_operacional": 6271,
+          "fcf": 3035,
+          "capex": -3236,
+          "divida_liquida": 39670,
+          "producao_kboed": 2300
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 48420,
+          "lucro_liquido": 1161,
+          "ebitda": 8975,
+          "fluxo_caixa_operacional": 7786,
+          "fcf": 4615,
+          "capex": -3171,
+          "divida_liquida": 39769,
+          "producao_kboed": 2362
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 47383,
+          "lucro_liquido": -3422,
+          "ebitda": 4312,
+          "fluxo_caixa_operacional": 7602,
+          "fcf": 4139,
+          "capex": -3463,
+          "divida_liquida": 35815,
+          "producao_kboed": 2344
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 52255,
+          "lucro_liquido": 3842,
+          "ebitda": 11884,
+          "fluxo_caixa_operacional": 2860,
+          "fcf": -382,
+          "capex": -3242,
+          "divida_liquida": 25300,
+          "producao_kboed": 2344
+        },
+        {
+          "periodo": "2026-Q2",
+          "receita": 69105,
+          "lucro_liquido": 3911,
+          "ebitda": 13671,
+          "fluxo_caixa_operacional": 10858,
+          "fcf": 7771,
+          "capex": -3087,
+          "divida_liquida": 35468,
+          "producao_kboed": 2201
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-11-05",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/bp/financials/",
+        "https://stockanalysis.com/stocks/bp/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/bp/statistics/",
+        "https://www.bp.com/en/global/corporate/investors/results-reports-and-presentations.html"
+      ]
+    },
+    {
+      "ticker": "EQNR",
+      "nome": "Equinor",
+      "pais": "Noruega",
+      "fy2025": {
+        "receita": 106462,
+        "lucro_liquido": 5043,
+        "ebitda": 37826,
+        "margem_liquida_pct": 4.75,
+        "fluxo_caixa_operacional": 19971,
+        "fcf": 5977,
+        "capex": -13994,
+        "divida_liquida": -11888,
+        "divida_patrimonio_pct": 77,
+        "roe_pct": 12.2,
+        "roa_pct": 3.8,
+        "producao_kboed": null
+      },
+      "q_recente": {
+        "trimestre": "Q3 2026",
+        "receita": 32936,
+        "lucro_liquido": 2536,
+        "ebitda": 14826,
+        "margem_liquida_pct": 7.7,
+        "fluxo_caixa_operacional": 7547,
+        "fcf": 4675,
+        "capex": -2872,
+        "divida_liquida": 5667,
+        "divida_patrimonio_pct": 66.0,
+        "roe_pct": 26.28,
+        "roa_pct": 8.02,
+        "producao_kboed": 2165
+      },
+      "mercado": {
+        "market_cap": 99386,
+        "pe": 8.71,
+        "ev_ebitda": 4.27,
+        "dividend_yield_pct": 3.72,
+        "preco_acao": 41.99
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 25130,
+          "lucro_liquido": 1313,
+          "ebitda": 9537,
+          "fluxo_caixa_operacional": 2477,
+          "fcf": -924,
+          "capex": -3401,
+          "divida_liquida": 10546,
+          "producao_kboed": 2096
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 26017,
+          "lucro_liquido": -210,
+          "ebitda": 8401,
+          "fluxo_caixa_operacional": 6346,
+          "fcf": 2926,
+          "capex": -3420,
+          "divida_liquida": 8564,
+          "producao_kboed": 2130
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 25297,
+          "lucro_liquido": 1314,
+          "ebitda": 8926,
+          "fluxo_caixa_operacional": 2106,
+          "fcf": -2040,
+          "capex": -4146,
+          "divida_liquida": 11887,
+          "producao_kboed": 2198
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 27843,
+          "lucro_liquido": 3106,
+          "ebitda": 11313,
+          "fluxo_caixa_operacional": 5213,
+          "fcf": 2097,
+          "capex": -3116,
+          "divida_liquida": -4209,
+          "producao_kboed": 2313
+        },
+        {
+          "periodo": "2026-Q2",
+          "receita": 34523,
+          "lucro_liquido": 4848,
+          "ebitda": 16184,
+          "fluxo_caixa_operacional": 9470,
+          "fcf": 6598,
+          "capex": -2872,
+          "divida_liquida": 8693,
+          "producao_kboed": 2165
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-11-05",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/eqnr/financials/",
+        "https://stockanalysis.com/stocks/eqnr/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/eqnr/statistics/",
+        "https://www.globenewswire.com/news-release/2026/05/06/3288464"
+      ]
+    }
+  ]
+}
