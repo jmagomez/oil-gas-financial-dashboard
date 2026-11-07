@@ -41,11 +41,13 @@ tests/                   pytest — fórmulas derivadas, as duas rotinas de escr
 .github/actions/
   prepara-ambiente/        Python 3.12 + dependências (uma versão só, para os quatro workflows)
   publica-artefatos/       gate: build -> pytest -> commit dos gerados, com rebase antes do push
+app/                     camada de apresentação em React + Vite (ver app/README.md)
 .github/workflows/
   atualiza-mercado.yml      seg-sex 22:00 UTC — mercado, publica pelo gate, e-mail
   atualiza-fundamentos.yml  dia 5 do mês — fundamentos, publica pelo gate
   build-dashboard.yml       on push (json/template/build/assets) — rede de segurança para edição manual
   ci.yml                    ruff check bloqueante + pytest, em PR e nos pushes que build-dashboard não cobre
+  deploy.yml                on push main — gate do app + publica Pages (raiz = HTML atual, /app = React)
 ```
 
 Os `paths` de `build-dashboard.yml` e os `paths-ignore` de `ci.yml` são complementares de
@@ -68,6 +70,48 @@ suíte inteira rodava duas vezes em paralelo. Ao mexer em um, mexa no outro.
 ### Escrita no JSON
 - `update_market_data.reescreve_json` reescreve o bloco `mercado` de **todas** as empresas a cada execução (por isso precisa reproduzir byte a byte o que não mudou). `update_fundamentals.reescreve_json` só toca os tickers com trimestre novo — uma empresa sem novidade nunca passa por `serializa_bloco`. É por desenho que só o primeiro tem teste de round-trip byte a byte; o segundo não precisa dessa garantia porque simplesmente não lida com dado não tocado.
 - Um commit de mercado mexe em ~8 linhas por empresa tocada; um commit de fundamentos (um trimestre, uma empresa) mexe em ~11 linhas. Se um diff desses ficar muito maior, é sinal de reserialização acidental do arquivo inteiro — é exatamente essa regressão que `test_formato_do_arquivo_vivo_suporta_escrita_cirurgica*` guarda, rodando contra o JSON real, não um fixture congelado.
+
+
+## Frontend (`app/`)
+
+O dashboard tem **duas camadas de apresentação ao mesmo tempo**, de propósito: o
+`dashboard_oleo_gas.html` gerado pelo pipeline, que continua no ar, e o app
+React em `app/`, que migra as análises uma a uma. Nada sai do ar antes de ter
+substituto. Quando o app atingir paridade, a raiz do Pages passa a apontar para
+ele e o template sai de cena.
+
+A arquitetura, o stack e as decisões de interface estão em `app/README.md` — que
+é o terceiro público desta divisão: quem edita o frontend. Aqui ficam só as
+regras que **cruzam a fronteira** entre pipeline e app.
+
+- **Fonte única de verdade continua sendo um arquivo.** O app não tem cópia do
+  dado: em dev o Vite faz proxy do `indicadores_oleo_gas.json` da raiz, e no
+  deploy o workflow copia o mesmo arquivo para `/app/data/`. Nunca versione um
+  segundo JSON dentro de `app/`.
+- **O app não calcula indicador de negócio.** `build_dashboard.py` segue sendo o
+  único ponto que deriva indicador — a regra "um derivado precisa de um
+  consumidor" perde o sentido se o consumidor recalcular por conta própria, e
+  duas implementações da mesma fórmula divergem. O que o app deriva é
+  **leitura**: situar um valor na faixa histórica da própria empresa, escolher
+  rótulo, decidir se há pontos suficientes para desenhar linha.
+- **Campo novo no payload = schema Zod antes de tela.** A fronteira de dados do
+  app valida com Zod e falha nomeando o campo. Renomear campo no pipeline sem
+  mexer no schema derruba o `validate:data` do deploy — isso é o desenho
+  funcionando, não um estorvo. Os dois mudam no mesmo commit.
+- **Ausência não é zero, do mesmo jeito que no pipeline.** A produção da Equinor
+  pode faltar; onde falta, indicador por barril aparece ausente. O fail-safe por
+  campo do lado Python não serve para nada se a tela preencher o buraco com 0.
+- **Gráficos em SVG, não `<canvas>`.** O template atual desenha 65 `<canvas>`
+  via Chart.js, e `<canvas>` é opaco para leitor de tela — foi o motivo
+  principal da reescrita. Gráfico novo no app usa Recharts e vem com tabela
+  equivalente; introduzir `<canvas>` reintroduz o defeito que motivou tudo isto.
+- **Dois gates, não um.** `ci.yml` cobre o Python (ruff bloqueante + pytest);
+  `deploy.yml` cobre o app (typecheck, lint, format:check, testes, build,
+  validate:data) e só publica se tudo passar. Nenhum dos dois é informativo.
+- **A publicação por branch está desligada.** O Pages serve da origem "GitHub
+  Actions", então **nada vai ao ar sem passar pelo `deploy.yml`** — inclusive o
+  HTML do pipeline, que o workflow copia para a raiz do artefato. Ao mexer no
+  passo "Monta o site", lembre que remover essa cópia derruba o dashboard atual.
 
 ## Ao mexer no código
 

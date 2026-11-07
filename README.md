@@ -26,6 +26,19 @@ Os dados de mercado (cotação, market cap, P/E, dividend yield e EV/EBITDA) sã
 - `.github/actions/` — dois composite actions (`prepara-ambiente`, `publica-artefatos`) que concentram o gate `build → teste → commit` usado pelos três workflows que escrevem nos artefatos gerados.
 - `tests/` — suíte `pytest`: fórmulas derivadas, base de 12 meses, histórico derivado, rotinas de mercado e de fundamentos, corpo do e-mail e camada de acessibilidade.
 
+## Duas camadas de apresentação, por enquanto
+
+O dashboard que está no ar é o `dashboard_oleo_gas.html`, gerado pelo pipeline
+Python. Em paralelo, uma camada nova em React vive em [`app/`](app/README.md) e
+migra as análises uma a uma — publicada em `/app` do mesmo site.
+
+A convivência é deliberada: **nenhuma análise sai do ar antes de ter
+substituto**. O motivo principal da reescrita é acessibilidade — o template
+atual desenha os gráficos em 65 elementos `<canvas>`, que um leitor de tela não
+consegue ler. A arquitetura e as decisões de interface estão no
+[README do app](app/README.md); este arquivo continua sendo o lugar onde os
+indicadores e as fontes são explicados.
+
 ## Como atualizar os dados
 
 Os dados têm dois regimes, e é essa separação que sustenta a automação:
