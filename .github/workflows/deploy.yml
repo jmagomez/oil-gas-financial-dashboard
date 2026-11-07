@@ -5,11 +5,12 @@ name: Deploy do dashboard (GitHub Pages)
 # gerado pelo pipeline Python, que este workflow copia para a raiz do site.
 # Remover essa copia derruba o dashboard que esta no ar.
 #
-# Estado atual: publica apenas a raiz. A camada React em app/ ainda nao tem
-# entry, tsconfig nem testes, entao os passos de gate dela (typecheck, lint,
-# format:check, testes, build, validate:data) entram NO MESMO COMMIT em que o
-# app passar a existir -- e nao antes. Workflow que roda um gate sobre codigo
-# inexistente falha e, aqui, falhar significa site sem publicador.
+#   /       dashboard_oleo_gas.html, gerado pelo pipeline
+#   /app/   a camada React, enquanto as analises migram uma a uma
+#
+# O gate do app roda ANTES de montar o site: app que nao compila, nao passa no
+# lint ou quebra um teste nao chega ao ar -- e, como aqui falhar significa site
+# sem publicador, o passo final confere que o artefato tem o dashboard dentro.
 
 on:
   push:
@@ -33,18 +34,64 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Monta o site
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.11"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      # O gate inteiro antes de qualquer build, com o mais rapido primeiro.
+      - name: Instala dependencias
+        working-directory: app
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: app
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: app
+        run: npm run lint
+
+      - name: Formatacao (prettier)
+        working-directory: app
+        run: npm run format:check
+
+      - name: Testes
+        working-directory: app
+        run: npm run test
+
+      - name: Build
+        working-directory: app
+        run: npm run build
+
+      # Contra o JSON REAL da raiz, nao contra fixture: se o pipeline renomear
+      # um campo, a falha acontece aqui e o site no ar continua sendo o ultimo
+      # bom. Os avisos (trimestres diferentes, producao ausente, ROE baixo)
+      # ficam no log do deploy de proposito.
+      - name: Valida o contrato de dados
+        working-directory: app
+        run: npm run validate:data
+
+      - name: Monta o site (raiz = pipeline, /app = React)
         run: |
           set -euo pipefail
-          mkdir -p site
+          mkdir -p site/app/data
           cp index.html dashboard_oleo_gas.html site/
           cp indicadores_oleo_gas.json indicadores_oleo_gas.csv site/
-          # Guarda-chuva contra o erro mais caro possivel neste workflow:
-          # publicar um artefato sem o dashboard. Falhar aqui mantem no ar o
-          # ultimo deploy bom; publicar vazio nao tem volta.
+          cp -r app/dist/. site/app/
+          # O app busca ./data/indicadores_oleo_gas.json relativo a /app/.
+          # Nao ha copia versionada dentro de app/: a fonte unica continua
+          # sendo o arquivo da raiz, copiado aqui no momento da publicacao.
+          cp indicadores_oleo_gas.json site/app/data/
+          # Guarda-chuva contra o erro mais caro deste workflow: publicar um
+          # artefato sem o dashboard. Falhar mantem no ar o ultimo deploy bom;
+          # publicar vazio nao tem volta.
           test -s site/dashboard_oleo_gas.html
           test -s site/index.html
           test -s site/indicadores_oleo_gas.json
+          test -s site/app/index.html
+          test -s site/app/data/indicadores_oleo_gas.json
 
       - uses: actions/configure-pages@v5
 
