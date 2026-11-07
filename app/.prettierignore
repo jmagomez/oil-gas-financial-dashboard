@@ -1,0 +1,6 @@
+# Saida de build e cobertura: nao e codigo nosso e ja esta no .gitignore.
+# Sem isto o resultado de `prettier --check .` passa a depender de haver ou
+# nao um build local na arvore -- verde na CI, vermelho na maquina de quem
+# acabou de rodar `npm run build`.
+dist/
+coverage/
