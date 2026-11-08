@@ -22,15 +22,34 @@ permissions:
   pages: write
   id-token: write
 
-# Uma publicacao por vez, e sem cancelar a que esta em andamento: cancelar no
-# meio do upload do artefato deixa o Pages servindo meio deploy.
-concurrency:
-  group: pages
-  cancel-in-progress: false
+# A concorrencia e SEPARADA POR JOB, de proposito -- os dois tem necessidades
+# opostas:
+#
+#   build  (gate)      cancela o que ficou obsoleto. Numa sequencia de pushes,
+#                      so o ultimo commit importa para o que vai ao ar; rodar o
+#                      gate inteiro em cada estado intermediario gasta tempo e
+#                      enche o historico de vermelho que ninguem vai consertar,
+#                      porque o commit ja foi superado.
+#
+#   deploy (publica)   NUNCA cancela. Interromper a ativacao do Pages no meio
+#                      deixa o site servindo meio deploy, e isso nao tem volta.
+#
+# Isto veio de um caso concreto: oito runs vermelhas seguidas (#19 a #26) ao
+# publicar arquivos interdependentes em commits separados. Nenhuma derrubou o
+# site -- deploy-pages so ativa em caso de sucesso, entao o deploy anterior
+# continuou servindo -- mas todas eram ruido evitavel. Com o cancelamento no
+# build, cada push novo encerra o gate do anterior e so o estado final e
+# avaliado. "Cancelado" e a semantica certa para commit superado; vermelho nao.
+#
+# O que isto NAO faz: tornar verde um commit quebrado. Se o ULTIMO push estiver
+# quebrado, ele reprova -- e deve.
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages-build
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v4
 
@@ -108,6 +127,10 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # Fila, nunca cancelamento: ver o comentario acima.
+    concurrency:
+      group: pages-deploy
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
