@@ -83,7 +83,15 @@ jobs:
 
       - name: Envia o e-mail
         if: ${{ !inputs.dry_run && env.MAIL_USERNAME != '' }}
-        uses: dawidd6/action-send-mail@v6
+        # Fixado por SHA de COMMIT, nao por tag. Esta action e de terceiro e
+        # recebe MAIL_PASSWORD_OILANDGAS: uma tag e mutavel, e mover `v6`
+        # para codigo que exfiltra a senha de SMTP nao exigiria nenhuma
+        # mudanca aqui. O SHA e imutavel. A tag fica no comentario para
+        # leitura humana e para o Dependabot continuar propondo bumps.
+        #
+        # Atencao ao atualizar: `v6` e tag ANOTADA. O SHA que serve aqui e o
+        # do commit (refs/tags/v6^{}), nao o do objeto-tag.
+        uses: dawidd6/action-send-mail@6d98ae34d733f9a723a9e04e94f2f24ba05e1402 # v6
         with:
           server_address: smtp.gmail.com
           server_port: 465
