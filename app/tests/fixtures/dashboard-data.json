@@ -1,0 +1,721 @@
+{
+  "referencia": {
+    "data_consulta": "2026-07-20",
+    "moeda": "USD (milhões, exceto onde indicado)",
+    "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
+    "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
+    "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
+    "notas": [
+      "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
+      "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total."
+    ],
+    "versao_dados": "1.2",
+    "atualizado_em": "2026-11-07",
+    "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
+  },
+  "empresas": [
+    {
+      "ticker": "XOM",
+      "nome": "ExxonMobil",
+      "pais": "EUA",
+      "fy2025": {
+        "receita": 323910,
+        "lucro_liquido": 29760,
+        "ebitda": 59530,
+        "margem_liquida_pct": 9.19,
+        "fluxo_caixa_operacional": 51970,
+        "fcf": 23610,
+        "capex": -28360,
+        "divida_liquida": 32860,
+        "divida_patrimonio_pct": 16.3,
+        "roe_pct": 11.1,
+        "roa_pct": 6.6,
+        "producao_kboed": 4740,
+        "derivados": {
+          "margem_liquida_calc_pct": 9.19,
+          "margem_ebitda_pct": 18.38,
+          "base_12m_ebitda": "fy",
+          "base_12m_fcf": "fy",
+          "janela_ttm": null,
+          "nd_ebitda_x": 0.55,
+          "conversao_fcf_pct": 39.66,
+          "capex_fco_pct": 54.57,
+          "receita_por_boe_usd": 187.22,
+          "ebitda_por_boe_usd": 34.41,
+          "producao_proxy": false,
+          "producao_usada_kboed": 4740,
+          "dias_periodo": 365,
+          "ev": 709481,
+          "ev_por_boed_usd": 149680.0,
+          "fcf_yield_pct": 3.49,
+          "dividendos_estimados": 16780.0,
+          "cobertura_dividendo_x": 1.41
+        },
+        "margem_liquida_fonte_pct": 9.19
+      },
+      "q_recente": {
+        "trimestre": "Q2 2026",
+        "receita": 114529,
+        "lucro_liquido": 14525,
+        "ebitda": 28340,
+        "margem_liquida_pct": 12.68,
+        "fluxo_caixa_operacional": 23555,
+        "fcf": 17028,
+        "capex": -6527,
+        "divida_liquida": 31780,
+        "divida_patrimonio_pct": 16.3,
+        "roe_pct": 12.63,
+        "roa_pct": 7.05,
+        "producao_kboed": 4514,
+        "derivados": {
+          "margem_liquida_calc_pct": 12.68,
+          "margem_ebitda_pct": 24.74,
+          "base_12m_ebitda": "ttm",
+          "base_12m_fcf": "ttm",
+          "janela_ttm": ["2025-Q3", "2025-Q4", "2026-Q1", "Q2 2026"],
+          "nd_ebitda_x": 0.43,
+          "conversao_fcf_pct": 60.08,
+          "capex_fco_pct": 27.71,
+          "receita_por_boe_usd": 278.81,
+          "ebitda_por_boe_usd": 68.99,
+          "producao_proxy": false,
+          "producao_usada_kboed": 4514,
+          "dias_periodo": 91,
+          "ev": 708401,
+          "ev_por_boed_usd": 156934.0,
+          "fcf_yield_pct": 4.52,
+          "dividendos_estimados": 16780.0,
+          "cobertura_dividendo_x": 1.82
+        },
+        "margem_liquida_fonte_pct": 12.68
+      },
+      "mercado": {
+        "market_cap": 676621,
+        "pe": 17.06,
+        "ev_ebitda": 8.94,
+        "dividend_yield_pct": 2.48,
+        "preco_acao": 165.87
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 79477,
+          "lucro_liquido": 7082,
+          "ebitda": 16951,
+          "fluxo_caixa_operacional": 11550,
+          "fcf": 5267,
+          "capex": -6283,
+          "divida_liquida": 24637,
+          "producao_kboed": 4630,
+          "derivados": {
+            "margem_ebitda_pct": 21.33,
+            "margem_liquida_pct": 8.91,
+            "conversao_fcf_pct": 31.07,
+            "capex_fco_pct": 54.4,
+            "receita_por_boe_usd": 188.63,
+            "ebitda_por_boe_usd": 40.23
+          }
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 83331,
+          "lucro_liquido": 7548,
+          "ebitda": 17497,
+          "fluxo_caixa_operacional": 14788,
+          "fcf": 6061,
+          "capex": -8727,
+          "divida_liquida": 28222,
+          "producao_kboed": 4769,
+          "derivados": {
+            "margem_ebitda_pct": 21.0,
+            "margem_liquida_pct": 9.06,
+            "conversao_fcf_pct": 34.64,
+            "capex_fco_pct": 59.01,
+            "receita_por_boe_usd": 189.93,
+            "ebitda_por_boe_usd": 39.88
+          }
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 80039,
+          "lucro_liquido": 6501,
+          "ebitda": 15909,
+          "fluxo_caixa_operacional": 12679,
+          "fcf": 5229,
+          "capex": -7450,
+          "divida_liquida": 32856,
+          "producao_kboed": 4988,
+          "derivados": {
+            "margem_ebitda_pct": 19.88,
+            "margem_liquida_pct": 8.12,
+            "conversao_fcf_pct": 32.87,
+            "capex_fco_pct": 58.76,
+            "receita_por_boe_usd": 174.42,
+            "ebitda_por_boe_usd": 34.67
+          }
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 83160,
+          "lucro_liquido": 4470,
+          "ebitda": 12060,
+          "fluxo_caixa_operacional": 8710,
+          "fcf": 2240,
+          "capex": -6470,
+          "divida_liquida": 39230,
+          "producao_kboed": 4590,
+          "derivados": {
+            "margem_ebitda_pct": 14.5,
+            "margem_liquida_pct": 5.38,
+            "conversao_fcf_pct": 18.57,
+            "capex_fco_pct": 74.28,
+            "receita_por_boe_usd": 201.31,
+            "ebitda_por_boe_usd": 29.19
+          }
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-08-13",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "release 2T26 (4,514 Mboe/d); historico 2025 do ATTACHMENT III dos releases trimestrais"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/xom/financials/",
+        "https://stockanalysis.com/stocks/xom/financials/balance-sheet/",
+        "https://stockanalysis.com/stocks/xom/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/xom/statistics/",
+        "https://stockanalysis.com/stocks/xom/financials/metrics/"
+      ],
+      "ttm": {
+        "receita": 361059,
+        "lucro_liquido": 33044,
+        "ebitda": 73806,
+        "fluxo_caixa_operacional": 59732,
+        "fcf": 30558,
+        "capex": -29174,
+        "producao_kboed": 4715.25,
+        "janela": ["2025-Q3", "2025-Q4", "2026-Q1", "Q2 2026"]
+      },
+      "derivados": {
+        "run_rate_ebitda_pct": 90.42
+      },
+      "perfil": {
+        "Rentabilidade": 11.3,
+        "Geração de caixa": 80.4,
+        "Solidez": 42.0,
+        "Valuation": 0.0,
+        "Retorno ao acionista": 24.3,
+        "Escala": 100.0
+      }
+    },
+    {
+      "ticker": "SHEL",
+      "nome": "Shell",
+      "pais": "Reino Unido",
+      "fy2025": {
+        "receita": 266886,
+        "lucro_liquido": 17837,
+        "ebitda": 52881,
+        "margem_liquida_pct": 6.68,
+        "fluxo_caixa_operacional": 42863,
+        "fcf": 23916,
+        "capex": -18948,
+        "divida_liquida": 45687,
+        "divida_patrimonio_pct": 20.7,
+        "roe_pct": 10.1,
+        "roa_pct": 4.7,
+        "producao_kboed": 2800,
+        "derivados": {
+          "margem_liquida_calc_pct": 6.68,
+          "margem_ebitda_pct": 19.81,
+          "base_12m_ebitda": "fy",
+          "base_12m_fcf": "fy",
+          "janela_ttm": null,
+          "nd_ebitda_x": 0.86,
+          "conversao_fcf_pct": 45.23,
+          "capex_fco_pct": 44.21,
+          "receita_por_boe_usd": 261.14,
+          "ebitda_por_boe_usd": 51.74,
+          "producao_proxy": false,
+          "producao_usada_kboed": 2800,
+          "dias_periodo": 365,
+          "ev": 326466,
+          "ev_por_boed_usd": 116595.0,
+          "fcf_yield_pct": 8.52,
+          "dividendos_estimados": 4380.0,
+          "cobertura_dividendo_x": 5.46
+        },
+        "margem_liquida_fonte_pct": 6.79
+      },
+      "q_recente": {
+        "trimestre": "Q3 2026",
+        "receita": 92848,
+        "lucro_liquido": 12057,
+        "ebitda": 24822,
+        "margem_liquida_pct": 12.99,
+        "fluxo_caixa_operacional": 21043,
+        "fcf": 13465,
+        "capex": -7578,
+        "divida_liquida": 39650,
+        "divida_patrimonio_pct": 38.3,
+        "roe_pct": 16.48,
+        "roa_pct": 7.78,
+        "producao_kboed": 2455,
+        "derivados": {
+          "margem_liquida_calc_pct": 12.99,
+          "margem_ebitda_pct": 26.73,
+          "base_12m_ebitda": "ttm",
+          "base_12m_fcf": "ttm",
+          "janela_ttm": ["2025-Q4", "2026-Q1", "2026-Q2", "Q3 2026"],
+          "nd_ebitda_x": 0.51,
+          "conversao_fcf_pct": 54.25,
+          "capex_fco_pct": 36.01,
+          "receita_por_boe_usd": 411.09,
+          "ebitda_por_boe_usd": 109.9,
+          "producao_proxy": false,
+          "producao_usada_kboed": 2455,
+          "dias_periodo": 92,
+          "ev": 320429,
+          "ev_por_boed_usd": 130521.0,
+          "fcf_yield_pct": 13.31,
+          "dividendos_estimados": 4380.0,
+          "cobertura_dividendo_x": 8.53
+        },
+        "margem_liquida_fonte_pct": 12.99
+      },
+      "mercado": {
+        "market_cap": 280779,
+        "pe": 8.6,
+        "ev_ebitda": 4.8,
+        "dividend_yield_pct": 1.56,
+        "preco_acao": 99.09
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 65406,
+          "lucro_liquido": 3601,
+          "ebitda": 12513,
+          "fluxo_caixa_operacional": 11937,
+          "fcf": 6487,
+          "capex": -5450,
+          "divida_liquida": 42993,
+          "producao_kboed": 2645,
+          "derivados": {
+            "margem_ebitda_pct": 19.13,
+            "margem_liquida_pct": 5.51,
+            "conversao_fcf_pct": 51.84,
+            "capex_fco_pct": 45.66,
+            "receita_por_boe_usd": 271.74,
+            "ebitda_por_boe_usd": 51.99
+          }
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 68153,
+          "lucro_liquido": 5322,
+          "ebitda": 15031,
+          "fluxo_caixa_operacional": 12207,
+          "fcf": 7650,
+          "capex": -4557,
+          "divida_liquida": 40924,
+          "producao_kboed": 2766,
+          "derivados": {
+            "margem_ebitda_pct": 22.05,
+            "margem_liquida_pct": 7.81,
+            "conversao_fcf_pct": 50.89,
+            "capex_fco_pct": 37.33,
+            "receita_por_boe_usd": 267.82,
+            "ebitda_por_boe_usd": 59.07
+          }
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 64093,
+          "lucro_liquido": 4134,
+          "ebitda": 13911,
+          "fluxo_caixa_operacional": 9438,
+          "fcf": 4189,
+          "capex": -5249,
+          "divida_liquida": 46013,
+          "producao_kboed": 2840,
+          "derivados": {
+            "margem_ebitda_pct": 21.7,
+            "margem_liquida_pct": 6.45,
+            "conversao_fcf_pct": 30.11,
+            "capex_fco_pct": 55.62,
+            "receita_por_boe_usd": 245.3,
+            "ebitda_por_boe_usd": 53.24
+          }
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 69691,
+          "lucro_liquido": 5694,
+          "ebitda": 16103,
+          "fluxo_caixa_operacional": 6062,
+          "fcf": 2305,
+          "capex": -3757,
+          "divida_liquida": 52606,
+          "producao_kboed": 2752,
+          "derivados": {
+            "margem_ebitda_pct": 23.11,
+            "margem_liquida_pct": 8.17,
+            "conversao_fcf_pct": 14.31,
+            "capex_fco_pct": 61.98,
+            "receita_por_boe_usd": 281.38,
+            "ebitda_por_boe_usd": 65.02
+          }
+        },
+        {
+          "periodo": "2026-Q2",
+          "receita": 94664,
+          "lucro_liquido": 10821,
+          "ebitda": 22427,
+          "fluxo_caixa_operacional": 21432,
+          "fcf": 17401,
+          "capex": -4031,
+          "divida_liquida": 41702,
+          "producao_kboed": 2455,
+          "derivados": {
+            "margem_ebitda_pct": 23.69,
+            "margem_liquida_pct": 11.43,
+            "conversao_fcf_pct": 77.59,
+            "capex_fco_pct": 18.81,
+            "receita_por_boe_usd": 423.73,
+            "ebitda_por_boe_usd": 100.39
+          }
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-11-05",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/shel/financials/",
+        "https://stockanalysis.com/stocks/shel/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/shel/statistics/",
+        "https://www.shell.com/investors/results-and-reporting/quarterly-results/"
+      ],
+      "ttm": {
+        "receita": 321296,
+        "lucro_liquido": 32706,
+        "ebitda": 77263,
+        "fluxo_caixa_operacional": 57975,
+        "fcf": 37360,
+        "capex": -20615,
+        "producao_kboed": 2625.5,
+        "janela": ["2025-Q4", "2026-Q1", "2026-Q2", "Q3 2026"]
+      },
+      "derivados": {
+        "run_rate_ebitda_pct": 87.76
+      },
+      "perfil": {
+        "Rentabilidade": 16.7,
+        "Geração de caixa": 99.2,
+        "Solidez": 29.6,
+        "Valuation": 57.8,
+        "Retorno ao acionista": 0.0,
+        "Escala": 12.3
+      }
+    },
+    {
+      "ticker": "EQNR",
+      "nome": "Equinor",
+      "pais": "Noruega",
+      "fy2025": {
+        "receita": 106462,
+        "lucro_liquido": 5043,
+        "ebitda": 37826,
+        "margem_liquida_pct": 4.74,
+        "fluxo_caixa_operacional": 19971,
+        "fcf": 5977,
+        "capex": -13994,
+        "divida_liquida": -11888,
+        "divida_patrimonio_pct": 77,
+        "roe_pct": 12.2,
+        "roa_pct": 3.8,
+        "producao_kboed": null,
+        "derivados": {
+          "margem_liquida_calc_pct": 4.74,
+          "margem_ebitda_pct": 35.53,
+          "base_12m_ebitda": "fy",
+          "base_12m_fcf": "fy",
+          "janela_ttm": null,
+          "nd_ebitda_x": -0.31,
+          "conversao_fcf_pct": 15.8,
+          "capex_fco_pct": 70.07,
+          "receita_por_boe_usd": 134.72,
+          "ebitda_por_boe_usd": 47.87,
+          "producao_proxy": true,
+          "producao_usada_kboed": 2165,
+          "dias_periodo": 365,
+          "ev": 87498,
+          "ev_por_boed_usd": 40415.0,
+          "fcf_yield_pct": 6.01,
+          "dividendos_estimados": 3697.0,
+          "cobertura_dividendo_x": 1.62
+        },
+        "margem_liquida_fonte_pct": 4.75
+      },
+      "q_recente": {
+        "trimestre": "Q3 2026",
+        "receita": 32936,
+        "lucro_liquido": 2536,
+        "ebitda": 14826,
+        "margem_liquida_pct": 7.7,
+        "fluxo_caixa_operacional": 7547,
+        "fcf": 4675,
+        "capex": -2872,
+        "divida_liquida": 5667,
+        "divida_patrimonio_pct": 66.0,
+        "roe_pct": 26.28,
+        "roa_pct": 8.02,
+        "producao_kboed": 2165,
+        "derivados": {
+          "margem_liquida_calc_pct": 7.7,
+          "margem_ebitda_pct": 45.01,
+          "base_12m_ebitda": "ttm",
+          "base_12m_fcf": "ttm",
+          "janela_ttm": ["2025-Q4", "2026-Q1", "2026-Q2", "Q3 2026"],
+          "nd_ebitda_x": 0.11,
+          "conversao_fcf_pct": 31.53,
+          "capex_fco_pct": 38.05,
+          "receita_por_boe_usd": 165.36,
+          "ebitda_por_boe_usd": 74.44,
+          "producao_proxy": false,
+          "producao_usada_kboed": 2165,
+          "dias_periodo": 92,
+          "ev": 105053,
+          "ev_por_boed_usd": 48523.0,
+          "fcf_yield_pct": 11.4,
+          "dividendos_estimados": 3697.0,
+          "cobertura_dividendo_x": 3.06
+        },
+        "margem_liquida_fonte_pct": 7.7
+      },
+      "mercado": {
+        "market_cap": 99386,
+        "pe": 8.71,
+        "ev_ebitda": 4.27,
+        "dividend_yield_pct": 3.72,
+        "preco_acao": 41.99
+      },
+      "historico": [
+        {
+          "periodo": "2025-Q2",
+          "receita": 25130,
+          "lucro_liquido": 1313,
+          "ebitda": 9537,
+          "fluxo_caixa_operacional": 2477,
+          "fcf": -924,
+          "capex": -3401,
+          "divida_liquida": 10546,
+          "producao_kboed": 2096,
+          "derivados": {
+            "margem_ebitda_pct": 37.95,
+            "margem_liquida_pct": 5.22,
+            "conversao_fcf_pct": -9.69,
+            "capex_fco_pct": 137.3,
+            "receita_por_boe_usd": 131.75,
+            "ebitda_por_boe_usd": 50.0
+          }
+        },
+        {
+          "periodo": "2025-Q3",
+          "receita": 26017,
+          "lucro_liquido": -210,
+          "ebitda": 8401,
+          "fluxo_caixa_operacional": 6346,
+          "fcf": 2926,
+          "capex": -3420,
+          "divida_liquida": 8564,
+          "producao_kboed": 2130,
+          "derivados": {
+            "margem_ebitda_pct": 32.29,
+            "margem_liquida_pct": -0.81,
+            "conversao_fcf_pct": 34.83,
+            "capex_fco_pct": 53.89,
+            "receita_por_boe_usd": 132.77,
+            "ebitda_por_boe_usd": 42.87
+          }
+        },
+        {
+          "periodo": "2025-Q4",
+          "receita": 25297,
+          "lucro_liquido": 1314,
+          "ebitda": 8926,
+          "fluxo_caixa_operacional": 2106,
+          "fcf": -2040,
+          "capex": -4146,
+          "divida_liquida": 11887,
+          "producao_kboed": 2198,
+          "derivados": {
+            "margem_ebitda_pct": 35.28,
+            "margem_liquida_pct": 5.19,
+            "conversao_fcf_pct": -22.85,
+            "capex_fco_pct": 196.87,
+            "receita_por_boe_usd": 125.1,
+            "ebitda_por_boe_usd": 44.14
+          }
+        },
+        {
+          "periodo": "2026-Q1",
+          "receita": 27843,
+          "lucro_liquido": 3106,
+          "ebitda": 11313,
+          "fluxo_caixa_operacional": 5213,
+          "fcf": 2097,
+          "capex": -3116,
+          "divida_liquida": -4209,
+          "producao_kboed": 2313,
+          "derivados": {
+            "margem_ebitda_pct": 40.63,
+            "margem_liquida_pct": 11.16,
+            "conversao_fcf_pct": 18.54,
+            "capex_fco_pct": 59.77,
+            "receita_por_boe_usd": 133.75,
+            "ebitda_por_boe_usd": 54.35
+          }
+        },
+        {
+          "periodo": "2026-Q2",
+          "receita": 34523,
+          "lucro_liquido": 4848,
+          "ebitda": 16184,
+          "fluxo_caixa_operacional": 9470,
+          "fcf": 6598,
+          "capex": -2872,
+          "divida_liquida": 8693,
+          "producao_kboed": 2165,
+          "derivados": {
+            "margem_ebitda_pct": 46.88,
+            "margem_liquida_pct": 14.04,
+            "conversao_fcf_pct": 40.77,
+            "capex_fco_pct": 30.33,
+            "receita_por_boe_usd": 175.23,
+            "ebitda_por_boe_usd": 82.15
+          }
+        }
+      ],
+      "proveniencia": {
+        "fundamentos": {
+          "fonte": "Yahoo Finance (demonstracoes trimestrais)",
+          "coletado_em": "2026-11-05",
+          "campos": [
+            "receita",
+            "lucro_liquido",
+            "ebitda",
+            "margem_liquida_pct",
+            "fluxo_caixa_operacional",
+            "fcf",
+            "capex",
+            "divida_liquida",
+            "divida_patrimonio_pct",
+            "roe_pct",
+            "roa_pct"
+          ]
+        },
+        "producao_kboed": {
+          "fonte": "release da empresa",
+          "trimestre_do_dado": "Q2 2026",
+          "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+        }
+      },
+      "fontes": [
+        "https://stockanalysis.com/stocks/eqnr/financials/",
+        "https://stockanalysis.com/stocks/eqnr/financials/cash-flow-statement/",
+        "https://stockanalysis.com/stocks/eqnr/statistics/",
+        "https://www.globenewswire.com/news-release/2026/05/06/3288464"
+      ],
+      "ttm": {
+        "receita": 120599,
+        "lucro_liquido": 11804,
+        "ebitda": 51249,
+        "fluxo_caixa_operacional": 24336,
+        "fcf": 11330,
+        "capex": -13006,
+        "producao_kboed": 2210.25,
+        "janela": ["2025-Q4", "2026-Q1", "2026-Q2", "Q3 2026"]
+      },
+      "derivados": {
+        "run_rate_ebitda_pct": 56.78
+      },
+      "perfil": {
+        "Rentabilidade": 66.4,
+        "Geração de caixa": 0.0,
+        "Solidez": 76.4,
+        "Valuation": 65.2,
+        "Retorno ao acionista": 57.1,
+        "Escala": 0.0
+      }
+    }
+  ],
+  "meta_build": {
+    "eixos_perfil": [
+      "Rentabilidade",
+      "Geração de caixa",
+      "Solidez",
+      "Valuation",
+      "Retorno ao acionista",
+      "Escala"
+    ],
+    "dias_periodo": {
+      "fy2025": 365,
+      "q_recente": 90
+    },
+    "fator_anualizacao": {
+      "fy2025": 1,
+      "q_recente": 4
+    },
+    "tem_historico": true,
+    "empresas_com_ttm": 7,
+    "derivados_historico": [
+      "capex_fco_pct",
+      "conversao_fcf_pct",
+      "ebitda_por_boe_usd",
+      "margem_ebitda_pct",
+      "margem_liquida_pct",
+      "receita_por_boe_usd"
+    ]
+  }
+}
