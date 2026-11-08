@@ -33,6 +33,7 @@ JSON_PATH = BASE / "indicadores_oleo_gas.json"
 TEMPLATE_PATH = BASE / "dashboard_template.html"
 HTML_OUT_PATH = BASE / "dashboard_oleo_gas.html"
 CSV_OUT_PATH = BASE / "indicadores_oleo_gas.csv"
+DADOS_OUT_PATH = BASE / "dashboard_data.json"
 
 # Dias por período, usados nos indicadores "por boe".
 # O trimestre é derivado do rótulo (ver `dias_do_trimestre`): Q1 tem 90 dias
@@ -442,6 +443,29 @@ def build_html(data):
     print(f"OK: {HTML_OUT_PATH.name} gerado ({len(html):,} bytes)")
 
 
+def build_dados(data):
+    """Publica o payload ENRIQUECIDO como arquivo, para o app React consumir.
+
+    Por que isto existe: `indicadores_oleo_gas.json` tem apenas campos
+    primarios -- nenhum derivado e gravado nele, por decisao de projeto. Os 18
+    indicadores derivados nascem aqui, em `enriquecer()`, e ate agora so
+    existiam dentro do HTML (injetados no lugar de `__DATA_JSON__`) e no CSV.
+
+    O app em `app/` precisa deles. As duas alternativas eram piores:
+    reimplementar as formulas em TypeScript (duas implementacoes da mesma
+    conta divergem -- e remover essa duplicacao foi o trabalho desta semana) ou
+    fazer o app parsear o CSV. Publicar o mesmo dicionario que o HTML ja
+    recebe mantem `build_dashboard.py` como UNICO ponto que deriva.
+
+    E arquivo GERADO: nunca editar a mao, nunca usar como fonte. A fonte
+    continua sendo indicadores_oleo_gas.json.
+    """
+    DADOS_OUT_PATH.write_text(
+        json.dumps(data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8"
+    )
+    print(f"OK: {DADOS_OUT_PATH.name} gerado ({DADOS_OUT_PATH.stat().st_size:,} bytes)")
+
+
 def build_csv(data):
     rows = []
     for e in data["empresas"]:
@@ -519,6 +543,7 @@ def main():
 
     build_html(data)
     build_csv(data)
+    build_dados(data)
 
 
 if __name__ == "__main__":
