@@ -12,14 +12,14 @@
    "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
    "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
    "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
-   "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 07/11/2026, iguais para as colunas FY2025 e Q1 2026.",
+   "Market Cap, P/E, EV/EBITDA, Dividend Yield e Preço são 'snapshot' de mercado em 08/11/2026, iguais para as colunas FY2025 e Q1 2026.",
    "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
    "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
    "Produção da Equinor em FY2025 não estava disponível de forma consistente na fonte padronizada; os indicadores por boe do ano fiscal usam a produção do trimestre mais recente como proxy nesse caso.",
    "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%."
   ],
   "versao_dados": "1.2",
-  "atualizado_em": "2026-11-07",
+  "atualizado_em": "2026-11-08",
   "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
  },
  "empresas": [
@@ -106,7 +106,7 @@
    "mercado": {
     "market_cap": 676621,
     "pe": 17.06,
-    "ev_ebitda": 8.94,
+    "ev_ebitda": 9.05,
     "dividend_yield_pct": 2.48,
     "preco_acao": 165.87
    },
@@ -277,10 +277,10 @@
      "producao_proxy": false,
      "producao_usada_kboed": 3720,
      "dias_periodo": 365,
-     "ev": 449262,
-     "ev_por_boed_usd": 120769.0,
+     "ev": 449316,
+     "ev_por_boed_usd": 120784.0,
      "fcf_yield_pct": 4.0,
-     "dividendos_estimados": 13771.0,
+     "dividendos_estimados": 13773.0,
      "cobertura_dividendo_x": 1.2
     },
     "margem_liquida_fonte_pct": 6.77
@@ -318,18 +318,18 @@
      "producao_proxy": false,
      "producao_usada_kboed": 4070,
      "dias_periodo": 91,
-     "ev": 443347,
-     "ev_por_boed_usd": 108930.0,
+     "ev": 443401,
+     "ev_por_boed_usd": 108944.0,
      "fcf_yield_pct": 6.51,
-     "dividendos_estimados": 13771.0,
+     "dividendos_estimados": 13773.0,
      "cobertura_dividendo_x": 1.96
     },
     "margem_liquida_fonte_pct": 17.96
    },
    "mercado": {
-    "market_cap": 414802,
+    "market_cap": 414856,
     "pe": 15.61,
-    "ev_ebitda": 7.72,
+    "ev_ebitda": 7.6,
     "dividend_yield_pct": 3.32,
     "preco_acao": 212.61
    },
@@ -464,7 +464,7 @@
     "Rentabilidade": 37.2,
     "Geração de caixa": 100.0,
     "Solidez": 26.4,
-    "Valuation": 17.0,
+    "Valuation": 19.9,
     "Retorno ao acionista": 46.6,
     "Escala": 81.1
    }
@@ -500,10 +500,10 @@
      "producao_proxy": false,
      "producao_usada_kboed": 2800,
      "dias_periodo": 365,
-     "ev": 326466,
-     "ev_por_boed_usd": 116595.0,
+     "ev": 326276,
+     "ev_por_boed_usd": 116527.0,
      "fcf_yield_pct": 8.52,
-     "dividendos_estimados": 4380.0,
+     "dividendos_estimados": 4377.0,
      "cobertura_dividendo_x": 5.46
     },
     "margem_liquida_fonte_pct": 6.79
@@ -541,16 +541,16 @@
      "producao_proxy": false,
      "producao_usada_kboed": 2455,
      "dias_periodo": 92,
-     "ev": 320429,
-     "ev_por_boed_usd": 130521.0,
+     "ev": 320239,
+     "ev_por_boed_usd": 130444.0,
      "fcf_yield_pct": 13.31,
-     "dividendos_estimados": 4380.0,
-     "cobertura_dividendo_x": 8.53
+     "dividendos_estimados": 4377.0,
+     "cobertura_dividendo_x": 8.54
     },
     "margem_liquida_fonte_pct": 12.99
    },
    "mercado": {
-    "market_cap": 280779,
+    "market_cap": 280589,
     "pe": 8.6,
     "ev_ebitda": 4.8,
     "dividend_yield_pct": 1.56,
@@ -705,7 +705,7 @@
     "Rentabilidade": 16.7,
     "Geração de caixa": 99.2,
     "Solidez": 29.6,
-    "Valuation": 57.8,
+    "Valuation": 58.5,
     "Retorno ao acionista": 0.0,
     "Escala": 12.3
    }
@@ -946,7 +946,7 @@
     "Rentabilidade": 0.0,
     "Geração de caixa": 81.3,
     "Solidez": 32.4,
-    "Valuation": 56.4,
+    "Valuation": 57.1,
     "Retorno ao acionista": 83.3,
     "Escala": 1.5
    }
@@ -1187,7 +1187,7 @@
     "Rentabilidade": 66.4,
     "Geração de caixa": 0.0,
     "Solidez": 76.4,
-    "Valuation": 65.2,
+    "Valuation": 65.7,
     "Retorno ao acionista": 57.1,
     "Escala": 0.0
    }
@@ -1428,7 +1428,7 @@
     "Rentabilidade": 25.8,
     "Geração de caixa": 47.4,
     "Solidez": 100.0,
-    "Valuation": 60.6,
+    "Valuation": 61.2,
     "Retorno ao acionista": 81.2,
     "Escala": 9.8
    }
