@@ -35,7 +35,7 @@ jobs:
       MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
       PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/prepara-ambiente
         with:
           coleta: "true"
@@ -97,7 +97,7 @@ jobs:
 
       - name: Guarda o relatorio da execucao
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: relatorio-mercado
           path: ${{ runner.temp }}/relatorio-mercado.json
