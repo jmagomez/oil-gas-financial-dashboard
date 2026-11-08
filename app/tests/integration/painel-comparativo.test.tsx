@@ -3,9 +3,14 @@ import { render, screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PainelComparativo } from '@/components/features/painel-comparativo';
-import payloadReal from '../fixtures/payload.json';
+import payloadReal from '../fixtures/dashboard-data.json';
 
-/** Fixture recortada do payload real: XOM (normal), BP (ROE ~0), EQNR (caixa liquido). */
+/**
+ * Fixture recortada do payload ENRIQUECIDO: XOM (normal), BP (ROE ~0), SHEL,
+ * EQNR (caixa liquido). E o dashboard_data.json, e nao o curado, porque a
+ * coluna EV / EBITDA le `derivados.ev_ebitda_x` -- derivado no
+ * build_dashboard.py, que e o unico lugar do projeto que calcula indicador.
+ */
 function envolve(children: ReactNode) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, gcTime: 0 } } });
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
