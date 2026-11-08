@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ErrorBoundary } from '@/app/providers';
@@ -16,6 +17,32 @@ const PainelComparativo = lazy(() =>
     default: m.PainelComparativo,
   })),
 );
+const PainelPonte = lazy(() =>
+  import('@/components/features/painel-ponte').then((m) => ({ default: m.PainelPonte })),
+);
+const PainelEficiencia = lazy(() =>
+  import('@/components/features/painel-eficiencia').then((m) => ({ default: m.PainelEficiencia })),
+);
+const PainelValuation = lazy(() =>
+  import('@/components/features/painel-valuation').then((m) => ({ default: m.PainelValuation })),
+);
+const PainelPerfil = lazy(() =>
+  import('@/components/features/painel-perfil').then((m) => ({ default: m.PainelPerfil })),
+);
+
+/**
+ * Ordem deliberada: primeiro o comparativo (a visao geral), depois a ponte
+ * (de onde vem o caixa), depois eficiencia (qualidade do barril), depois o
+ * que o mercado paga por isso, e por fim o radar -- que e o mais sujeito a
+ * leitura errada e so faz sentido depois dos numeros absolutos.
+ */
+const ABAS = [
+  { id: 'comparativo', rotulo: 'Comparativo', painel: <PainelComparativo /> },
+  { id: 'ponte', rotulo: 'Ponte de caixa', painel: <PainelPonte /> },
+  { id: 'eficiencia', rotulo: 'Eficiência', painel: <PainelEficiencia /> },
+  { id: 'valuation', rotulo: 'Valuation', painel: <PainelValuation /> },
+  { id: 'perfil', rotulo: 'Perfil', painel: <PainelPerfil /> },
+] as const;
 
 function Carregando() {
   return (
@@ -79,11 +106,24 @@ export function App() {
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
         <Cabecalho />
         <main id="conteudo" className="mt-5">
-          <ErrorBoundary>
-            <Suspense fallback={<Carregando />}>
-              <PainelComparativo />
-            </Suspense>
-          </ErrorBoundary>
+          <Tabs defaultValue="comparativo">
+            <TabsList aria-label="Seções do dashboard">
+              {ABAS.map((a) => (
+                <TabsTrigger key={a.id} value={a.id}>
+                  {a.rotulo}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            {ABAS.map((a) => (
+              <TabsContent key={a.id} value={a.id}>
+                {/* Uma fronteira de erro POR ABA: payload inesperado num
+                    painel nao pode apagar a tela inteira. */}
+                <ErrorBoundary>
+                  <Suspense fallback={<Carregando />}>{a.painel}</Suspense>
+                </ErrorBoundary>
+              </TabsContent>
+            ))}
+          </Tabs>
         </main>
         <Rodape />
       </div>
