@@ -37,7 +37,7 @@ def _empresa(historico, q_ebitda=40, q_fcf=10, nd=500, market_cap=1000):
         "ticker": "TST", "nome": "Teste", "pais": "X",
         "fy2025": dict(_tri("FY2025", receita=400, ebitda=160, fcf=40, capex=-80)),
         "q_recente": q,
-        "mercado": {"market_cap": market_cap, "pe": 10.0, "ev_ebitda": 5.0,
+        "mercado": {"market_cap": market_cap, "pe": 10.0,
                     "dividend_yield_pct": 2.0, "preco_acao": 20.0},
         "historico": historico,
         "fontes": ["x"],
@@ -97,6 +97,21 @@ def test_nd_ebitda_do_trimestre_usa_ttm_quando_disponivel():
     # x4 daria 600/400 = 1.50, subestimando a alavancagem em 3x
     assert d["base_12m_ebitda"] == "ttm"
     assert d["nd_ebitda_x"] == pytest.approx(600 / 130, abs=0.01)
+
+
+def test_ev_ebitda_do_trimestre_tambem_usa_ttm_quando_disponivel():
+    """Mesmo cenario do ND/EBITDA, pelo mesmo motivo.
+
+    Com um trimestre de pico, o x4 infla o EBITDA anual e BARATEIA o
+    valuation: 1600/400 = 4,0x contra 1600/130 = 12,3x. Um fundo de 3x no
+    multiplo e a diferenca entre "barata" e "cara".
+    """
+    hist = [_tri("2025-Q2", ebitda=10), _tri("2025-Q3", ebitda=10),
+            _tri("2025-Q4", ebitda=10), _tri("2026-Q1", ebitda=10)]
+    e = _empresa(hist, q_ebitda=100, nd=600, market_cap=1000)
+    d = bd.enriquecer({"empresas": [e]})["empresas"][0]["q_recente"]["derivados"]
+    assert d["base_12m_ebitda"] == "ttm"
+    assert d["ev_ebitda_x"] == pytest.approx(1600 / 130, abs=0.01)
 
 
 def test_fcf_yield_do_trimestre_usa_ttm_quando_disponivel():

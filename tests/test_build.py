@@ -28,7 +28,7 @@ def empresa_sintetica(receita, lucro, margem):
     return {
         "ticker": "TST", "nome": "Teste", "pais": "X",
         "fy2025": dict(periodo), "q_recente": dict(periodo),
-        "mercado": {"market_cap": 1000.0, "pe": 10.0, "ev_ebitda": 5.0,
+        "mercado": {"market_cap": 1000.0, "pe": 10.0,
                     "dividend_yield_pct": 2.0, "preco_acao": 50.0},
         "fontes": ["teste"],
     }
@@ -101,6 +101,45 @@ def test_enterprise_value_soma_divida_liquida(dados):
     for e in dados["empresas"]:
         p = e["fy2025"]
         assert p["derivados"]["ev"] == round(e["mercado"]["market_cap"] + p["divida_liquida"])
+
+
+def test_ev_ebitda_sai_do_ev_e_do_ebitda_do_proprio_payload(dados):
+    """O multiplo tem de ser reconstituivel a partir de campos publicados.
+
+    Era isso que o numero do Yahoo nao permitia: nao havia como mostrar de onde
+    ele vinha, e ele divergia do nosso `ev` sobre o nosso `ebitda`.
+    """
+    for e in dados["empresas"]:
+        p = e["fy2025"]
+        esperado = round(p["derivados"]["ev"] / p["ebitda"], 2)
+        assert p["derivados"]["ev_ebitda_x"] == esperado, e["ticker"]
+
+
+def test_ev_ebitda_e_nd_ebitda_usam_a_MESMA_base_de_12_meses(dados):
+    """Dois multiplos com o mesmo denominador nao podem divergir de base.
+
+    Se um usasse TTM e o outro trimestre x4, a tela mostraria uma alavancagem
+    e um valuation calculados sobre EBITDAs diferentes -- e nada na interface
+    avisaria.
+
+    O teste afirma a base DIRETAMENTE, reconstruindo o `ebitda_anual` a partir
+    de `base_12m_ebitda`. A versao obvia (dividir `ev` pelo multiplo e comparar
+    com `divida_liquida` dividida pelo outro) nao serve: os multiplos vem
+    arredondados em 2 casas e, num ND/EBITDA de 0,43x, meio centesimo e 1,2% --
+    o resultado media o arredondamento, nao a base.
+    """
+    for e in dados["empresas"]:
+        q = e["q_recente"]
+        d = q["derivados"]
+        base = d["base_12m_ebitda"]
+        if base == "ttm":
+            ebitda_anual = e["ttm"]["ebitda"]
+        elif base == "x4":
+            ebitda_anual = q["ebitda"] * 4
+        else:
+            raise AssertionError(f"{e['ticker']}: base inesperada {base!r}")
+        assert d["ev_ebitda_x"] == round(d["ev"] / ebitda_anual, 2), e["ticker"]
+        assert d["nd_ebitda_x"] == round(q["divida_liquida"] / ebitda_anual, 2), e["ticker"]
 
 
 def test_caixa_liquido_gera_ev_menor_que_market_cap(dados):
@@ -224,7 +263,7 @@ def test_scores_do_radar_ficam_entre_0_e_100_com_extremos(dados):
 
 def test_score_de_valuation_premia_multiplo_menor(dados):
     """Menor EV/EBITDA do grupo deve receber score 100 no eixo Valuation."""
-    barata = min(dados["empresas"], key=lambda e: e["mercado"]["ev_ebitda"])
+    barata = min(dados["empresas"], key=lambda e: e["q_recente"]["derivados"]["ev_ebitda_x"])
     assert barata["perfil"]["Valuation"] == 100
 
 
