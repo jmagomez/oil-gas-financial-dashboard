@@ -1,14 +1,10 @@
-name: Regenera e publica os artefatos
+name: Publica artefatos gerados
 description: >
-  Gate unico de publicacao: regenera HTML/CSV a partir do JSON, roda a suite e
-  so entao comita. Os tres workflows que escrevem nos artefatos gerados
-  (atualiza-mercado, atualiza-fundamentos, build-dashboard) passam por aqui.
-
-  Existe porque o bloco estava escrito tres vezes e ja havia divergido: um dos
-  workflows rodava Python 3.11 e os outros dois 3.12 para o mesmo codigo, e so
-  um fazia `git pull --rebase` antes do push -- os outros dois perdiam corrida
-  de push em silencio. Versao, ordem dos passos e tratamento de corrida agora
-  moram num lugar so.
+  Gate unico de publicacao: regenera os artefatos, roda a suite e so entao
+  comita. Existia em triplicata nos workflows e ja havia divergido -- um
+  rodava Python 3.11 e os outros 3.12 para o mesmo codigo, e apenas um fazia
+  `git pull --rebase` antes do push -- os outros dois perdiam corrida
+  silenciosamente.
 
 inputs:
   mensagem:
@@ -23,17 +19,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Regenera HTML + CSV a partir do JSON
+    - name: Regenera os artefatos
       shell: bash
-      run: python3 build_dashboard.py
+      run: python build_dashboard.py
 
-    # Roda DEPOIS do build: parte da suite confere os artefatos gerados, nao so
-    # as funcoes. Nada e commitado se algo aqui quebrar.
+    # A suite roda DEPOIS do build e ANTES do commit: ela confere as formulas
+    # derivadas contra os artefatos recem-gerados, nao contra o estado antigo.
+    # Nada e commitado se algo aqui quebrar.
     - name: Testes
       shell: bash
-      run: python3 -m pytest
+      run: pytest
 
-    - name: Comita se algo mudou
+    - name: Comita se houver mudanca
       if: inputs.mensagem != ''
       shell: bash
       env:
@@ -43,7 +40,12 @@ runs:
         set -euo pipefail
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add indicadores_oleo_gas.json dashboard_oleo_gas.html indicadores_oleo_gas.csv
+        # dashboard_data.json entra aqui junto dos outros gerados: sem isso
+        # ele envelhece em silencio enquanto HTML e CSV seguem frescos --
+        # e o `git pull --rebase --autostash` abaixo esconderia a mudanca
+        # nao preparada em vez de comita-la.
+        git add indicadores_oleo_gas.json dashboard_oleo_gas.html \
+          indicadores_oleo_gas.csv dashboard_data.json
         if git diff --cached --quiet; then
           echo "Nada mudou -- nenhum commit."
           exit 0
