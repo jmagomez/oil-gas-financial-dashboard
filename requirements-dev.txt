@@ -8,6 +8,14 @@
 # pytest: a faixa >=8.0 ja resolvia 9.2.0 na pratica. O piso em 9.1.1 declara
 # o que a suite de fato exige, em vez de prometer compatibilidade com 8.x que
 # ninguem verifica.
-ruff>=0.6
+#
+# ruff PINADO, nao em faixa aberta: `ruff check` e bloqueante no ci.yml, e
+# versao nova habilita regras novas dentro das familias ja selecionadas no
+# pyproject (E, F, I, UP, B). Com faixa aberta, uma release do ruff pode
+# reprovar um commit que nao tem nada a ver com ela. Atualizar o pino e uma
+# mudanca deliberada, com o diff junto, em vez de surpresa no meio de outro
+# trabalho. 0.17.4 e a versao em que `ruff check .` passa limpo hoje --
+# verificado antes de pinar.
+ruff==0.17.4
 pytest>=9.1.1
 pandas>=2.0
