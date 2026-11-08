@@ -10,7 +10,12 @@ if (!('ResizeObserver' in globalThis)) {
 }
 
 // use-theme le a preferencia do sistema.
-if (!window.matchMedia) {
+//
+// O guard de `typeof window` nao e defensividade vazia: o teste do dev server
+// roda em ambiente `node` (faz HTTP de verdade, nao renderiza nada) e este
+// setup e aplicado a TODA a suite. Sem o guard, ele estoura com
+// "window is not defined" antes de qualquer teste daquele arquivo rodar.
+if (typeof window !== 'undefined' && !window.matchMedia) {
   window.matchMedia = (q: string) => ({
     matches: false,
     media: q,
