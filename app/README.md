@@ -254,7 +254,7 @@ diferente. Com sete empresas, basta uma no extremo para comprimir as outras seis
 
 ## Indicadores: o que entra, e o que eu recomendo **não** entrar
 
-O pipeline já calcula **18 indicadores derivados** — entre eles `fcf_yield_pct`,
+O pipeline já calcula **19 indicadores derivados** — entre eles `fcf_yield_pct`,
 `conversao_fcf_pct`, `nd_ebitda_x`, `ebitda_por_boe_usd` e `ev_por_boed_usd`.
 O `CLAUDE.md` tem duas regras que valem aqui: _um derivado precisa de um
 consumidor_ e _nenhum indicador é função algébrica de outro_. Então a resposta
