@@ -1,6 +1,13 @@
 name: CI
 
-# Lint, formatacao e a suite completa.
+# Lint, formatacao e a suite completa -- dos DOIS lados: Python e o app React.
+#
+# Por que o gate do app roda aqui, e nao so no deploy.yml: o deploy protege o
+# SITE, entao a ele basta avaliar o estado que vai ao ar (e por isso ele cancela
+# builds superados). Este workflow protege o HISTORICO: cada commit de main e
+# de PR passa pelo gate, o que mantem a arvore bissecavel. Sao objetivos
+# diferentes, e e por isso que a politica de concorrencia dos dois e oposta --
+# ver o bloco `concurrency` abaixo.
 #
 # Nao dispara nos caminhos que acionam build-dashboard.yml (o JSON, o template,
 # o build script e os assets): aquele workflow ja roda a mesma suite, e como ele
@@ -20,11 +27,25 @@ on:
       # Gerados: chegam por commit de bot, nunca sozinhos.
       - dashboard_oleo_gas.html
       - indicadores_oleo_gas.csv
+      - dashboard_data.json
       - "**/*.md"
   pull_request:
 
 permissions:
   contents: read
+
+# SEM cancelamento, ao contrario do deploy.yml -- e a diferenca e o ponto.
+#
+# O deploy cancela gate superado porque so o ultimo estado importa para o que
+# vai ao ar. Aqui o objetivo e o inverso: avaliar CADA commit, para que a
+# arvore continue bissecavel. Cancelar runs intermediarias aqui destruiria
+# exatamente a garantia que este workflow existe para dar.
+#
+# O agrupamento por ref ainda serve para serializar: duas runs do mesmo branch
+# nao brigam por cache de npm.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   test:
@@ -48,3 +69,48 @@ jobs:
 
       - name: Testes (pytest)
         run: pytest
+
+  app:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.11"
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - name: Instala dependencias
+        run: npm ci
+
+      # Mesma ordem do deploy.yml, e o mais rapido falha primeiro. Nenhum passo
+      # aqui e informativo: o lado web nao tem a excecao de formatacao que o
+      # ruff format tem acima, porque o prettier foi adotado desde o inicio.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Formatacao (prettier)
+        run: npm run format:check
+
+      # Inclui o teste que sobe o dev server e faz HTTP de verdade. E o mais
+      # lento da suite e o unico com ciclo de vida de servidor -- existe porque
+      # typecheck, lint e testes de componente passavam todos com o
+      # `npm run dev` quebrado, porque nenhum deles o executa.
+      - name: Testes
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      # Contra os JSON REAIS do repositorio: a fonte curada e o gerado. Rodar
+      # isto aqui, e nao so no deploy, e o que faz uma divergencia de contrato
+      # aparecer no commit que a introduziu.
+      - name: Valida o contrato de dados
+        run: npm run validate:data
