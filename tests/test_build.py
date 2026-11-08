@@ -280,3 +280,79 @@ def test_historico_e_opcional_e_normalizado(dados):
         assert isinstance(e["historico"], list)
     esperado = any(e["historico"] for e in dados["empresas"])
     assert dados["meta_build"]["tem_historico"] is esperado
+
+
+# ---------------------------------------------------------------------------
+# dashboard_data.json -- o payload enriquecido como arquivo
+# ---------------------------------------------------------------------------
+def test_build_dados_publica_os_derivados_que_o_json_fonte_nao_tem(dados, tmp_path, monkeypatch):
+    """O app React precisa dos derivados; a fonte curada nao os tem.
+
+    Reimplementar as formulas no frontend criaria duas implementacoes da mesma
+    conta -- exatamente a duplicacao que este repositorio removeu. Publicar o
+    mesmo dicionario que o HTML recebe mantem build_dashboard.py como unico
+    ponto que deriva.
+    """
+    saida = tmp_path / "dashboard_data.json"
+    monkeypatch.setattr(bd, "DADOS_OUT_PATH", saida)
+    bd.build_dados(dados)
+
+    lido = json.loads(saida.read_text(encoding="utf-8"))
+    empresa = lido["empresas"][0]
+
+    for bloco in ("fy2025", "q_recente"):
+        assert "derivados" in empresa[bloco]
+        assert "ebitda_por_boe_usd" in empresa[bloco]["derivados"]
+    # E os eixos do radar, que o app nao recalcula.
+    assert lido["meta_build"]["eixos_perfil"]
+    assert set(empresa["perfil"]) == set(lido["meta_build"]["eixos_perfil"])
+
+
+def test_build_dados_e_o_mesmo_payload_que_vai_para_o_html(dados, tmp_path, monkeypatch):
+    """Se os dois divergirem, o dashboard antigo e o app mostram numeros
+    diferentes para o mesmo indicador -- o pior defeito possivel aqui."""
+    json_saida = tmp_path / "dashboard_data.json"
+    html_saida = tmp_path / "dash.html"
+    monkeypatch.setattr(bd, "DADOS_OUT_PATH", json_saida)
+    monkeypatch.setattr(bd, "HTML_OUT_PATH", html_saida)
+
+    bd.build_dados(dados)
+    bd.build_html(dados)
+
+    do_arquivo = json.loads(json_saida.read_text(encoding="utf-8"))
+    html = html_saida.read_text(encoding="utf-8")
+
+    # Recupera o payload de DENTRO do HTML e compara os dois objetos. O HTML
+    # serializa sem indentacao, entao comparar texto nao serve -- o que tem de
+    # bater e a estrutura.
+    marcador = "const DATA = "
+    assert marcador in html, "o template mudou: o payload nao esta mais em `const DATA = `"
+    trecho = html[html.index(marcador) + len(marcador) :]
+    do_html, _ = json.JSONDecoder().raw_decode(trecho)
+    assert do_html == do_arquivo
+
+
+def test_build_dados_termina_com_quebra_de_linha(dados, tmp_path, monkeypatch):
+    """Arquivo versionado sem newline final suja o diff de quem editar depois."""
+    saida = tmp_path / "dashboard_data.json"
+    monkeypatch.setattr(bd, "DADOS_OUT_PATH", saida)
+    bd.build_dados(dados)
+    assert saida.read_text(encoding="utf-8").endswith("\n")
+
+
+def test_main_gera_os_TRES_artefatos(tmp_path, monkeypatch):
+    """Guarda contra artefato orfao.
+
+    Este teste existe por causa de um erro real: o dashboard_data.json foi
+    publicado antes do gerador, e o repositorio ficou com um artefato que
+    NENHUMA rotina regenerava -- ele envelheceria em silencio enquanto HTML e
+    CSV seguiam frescos. Se alguem tirar build_dados() do main, isto cai.
+    """
+    html, csv_, dados_json = (tmp_path / n for n in ("d.html", "d.csv", "d.json"))
+    monkeypatch.setattr(bd, "HTML_OUT_PATH", html)
+    monkeypatch.setattr(bd, "CSV_OUT_PATH", csv_)
+    monkeypatch.setattr(bd, "DADOS_OUT_PATH", dados_json)
+    bd.main()
+    for caminho in (html, csv_, dados_json):
+        assert caminho.exists(), f"{caminho.name} nao foi gerado por main()"
+        assert caminho.stat().st_size > 0
