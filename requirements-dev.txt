@@ -1,7 +1,13 @@
-# Ferramentas de desenvolvimento (lint, format, testes)
+# Ferramentas de desenvolvimento (lint, testes) e o que a suite precisa.
+#
+# pandas NAO e dependencia de runtime: nenhum script o importa. Ele esta aqui
+# porque tests/test_update_fundamentals.py monta DataFrames iguais aos que o
+# yfinance devolve, e sem ele o `importorskip` pula ~41 testes de uma vez --
+# o CI ficaria verde sem testar a leitura das demonstracoes.
+#
+# pytest: a faixa >=8.0 ja resolvia 9.2.0 na pratica. O piso em 9.1.1 declara
+# o que a suite de fato exige, em vez de prometer compatibilidade com 8.x que
+# ninguem verifica.
 ruff>=0.6
-pytest>=8.0
-# pandas: os testes de update_fundamentals montam DataFrames iguais aos que o
-# yfinance devolve. Sem ela aqui, esses testes seriam pulados no CI e a
-# traducao das demonstracoes ficaria sem cobertura onde ela mais quebra.
+pytest>=9.1.1
 pandas>=2.0
