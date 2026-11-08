@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PainelComparativo } from '@/components/features/painel-comparativo';
-import payloadReal from '../fixtures/payload.json';
+import payloadReal from '../fixtures/dashboard-data.json';
 
 /**
  * O painel e uma TABELA de dados, e tabela e onde cabecalho sem `scope`,
