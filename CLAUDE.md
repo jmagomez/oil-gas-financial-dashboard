@@ -4,7 +4,7 @@
 
 Manter um dashboard comparativo de **27 indicadores** (17 primários, 10 derivados) de 7 petroleiras — ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies, Petrobras — publicado no GitHub Pages, com dados de mercado atualizados **todo dia útil** e fundamentos revisados **a cada balanço**.
 
-**Divisão por público, sem sobreposição.** O `README.md` é para quem *lê* o dashboard: o que cada indicador significa, o que cada seção mostra, metodologia e fontes por empresa. Este arquivo é para quem *edita*: convenções, regras de negócio e a mecânica das rotinas. A mecânica de implementação (quais faixas, quais limites, a ambiguidade de unidade do dividend yield, o porquê da escrita cirúrgica) existe **só aqui** — o README aponta para cá em vez de repetir. Antes os dois contavam a mesma história, e manter duas versões em sincronia é como elas divergem.
+**Divisão por público, sem sobreposição.** O `README.md` é para quem _lê_ o dashboard: o que cada indicador significa, o que cada seção mostra, metodologia e fontes por empresa. Este arquivo é para quem _edita_: convenções, regras de negócio e a mecânica das rotinas. A mecânica de implementação (quais faixas, quais limites, a ambiguidade de unidade do dividend yield, o porquê da escrita cirúrgica) existe **só aqui** — o README aponta para cá em vez de repetir. Antes os dois contavam a mesma história, e manter duas versões em sincronia é como elas divergem.
 
 ## Fontes
 
@@ -16,9 +16,9 @@ Manter um dashboard comparativo de **27 indicadores** (17 primários, 10 derivad
 
 - **Escrita cirúrgica.** O JSON é curado à mão, com objetos compactos de uma linha e zeros à direita preservados (`"pe": 10.70`, não `10.7`). Reserializar com `json.dump()` trocaria centenas de linhas de formatação a cada execução automática, e o histórico do arquivo deixaria de ser legível — foi exatamente esse bug que motivou o desenho atual (ver docstring de `update_fundamentals.reescreve_json`). As primitivas desse padrão (achar cada ticker no texto, serializar um bloco na ordem canônica, sincronizar `atualizado_em`) vivem em `escrita_cirurgica.py`, compartilhado por `update_market_data.py` e `update_fundamentals.py`. Ao tocar nessas rotinas, use as primitivas do módulo em vez de reimplementar regex local — foi assim que as duas rotinas acumularam a mesma lógica duplicada (e o mesmo formato de bug possível) antes da extração.
 - **Dois regimes, duas cadências.** Mercado muda todo pregão; fundamentos mudam a cada balanço. Nunca misture as duas rotinas — `update_market_data.py` não toca em receita/EBITDA/capex/dívida/produção, e `update_fundamentals.py` não toca em cotação/P-E/dividend yield.
-- **Fail-safe por campo, nunca por arquivo.** Um campo fora da faixa de plausibilidade ou com variação implausível é descartado e o valor antigo é mantido; a rotina só falha (workflow vermelho) se *nenhum* ticker responder. Dado curado não é sobrescrito em silêncio.
+- **Fail-safe por campo, nunca por arquivo.** Um campo fora da faixa de plausibilidade ou com variação implausível é descartado e o valor antigo é mantido; a rotina só falha (workflow vermelho) se _nenhum_ ticker responder. Dado curado não é sobrescrito em silêncio.
 - **TTM, não trimestre × 4.** Margens e múltiplos usam base de 12 meses (soma dos 4 últimos trimestres), não o trimestre mais recente anualizado — setor cíclico com capex e produção sazonais distorce qualquer anualização simples. Ver `calcular_ttm`/`consolidar_margem` em `build_dashboard.py` e a seção "Base de 12 meses" do README.
-- **Um derivado precisa de um consumidor.** Sete campos derivados eram calculados a cada build e lidos por ninguém — `ebitda_anualizado` e `fcf_anualizado` (sobras da migração para TTM), três `run_rate_*` além do de EBITDA e dois `delta_*`. Campo derivado novo nasce junto com o lugar onde é exibido (template, CSV ou e-mail); se não há lugar, não há campo. Exceção explícita: os campos de **procedência** (`producao_proxy`, `producao_usada_kboed`, `dias_periodo`, `janela_ttm`, `base_12m_*`) existem para dizer *com que número a conta foi feita* e são trilha de auditoria, não indicador.
+- **Um derivado precisa de um consumidor.** Sete campos derivados eram calculados a cada build e lidos por ninguém — `ebitda_anualizado` e `fcf_anualizado` (sobras da migração para TTM), três `run_rate_*` além do de EBITDA e dois `delta_*`. Campo derivado novo nasce junto com o lugar onde é exibido (template, CSV ou e-mail); se não há lugar, não há campo. Exceção explícita: os campos de **procedência** (`producao_proxy`, `producao_usada_kboed`, `dias_periodo`, `janela_ttm`, `base_12m_*`) existem para dizer _com que número a conta foi feita_ e são trilha de auditoria, não indicador.
 - **Nenhum indicador é função algébrica de outro.** `payout_fcf_pct` era exatamente `100 ÷ cobertura_dividendo_x`: duas colunas da tabela, duas do CSV e dois lugares na contagem do badge para uma informação só. Ficou a cobertura, que é a leitura padrão de crédito. Indicador novo que seja transformação monotônica de um existente não acrescenta leitura — acrescenta ruído a um público que faz a conta de cabeça.
 - **O gate de publicação mora nos composite actions.** `build → pytest → commit` estava escrito três vezes e já havia divergido: um workflow rodava Python 3.11 e os outros dois 3.12 para o mesmo código, e só um fazia `git pull --rebase` antes do push. Agora versão, ordem dos passos e tratamento de corrida vivem em `.github/actions/{prepara-ambiente,publica-artefatos}`. Workflow novo que escreva nos artefatos gerados usa os dois; não copie os steps.
 - **Commits automáticos** seguem o padrão `dados: atualiza mercado (DD/MM/AAAA)` / `dados: atualiza fundamentos`, autor `github-actions[bot]`. Esses commits usam o `GITHUB_TOKEN` padrão, então **não** disparam outros workflows `on: push` (proteção anti-recursão do GitHub) — `build-dashboard.yml` só dispara por edição humana direta no JSON/template/build script, ou por `workflow_dispatch`.
@@ -34,8 +34,9 @@ build_email.py           corpo do e-mail diário, reaproveita build_dashboard.en
 dashboard_template.html  esqueleto HTML/CSS/JS com o placeholder __DATA_JSON__
 assets_a11y.{css,js}     camada de acessibilidade, embutida no HTML pelo build
 indicadores_oleo_gas.json   fonte única de verdade — único arquivo de dados editado à mão
-dashboard_oleo_gas.html  )  GERADOS — nunca editar à mão, só via build_dashboard.py
-indicadores_oleo_gas.csv )
+dashboard_oleo_gas.html  )
+indicadores_oleo_gas.csv )  GERADOS — nunca editar à mão, só via build_dashboard.py
+dashboard_data.json      )  (o último é o payload enriquecido que o app consome)
 tests/                   pytest — fórmulas derivadas, as duas rotinas de escrita, e-mail, a11y,
                          e o contrato entre o template e o payload
 .github/actions/
@@ -58,19 +59,21 @@ suíte inteira rodava duas vezes em paralelo. Ao mexer em um, mexa no outro.
 ## Regras de negócio
 
 ### Validação de mercado
+
 - Faixas de plausibilidade por campo (ex.: P/E entre 0,5 e 200).
 - Limite de variação por atualização (40% preço/market cap, 70% múltiplos) — um desdobramento de ações ou troca de símbolo gera um valor válido isoladamente mas que pula de patamar; fica registrado como rejeição, não aplicado.
 - Dividend yield: `yfinance` já devolveu esse campo tanto como fração (`0.0278`) quanto como percentual (`2.78`) — ambiguidade silenciosa de 100×. A rotina prefere calcular o yield a partir do dividendo anual e do preço (sem ambiguidade de unidade) e só usa o campo pronto como último recurso, desambiguado por magnitude.
 
 ### Validação de fundamentos
+
 - Um trimestre só é promovido se for **mais novo** que o que já está no arquivo — mesmo trimestre devolvido pela fonte não toca nada.
 - Coerência entre demonstrações (FCF = FCO + capex, EBITDA ≤ receita, margem batendo com lucro/receita) é checada **além** da faixa por campo: um número plausível no campo errado passa na faixa mas não na identidade contábil. Coerência quebrada descarta a empresa inteira naquele run — meio balanço errado é pior que nenhum.
 - Divergência acima de 5% entre o dado curado e o que a fonte devolve vira aviso no relatório, não bloqueio.
 
 ### Escrita no JSON
+
 - `update_market_data.reescreve_json` reescreve o bloco `mercado` de **todas** as empresas a cada execução (por isso precisa reproduzir byte a byte o que não mudou). `update_fundamentals.reescreve_json` só toca os tickers com trimestre novo — uma empresa sem novidade nunca passa por `serializa_bloco`. É por desenho que só o primeiro tem teste de round-trip byte a byte; o segundo não precisa dessa garantia porque simplesmente não lida com dado não tocado.
 - Um commit de mercado mexe em ~8 linhas por empresa tocada; um commit de fundamentos (um trimestre, uma empresa) mexe em ~11 linhas. Se um diff desses ficar muito maior, é sinal de reserialização acidental do arquivo inteiro — é exatamente essa regressão que `test_formato_do_arquivo_vivo_suporta_escrita_cirurgica*` guarda, rodando contra o JSON real, não um fixture congelado.
-
 
 ## Frontend (`app/`)
 
@@ -84,16 +87,59 @@ A arquitetura, o stack e as decisões de interface estão em `app/README.md` —
 é o terceiro público desta divisão: quem edita o frontend. Aqui ficam só as
 regras que **cruzam a fronteira** entre pipeline e app.
 
-- **Fonte única de verdade continua sendo um arquivo.** O app não tem cópia do
-  dado: em dev o Vite faz proxy do `indicadores_oleo_gas.json` da raiz, e no
-  deploy o workflow copia o mesmo arquivo para `/app/data/`. Nunca versione um
-  segundo JSON dentro de `app/`.
+- **Dois arquivos, uma fonte.** `indicadores_oleo_gas.json` é a fonte curada e
+  tem **só campos primários**. O app consome o `dashboard_data.json`, que é
+  **gerado** por `build_dashboard.py` e carrega os 18 derivados, os eixos do
+  radar (`perfil`) e o TTM. O fonte continua sendo o único arquivo editado à
+  mão; o enriquecido é artefato, como o HTML e o CSV.
+
+  A alternativa era reimplementar as fórmulas em TypeScript, e duas
+  implementações da mesma conta divergem — remover essa duplicação foi o
+  trabalho desta semana. `build_dados()` publica o **mesmo dicionário** que
+  `build_html()` já injetava no lugar de `__DATA_JSON__`, e há teste
+  comparando os dois: se divergirem, o dashboard antigo e o app mostram
+  números diferentes para o mesmo indicador.
+
+  **Artefato novo precisa dos três elos.** O gerador (`build_dados` chamado em
+  `main`), o `git add` do composite action e a cópia no `deploy.yml`. Eu
+  publiquei o `dashboard_data.json` com só um deles e o repositório ficou com
+  um artefato que nenhuma rotina regenerava — envelheceria em silêncio
+  enquanto HTML e CSV seguiam frescos. `test_main_gera_os_TRES_artefatos`
+  existe por causa disso.
+
+- **O app não tem cópia do dado versionada.** Em dev um middleware do Vite
+  (`serveDadosDaRaiz`) serve os JSON da raiz em `/data/`, com lista de
+  permissão por nome; no deploy o workflow copia os mesmos arquivos para
+  `/app/data/`. Nunca versione um segundo JSON dentro de `app/`.
+
+  Antes era `server.proxy` com `bypass`, e estava **quebrado**: proxy
+  encaminha para outro servidor, e aqui não há outro — o arquivo está no
+  disco. O resultado era `index.html` no lugar do JSON (1.402 bytes) e HTTP
+  500 no segundo arquivo. Passou da primeira publicação porque nada testa o
+  dev server; se mexer nisso, teste com `curl` de verdade.
+
 - **O app não calcula indicador de negócio.** `build_dashboard.py` segue sendo o
   único ponto que deriva indicador — a regra "um derivado precisa de um
   consumidor" perde o sentido se o consumidor recalcular por conta própria, e
   duas implementações da mesma fórmula divergem. O que o app deriva é
   **leitura**: situar um valor na faixa histórica da própria empresa, escolher
-  rótulo, decidir se há pontos suficientes para desenhar linha.
+  rótulo, decidir se há pontos suficientes para desenhar linha, e montar a
+  ponte de caixa (que é subtração entre campos do mesmo período, não fórmula
+  nova).
+
+  A **ponte expõe o resíduo** em vez de fechar a conta na força: a Shell em
+  FY2025 tem FCO 42.863 + capex −18.948 = 23.915 contra FCF publicado de
+  23.916. Um dólar de arredondamento na fonte, e os outros 13 casos fecham
+  exato. Ajustar as barras esconderia a diferença.
+
+- **Cinco abas, e a ordem importa.** Comparativo → Ponte de caixa →
+  Eficiência → Valuation → Perfil. O radar vem por último de propósito: é o
+  painel mais sujeito a leitura errada, porque a normalização é min-max entre
+  as sete e o eixo Valuation pontua múltiplo **baixo** como alto — a Petrobras
+  sai com 100 em Rentabilidade, Valuation e Retorno ao acionista, e 0 em
+  Solidez. Abrir o dashboard no radar convidaria à conclusão de que ela é a
+  melhor empresa do grupo. Painel novo que ranqueia entra depois dos números
+  absolutos, não antes.
 - **Campo novo no payload = schema Zod antes de tela.** A fronteira de dados do
   app valida com Zod e falha nomeando o campo. Renomear campo no pipeline sem
   mexer no schema derruba o `validate:data` do deploy — isso é o desenho
@@ -108,6 +154,20 @@ regras que **cruzam a fronteira** entre pipeline e app.
 - **Dois gates, não um.** `ci.yml` cobre o Python (ruff bloqueante + pytest);
   `deploy.yml` cobre o app (typecheck, lint, format:check, testes, build,
   validate:data) e só publica se tudo passar. Nenhum dos dois é informativo.
+- **Arquivo que depende de arquivo vai no MESMO commit.** Publiquei o Passo 3
+  em oito commits e colhi **oito runs vermelhas seguidas** (#19 a #26): cada
+  estado intermediário tinha `Cannot find module`, porque o importador entrou
+  antes do importado. Nenhuma derrubou o site — `deploy-pages` só ativa em
+  caso de sucesso, então o deploy anterior continuou servindo — mas eram oito
+  vermelhos evitáveis.
+
+  O `deploy.yml` passou a separar a concorrência **por job**: o `build` usa
+  `cancel-in-progress: true`, porque numa sequência de pushes só o último
+  commit importa para o que vai ao ar; o `deploy` nunca cancela, porque
+  interromper a ativação do Pages deixa o site servindo meio deploy. Isso
+  reduz o ruído, mas **não torna verde um commit quebrado**: se o último push
+  estiver quebrado, ele reprova — e deve.
+
 - **A publicação por branch está desligada.** O Pages serve da origem "GitHub
   Actions", então **nada vai ao ar sem passar pelo `deploy.yml`** — inclusive o
   HTML do pipeline, que o workflow copia para a raiz do artefato. Ao mexer no
