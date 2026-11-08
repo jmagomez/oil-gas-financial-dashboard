@@ -10,31 +10,43 @@
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import type { ZodTypeAny, z } from 'zod';
 import { payloadSchema } from '../src/services/schemas/indicadores.schema.js';
+import { dadosSchema } from '../src/services/schemas/dashboard-data.schema.js';
 
-const CAMINHO = resolve(
-  process.argv[2] ?? join(import.meta.dirname, '..', '..', 'indicadores_oleo_gas.json'),
-);
+const RAIZ = process.argv[2] ?? join(import.meta.dirname, '..', '..');
 
-if (!existsSync(CAMINHO)) {
-  console.error(`FALTA   ${CAMINHO}`);
-  process.exit(1);
+/**
+ * A fonte curada (so primarios) E o gerado (com os 18 derivados).
+ *
+ * Os dois, de proposito: o app consome o gerado, mas se o pipeline quebrar o
+ * contrato da FONTE o gerado sai errado em silencio. Validar so o consumido
+ * deixaria passar o erro na origem.
+ */
+function valida<S extends ZodTypeAny>(arquivo: string, schema: S): z.infer<S> {
+  const caminho = resolve(join(RAIZ, arquivo));
+  if (!existsSync(caminho)) {
+    console.error(`FALTA   ${caminho}`);
+    process.exit(1);
+  }
+  const r = schema.safeParse(JSON.parse(readFileSync(caminho, 'utf8')));
+  if (!r.success) {
+    console.error(`INVALIDO ${arquivo}`);
+    for (const issue of r.error.issues.slice(0, 20)) {
+      console.error(`   ${issue.path.join('.') || '(raiz)'}: ${issue.message}`);
+    }
+    if (r.error.issues.length > 20) {
+      console.error(`   ... e mais ${r.error.issues.length - 20} problema(s)`);
+    }
+    process.exit(1);
+  }
+  console.log(`OK      ${arquivo}`);
+  return r.data as z.infer<S>;
 }
 
-const r = payloadSchema.safeParse(JSON.parse(readFileSync(CAMINHO, 'utf8')));
-
-if (!r.success) {
-  console.error(`INVALIDO ${CAMINHO}`);
-  for (const issue of r.error.issues.slice(0, 20)) {
-    console.error(`   ${issue.path.join('.') || '(raiz)'}: ${issue.message}`);
-  }
-  if (r.error.issues.length > 20) {
-    console.error(`   ... e mais ${r.error.issues.length - 20} problema(s)`);
-  }
-  process.exit(1);
-}
-
-const { referencia, empresas } = r.data;
+valida('indicadores_oleo_gas.json', payloadSchema);
+const gerado = valida('dashboard_data.json', dadosSchema);
+const { referencia, empresas } = gerado;
 console.log(`OK      ${empresas.length} empresas, dados v${referencia.versao_dados}`);
 console.log(`        atualizado em ${referencia.atualizado_em}`);
 
