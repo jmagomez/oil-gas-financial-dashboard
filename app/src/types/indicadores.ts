@@ -39,7 +39,6 @@ export interface BlocoTrimestral extends BlocoFinanceiro {
 export interface Mercado {
   market_cap: Valor;
   pe: Valor;
-  ev_ebitda: Valor;
   /**
    * Para a Petrobras o proprio payload avisa que o numero e uma FAIXA de
    * referencia (~5% a ~9%), nao um valor preciso: as fontes divergem por
