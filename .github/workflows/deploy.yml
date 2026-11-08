@@ -84,6 +84,11 @@ jobs:
           # Nao ha copia versionada dentro de app/: a fonte unica continua
           # sendo o arquivo da raiz, copiado aqui no momento da publicacao.
           cp indicadores_oleo_gas.json site/app/data/
+          # O PAYLOAD ENRIQUECIDO, que e o que o app de fato consome: os 18
+          # derivados, os eixos do radar e o TTM. Sem esta linha o app sobe e
+          # falha no fetch -- e o gate acima nao pegaria, porque validate:data
+          # confere o arquivo na RAIZ do repositorio, nao no artefato.
+          cp dashboard_data.json site/app/data/
           # Guarda-chuva contra o erro mais caro deste workflow: publicar um
           # artefato sem o dashboard. Falhar mantem no ar o ultimo deploy bom;
           # publicar vazio nao tem volta.
@@ -92,6 +97,7 @@ jobs:
           test -s site/indicadores_oleo_gas.json
           test -s site/app/index.html
           test -s site/app/data/indicadores_oleo_gas.json
+          test -s site/app/data/dashboard_data.json
 
       - uses: actions/configure-pages@v5
 
