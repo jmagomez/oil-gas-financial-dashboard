@@ -63,6 +63,31 @@ export function PainelEficiencia() {
     [data, periodo],
   );
 
+  /** Producao de outro trimestre: numerador e denominador desencontrados. */
+  const comProducaoDefasada = useMemo(
+    () =>
+      (data?.empresas ?? [])
+        .filter((e) => bloco(e, periodo).derivados.producao_defasada)
+        .map((e) => {
+          const d = bloco(e, periodo).derivados;
+          return `${e.ticker} (${d.producao_periodo_do_dado})`;
+        }),
+    [data, periodo],
+  );
+
+  /**
+   * Trimestres distintos no payload, lidos do DADO.
+   *
+   * Estavam escritos a mao aqui ("algumas em Q2 2026 e outras em Q3 2026"). Um
+   * rotulo de periodo escrito a mao envelhece sozinho: no dia em que as sete
+   * convergirem para o mesmo trimestre, o aviso continuaria afirmando uma
+   * divergencia que deixou de existir -- e ninguem receberia um erro por isso.
+   */
+  const trimestres = useMemo(
+    () => [...new Set((data?.empresas ?? []).map((e) => e.q_recente.trimestre))].sort(),
+    [data],
+  );
+
   if (isPending) return <Skeleton className="h-96 w-full" />;
   if (error || !data) {
     return (
@@ -86,11 +111,20 @@ export function PainelEficiencia() {
           Indicadores que normalizam as empresas pelo tamanho da operação — a leitura que separa
           escala de qualidade do barril. Todos são calculados pelo pipeline, não aqui.
         </CardNote>
-        {periodo === 'q_recente' && (
+        {periodo === 'q_recente' && trimestres.length > 1 && (
           <CardNote className="mt-2">
-            <b>Atenção ao comparar o trimestre.</b> As empresas divulgam em datas diferentes:
-            algumas estão em Q2 2026 e outras em Q3 2026. O seletor diz só &quot;trimestre&quot;
-            porque não existe um único.
+            <b>Atenção ao comparar o trimestre.</b> As empresas divulgam em datas diferentes e o
+            payload tem {trimestres.length} trimestres ao mesmo tempo ({trimestres.join(', ')}). O
+            seletor diz só &quot;trimestre&quot; porque não existe um único.
+          </CardNote>
+        )}
+        {comProducaoDefasada.length > 0 && (
+          <CardNote className="mt-2">
+            <b>Produção de outro trimestre em {comProducaoDefasada.join(', ')}.</b> O resultado é do
+            trimestre exibido, mas a produção no denominador é a do trimestre indicado — ela não sai
+            da demonstração financeira, então o pipeline carrega a anterior até alguém atualizá-la
+            pelo relatório da empresa. Enquanto isso durar, receita e EBITDA por barril comparam
+            numerador e denominador de períodos diferentes.
           </CardNote>
         )}
         {comProxy.length > 0 && (
