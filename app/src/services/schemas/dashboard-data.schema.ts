@@ -37,6 +37,17 @@ const proveniencia = {
   janela_ttm: z.array(z.string()).nullable(),
   /** true quando a producao do periodo veio de outro (caso Equinor FY2025). */
   producao_proxy: z.boolean(),
+  /**
+   * Trimestre a que pertence a producao usada, e se ele difere do periodo.
+   *
+   * Nao e o mesmo que `producao_proxy`, que responde "faltou producao?". Aqui a
+   * producao EXISTE -- so e de outro trimestre, porque o pipeline a carrega do
+   * anterior ao promover um balanco novo (ela nao sai de demonstracao
+   * financeira). Sem este par, os indicadores por barril apareciam com
+   * numerador e denominador de trimestres diferentes, sem aviso.
+   */
+  producao_periodo_do_dado: z.string().nullable(),
+  producao_defasada: z.boolean(),
   producao_usada_kboed: num,
   dias_periodo: z.number().int().positive(),
 };
@@ -51,6 +62,8 @@ const derivadosPeriodoSchema = z.object({
   receita_por_boe_usd: num,
   ebitda_por_boe_usd: num,
   ev: num,
+  /** Derivado de ev / ebitda_anual, na base de `base_12m_ebitda`. */
+  ev_ebitda_x: num,
   ev_por_boed_usd: num,
   fcf_yield_pct: num,
   dividendos_estimados: num,
