@@ -50,7 +50,6 @@
       "mercado": {
         "market_cap": 676621,
         "pe": 17.06,
-        "ev_ebitda": 8.94,
         "dividend_yield_pct": 2.48,
         "preco_acao": 165.87
       },
@@ -168,7 +167,6 @@
       "mercado": {
         "market_cap": 114694,
         "pe": 21.72,
-        "ev_ebitda": 4.9,
         "dividend_yield_pct": 4.71,
         "preco_acao": 44.53
       },
@@ -296,7 +294,6 @@
       "mercado": {
         "market_cap": 99386,
         "pe": 8.71,
-        "ev_ebitda": 4.27,
         "dividend_yield_pct": 3.72,
         "preco_acao": 41.99
       },
