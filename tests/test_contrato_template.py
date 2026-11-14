@@ -93,3 +93,27 @@ def test_seletor_do_historico_so_oferece_derivado_que_o_build_publica(payload):
     for e in payload["empresas"]:
         for h in e.get("historico") or []:
             assert set(h.get("derivados") or {}) <= publicados
+
+
+def test_arquivo_vivo_nao_traz_mais_o_ev_ebitda_do_yahoo():
+    """Roda contra indicadores_oleo_gas.json de VERDADE, nao contra fixture.
+
+    O campo nao foi aposentado por estar errado em todos os casos -- na carga
+    de 08/11/2026, XOM e CVX batiam com o nosso calculo dentro de 6%. Foi
+    aposentado porque conviver com o derivado sob o MESMO rotulo "EV / EBITDA"
+    tornava impossivel dizer qual dos dois numeros a tela mostrava. A
+    divergencia ia de -52% (EQNR) a +100% (PBR, cujo 1,78x do Yahoo e
+    incompativel com EV de US$ 180 bi sobre EBITDA de US$ 50 bi).
+
+    Este teste existe porque uma atualizacao de fonte poderia reintroduzir o
+    campo em silencio: o `reescreve_json` preserva chaves desconhecidas de
+    proposito, entao ninguem notaria.
+    """
+    raw = json.loads((ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    com_campo = [e["ticker"] for e in raw["empresas"] if "ev_ebitda" in e["mercado"]]
+    assert not com_campo, f"ev_ebitda do Yahoo voltou em: {com_campo}"
+
+
+def test_cabecalho_do_csv_so_tem_o_multiplo_derivado():
+    assert "ev_ebitda" not in bd.CSV_HEADER
+    assert "ev_ebitda_x" in bd.CSV_HEADER

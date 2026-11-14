@@ -57,6 +57,75 @@ def test_yield_ausente_devolve_none():
 
 
 # ---------------------------------------------------------------------------
+# Armadilha de ADR no dividend yield
+#
+# Caso REAL, da BP, em producao. O yfinance devolveu
+# trailingAnnualDividendRate = 0.34 -- o dividendo anual por acao ORDINARIA --
+# enquanto o preco e por ADS, e 1 ADS da BP vale 6 acoes ordinarias (Form
+# 20-F: 2025 pagou 8,000 + 8,000 + 8,320 + 8,320 centavos por ordinaria, ou
+# 195,84 centavos por ADS). A divisao direta dava 0,76% em vez de ~4,7%.
+#
+# Na epoca isso foi barrado pelo limite de VARIACAO, e so porque existia valor
+# anterior bom. A faixa absoluta comeca em zero, entao num ticker novo o 0,76%
+# passaria. Estes testes fecham esse caminho.
+# ---------------------------------------------------------------------------
+def test_yield_do_yahoo_vence_a_taxa_caso_bp():
+    """O yield pronto do Yahoo e coerente com o preco dele; a taxa nao era.
+
+    BP: taxa 0.34 (por ordinaria) sobre preco 44.53 (por ADS) dava 0,76%.
+    Com o yield do Yahoo disponivel, ele e usado e o erro de 6x desaparece.
+    """
+    info = {"trailingAnnualDividendRate": 0.34, "trailingAnnualDividendYield": 0.0471}
+    assert umd.normaliza_yield(info, 44.53) == pytest.approx(4.71)
+
+
+def test_descasamento_de_adr_SEM_cruzamento_ainda_passa():
+    """Limite conhecido, afirmado de proposito.
+
+    Sem `trailingAnnualDividendYield` nao ha com o que cruzar, e 0,76% esta
+    dentro de qualquer faixa de plausibilidade razoavel -- nao existe piso
+    absoluto que separe "dividendo pequeno" de "unidade errada". A defesa que
+    resta e o limite de VARIACAO contra o valor anterior, que foi o que barrou
+    a BP em producao.
+
+    Este teste existe para que a lacuna seja explicita: se alguem "consertar"
+    isto com um piso maior, vai rejeitar yields baixos legitimos.
+    """
+    info = {"trailingAnnualDividendRate": 0.34}
+    assert umd.normaliza_yield(info, 44.53) == pytest.approx(0.7635, abs=1e-3)
+
+
+def test_taxa_absurda_e_recusada_e_cai_para_o_proximo():
+    """Erro grosseiro a faixa pega: 12.0 sobre 18.53 daria 65%."""
+    info = {"trailingAnnualDividendRate": 12.0, "dividendYield": 0.0534}
+    assert umd.normaliza_yield(info, 18.53) == pytest.approx(5.34)
+
+
+def test_taxa_zero_e_yield_zero_legitimo_nao_implausivel():
+    """Quem nao paga dividendo tem yield zero, e isso e informacao -- nao erro.
+
+    Por isso o piso de plausibilidade NAO pode ser aplicado as cegas: ele
+    julga o resultado de uma divisao suspeita, nao a ausencia de dividendo.
+    """
+    assert umd.normaliza_yield({"trailingAnnualDividendRate": 0.0}, 50.0) == 0.0
+
+
+def test_yield_do_yahoo_implausivel_tambem_cai_para_o_proximo():
+    info = {"trailingAnnualDividendYield": 0.0001, "dividendYield": 0.0278}
+    assert umd.normaliza_yield(info, None) == pytest.approx(2.78)
+
+
+def test_faixa_plausivel_do_yield_nao_se_confunde_com_a_faixa_absoluta():
+    """A faixa absoluta aceita zero; a de plausibilidade do CALCULO, nao.
+
+    Confundir as duas foi o que deixou o buraco: FAIXAS comeca em 0.0 porque
+    yield zero existe, e esse piso nao serve para julgar uma divisao.
+    """
+    assert umd.FAIXAS["dividend_yield_pct"][0] == 0.0
+    assert umd.YIELD_PLAUSIVEL_PCT[0] > 0.0
+
+
+# ---------------------------------------------------------------------------
 # Extracao e unidades
 # ---------------------------------------------------------------------------
 def test_market_cap_convertido_de_unidades_para_milhoes():
@@ -82,7 +151,7 @@ def test_booleano_nao_e_confundido_com_numero():
         ("market_cap", 12.0, 614_870),  # unidade errada (nao convertida)
         ("pe", 5_000.0, 24.98),  # fora de faixa
         ("dividend_yield_pct", 40.0, 2.78),  # fracao/percentual trocados
-        ("ev_ebitda", -3.0, 11.68),  # negativo
+        ("market_cap", -3.0, 614_870),  # negativo
     ],
 )
 def test_valores_absurdos_sao_rejeitados(campo, valor, anterior):
@@ -222,7 +291,6 @@ def test_serializacao_nao_perde_chave_desconhecida():
     bloco = {
         "market_cap": 1000,
         "pe": 10.0,
-        "ev_ebitda": 5.0,
         "dividend_yield_pct": 1.0,
         "preco_acao": 20.0,
         "campo_novo": "x",
@@ -277,7 +345,6 @@ def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
         "XOM": {
             "market_cap": 1,
             "pe": 1.0,
-            "ev_ebitda": 1.0,
             "dividend_yield_pct": 1.0,
             "preco_acao": 1.0,
         }

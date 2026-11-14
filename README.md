@@ -1,12 +1,12 @@
 # Dashboard Financeiro — Óleo & Gás
 
-Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 17 primários e 10 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
+Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 16 primários e 11 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
 
 Períodos cobertos: ano fiscal **FY2025** (encerrado em 31/12/2025) e o trimestre mais recente divulgado, **Q2 2026** (encerrado em 30/06/2026), com os quatro trimestres anteriores na série histórica. Os fundamentos foram coletados em 20/07/2026 e revisados a cada balanço; a data do último snapshot de mercado está no rodapé do dashboard.
 
 **Dashboard ao vivo (GitHub Pages):** https://jmagomez.github.io/oil-gas-financial-dashboard/
 
-Os dados de mercado (cotação, market cap, P/E, dividend yield e EV/EBITDA) são atualizados **automaticamente todo dia útil**, após o fechamento de Nova York.
+Os dados de mercado (cotação, market cap, P/E e dividend yield) são atualizados **automaticamente todo dia útil**, após o fechamento de Nova York.
 
 ## Arquivos
 
@@ -45,7 +45,7 @@ Os dados têm dois regimes, e é essa separação que sustenta a automação:
 
 | | Fundamentos | Mercado |
 |---|---|---|
-| Campos | receita, EBITDA, capex, dívida líquida, produção, margens, ROE/ROA | preço, market cap, P/E, dividend yield, EV/EBITDA |
+| Campos | receita, EBITDA, capex, dívida líquida, produção, margens, ROE/ROA | preço, market cap, P/E, dividend yield |
 | Muda quando | sai um balanço (trimestral) | todo pregão |
 | Como atualiza | rotina mensal + revisão à mão, com fonte citada | rotina automática diária |
 
@@ -94,7 +94,7 @@ Para editar à mão:
 
 ## Indicadores
 
-**Primários** (direto da fonte): receita, lucro líquido, EBITDA, margem líquida, fluxo de caixa operacional, free cash flow, capex, dívida líquida, dívida/patrimônio, ROE, ROA, produção, market cap, P/E, EV/EBITDA, dividend yield e preço da ação.
+**Primários** (direto da fonte): receita, lucro líquido, EBITDA, margem líquida, fluxo de caixa operacional, free cash flow, capex, dívida líquida, dívida/patrimônio, ROE, ROA, produção, market cap, P/E, dividend yield e preço da ação. O **EV/EBITDA saiu desta lista**: deixou de ser lido da fonte e passou a ser derivado de `ev ÷ EBITDA`.
 
 **Derivados** (calculados em `build_dashboard.py`, nunca gravados no JSON):
 
@@ -107,6 +107,7 @@ Para editar à mão:
 | Receita por boe | receita ÷ (produção × dias do período) | Preço realizado por barril (inflado por downstream) |
 | EBITDA por boe | EBITDA ÷ (produção × dias do período) | Margem por barril — a leitura comparável entre pares |
 | Enterprise value | market cap + dívida líquida | Valor da firma, neutro à estrutura de capital |
+| EV / EBITDA | EV ÷ EBITDA dos últimos 12 meses (TTM) | Múltiplo de valuation neutro à estrutura de capital. **Calculado aqui, não lido do Yahoo**: o `enterpriseToEbitda` da fonte usa outro numerador e outro denominador, e as duas definições divergiam de +6% a +100% sob o mesmo rótulo. Mesma base de 12 meses do ND / EBITDA |
 | EV por boe/d | EV ÷ produção diária | Quanto o mercado paga pela capacidade instalada |
 | FCF yield | FCF dos últimos 12 meses (TTM) ÷ market cap | Retorno de caixa implícito no preço |
 | Cobertura do dividendo | FCF dos últimos 12 meses (TTM) ÷ (market cap × dividend yield) | Se o dividendo cabe no caixa gerado. O payout sobre FCF é `100 ÷ cobertura` e não existe como indicador próprio — seria a mesma informação em duas colunas |
@@ -150,6 +151,8 @@ Campos ausentes viram `null` e são pulados nas linhas. Métricas com cobertura 
 
 `build_dashboard.py` avisa (sem bloquear) sobre: lucro maior que receita, EBITDA fora de escala, margem EBITDA acima de 100%, ND/EBITDA acima de 4x, FCF que não cobre o dividendo estimado, produção ausente (uso de proxy), P/E negativo, empresa sem fontes e item de histórico sem `periodo`.
 
+A coleta de fundamentos **bloqueia**, descartando a empresa inteira: demonstrações em moeda diferente de USD (`financialCurrency`, que é a moeda do balanço — não `currency`, que é a da cotação) e salto de receita acima de 2,5× contra o trimestre curado. A segunda existe porque a primeira depende de um metadado: se a fonte deixar de informá-lo, a guarda pararia de guardar sem avisar. As identidades contábeis não cobrem esse caso — todas são invariantes a escala, e um balanço inteiro em BRL passa em todas.
+
 A suíte `pytest` cobre as fórmulas derivadas contra cálculos manuais, a base de 12 meses e seu fallback, os derivados do histórico, as duas rotinas de coleta sem tocar a rede, o corpo do e-mail e a camada de acessibilidade. Cada defeito já corrigido tem um teste que o nomeia.
 
 Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapshot congelado — não o arquivo vivo. Assertar sobre o arquivo vivo faria a própria atualização dos dados quebrar a suíte, e a trava "roda os testes antes de commitar" passaria a impedir para sempre o commit que ela deveria proteger. O contrato de **formato** do arquivo vivo continua testado, em `test_update_market.test_formato_do_arquivo_vivo_suporta_escrita_cirurgica`.
@@ -166,6 +169,7 @@ Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapsho
 - **Shell**: a empresa publica duas bases de produção. A coluna anual usa o total do grupo (FY2025 = 2.800 mil boe/d); a série trimestral usa a soma de Upstream + Integrated Gas (2.759 no mesmo ano). As duas divergem ~1,5% e estão em bases diferentes — divergência preexistente, registrada nas notas do JSON.
 - **ROE e ROA**: no trimestre são lucro dos últimos 12 meses ÷ patrimônio (ou ativos) do **fim** do período; no ano fiscal vêm da fonte padronizada, em base própria. **As duas colunas não são comparáveis entre si** — a diferença entre períodos não é variação real.
 - **Margem líquida**: a exibida é sempre `lucro_liquido ÷ receita`, recalculada dos campos gravados. A fonte calcula sobre o lucro **consolidado** (com não-controladores) e o campo `lucro_liquido` traz a parcela **atribuível aos acionistas** — na BP de FY2025 a diferença é entre 0,68% e 0,03%. O valor original fica em `margem_liquida_fonte_pct` e a divergência vira aviso de validação.
-- **Produção**: não sai de demonstração financeira, e sim dos relatórios de produção. A rotina automática carrega o valor do trimestre anterior e marca isso em `proveniencia`; a atualização é manual, rastreada release por release.
+- **Produção**: não sai de demonstração financeira, e sim dos relatórios de produção. A rotina automática carrega o valor do trimestre anterior e marca isso em `proveniencia`; a atualização é manual, rastreada release por release. **Enquanto a produção não é atualizada, o denominador dos indicadores por barril fica um trimestre atrás do numerador** — e agora isso aparece na tela: `derivados.producao_defasada` dispara um aviso no painel de eficiência, dizendo de que trimestre veio a produção. Não confundir com `producao_proxy`, que marca ausência total.
+- **Produção do 3T26** (cada número conferido contra o trimestre anterior já presente no JSON antes de ser aceito): ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL integrado 511), Petrobras 3.512 (produção própria, não a operada de 5,08 MMboed). O salto do Integrated Gas da Shell (631 → 772) é a aquisição da ARC Resources, não crescimento orgânico.
 
-⚠️ Os dados de mercado são atualizados automaticamente todo dia útil (a data do último snapshot está no rodapé do dashboard). Os **fundamentos** continuam ancorados em FY2025 e Q2 2026 e só mudam quando sai um balanço novo — ou seja, múltiplos como P/E e EV/EBITDA combinam preço de hoje com lucro de ontem, que é como o mercado os calcula mesmo. Conteúdo informativo, não é recomendação de investimento.
+⚠️ Os dados de mercado são atualizados automaticamente todo dia útil (a data do último snapshot está no rodapé do dashboard). Os **fundamentos** continuam ancorados em FY2025 e no trimestre mais recente **de cada empresa** — que nem sempre é o mesmo — e só mudam quando sai um balanço novo — ou seja, múltiplos como P/E e EV/EBITDA combinam preço de hoje com lucro de ontem (no EV/EBITDA, com o EBITDA de 12 meses do próprio payload), que é como o mercado os calcula mesmo. Conteúdo informativo, não é recomendação de investimento.

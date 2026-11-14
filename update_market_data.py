@@ -2,7 +2,7 @@
 """Atualiza os dados de MERCADO do indicadores_oleo_gas.json.
 
 Campos atualizados (bloco "mercado" de cada empresa):
-    preco_acao, market_cap, pe, dividend_yield_pct, ev_ebitda
+    preco_acao, market_cap, pe, dividend_yield_pct
 
 Os dados FUNDAMENTAIS (receita, EBITDA, capex, divida liquida, producao...)
 NAO sao tocados: continuam curados a mao a cada balanco. Esta rotina cuida
@@ -44,7 +44,7 @@ RAIZ = Path(__file__).resolve().parent
 JSON_DADOS = RAIZ / "indicadores_oleo_gas.json"
 
 # Ordem das chaves dentro do bloco "mercado", preservada na reescrita.
-ORDEM_MERCADO = ["market_cap", "pe", "ev_ebitda", "dividend_yield_pct", "preco_acao"]
+ORDEM_MERCADO = ["market_cap", "pe", "dividend_yield_pct", "preco_acao"]
 
 # Faixas de plausibilidade. Valor fora da faixa e tratado como dado corrompido
 # da fonte (simbolo errado, campo ausente virando zero, etc).
@@ -53,7 +53,6 @@ FAIXAS: dict[str, tuple[float, float]] = {
     "market_cap": (1_000.0, 5_000_000.0),   # US$ milhoes
     "pe": (0.5, 200.0),
     "dividend_yield_pct": (0.0, 25.0),
-    "ev_ebitda": (0.5, 60.0),
 }
 
 # Variacao maxima aceita em relacao ao valor anterior, por atualizacao.
@@ -70,11 +69,10 @@ VARIACAO_MAX: dict[str, float] = {
     "market_cap": 0.40,
     "pe": 0.70,
     "dividend_yield_pct": 0.60,
-    "ev_ebitda": 0.70,
 }
 
 # Campos que sao decimais com 2 casas; market_cap fica inteiro (US$ milhoes).
-DECIMAIS = {"pe": 2, "ev_ebitda": 2, "dividend_yield_pct": 2, "preco_acao": 2}
+DECIMAIS = {"pe": 2, "dividend_yield_pct": 2, "preco_acao": 2}
 
 
 # ---------------------------------------------------------------------------
@@ -172,28 +170,74 @@ def _primeiro(info: dict[str, Any], *chaves: str) -> float | None:
     return None
 
 
+# Faixa de plausibilidade do dividend yield CALCULADO, em pontos percentuais.
+#
+# NAO e a mesma coisa que FAIXAS["dividend_yield_pct"], que vai de 0 a 25: la o
+# piso e zero de proposito, porque empresa que nao paga dividendo tem yield
+# zero DE VERDADE. Esta faixa julga o resultado de uma divisao, e serve para
+# erro grosseiro de unidade -- nao para descasamento fino (ver a armadilha de
+# ADR no docstring abaixo, que passa por esta faixa sem ser notada).
+YIELD_PLAUSIVEL_PCT = (0.5, 50.0)
+
+
+def _yield_plausivel(valor: float) -> bool:
+    minimo, maximo = YIELD_PLAUSIVEL_PCT
+    return minimo <= valor <= maximo
+
+
 def normaliza_yield(info: dict[str, Any], preco: float | None) -> float | None:
     """Devolve o dividend yield em pontos percentuais.
 
-    O yfinance ja devolveu esse campo como fracao (0.0278) em umas versoes e
-    como percentual (2.78) em outras -- e um erro classico de 100x. Por isso a
-    ordem de preferencia comeca pelo calculo explicito a partir do dividendo
-    anual, que nao tem ambiguidade de unidade.
-    """
-    taxa = _primeiro(info, "trailingAnnualDividendRate", "dividendRate")
-    if taxa is not None and preco:
-        return taxa / preco * 100
+    ORDEM DE PREFERENCIA, e por que ela mudou.
 
-    # trailingAnnualDividendYield e sempre fracao.
+    A versao anterior comecava pelo calculo explicito `taxa / preco`, com o
+    argumento de que taxa e preco nao tem ambiguidade de unidade -- ao
+    contrario de `dividendYield`, que o yfinance ja devolveu como fracao
+    (0.0278) e como percentual (2.78) em versoes diferentes. O argumento
+    estava certo sobre a ambiguidade de escala e errado sobre o resto: o
+    calculo explicito troca uma ambiguidade por outra.
+
+    ARMADILHA DE ADR, encontrada em producao com a BP. O
+    `trailingAnnualDividendRate` veio 0.34, que e o dividendo anual por acao
+    ORDINARIA, enquanto `preco` e por ADS -- e 1 ADS da BP equivale a 6 acoes
+    ordinarias (Form 20-F; 2025 pagou 8,000 + 8,000 + 8,320 + 8,320 centavos
+    por ordinaria, ou 195,84 centavos por ADS). A divisao dava 0,76% em vez de
+    ~4,7%: erro de 6x, do tamanho exato da razao do ADS.
+
+    O detalhe que importa: 0,76% esta DENTRO de qualquer faixa de
+    plausibilidade razoavel. Nao ha teto nem piso absoluto que pegue isso, e
+    por isso a correcao nao e uma faixa -- e a ordem das fontes.
+
+    `trailingAnnualDividendYield` nao tem nenhum dos dois problemas: e sempre
+    fracao (sem ambiguidade de escala) e e um YIELD calculado pelo Yahoo sobre
+    a mesma base do preco que ele publica (sem risco de razao de ADR). Por
+    isso ele vem primeiro agora.
+
+    LIMITE QUE PERMANECE, dito de frente: quando so existe a taxa, nao ha com
+    o que cruzar, e um descasamento de ADR passa. A defesa nesse caso continua
+    sendo o limite de variacao contra o valor anterior -- que e exatamente o
+    que barrou a BP em producao. Num ticker novo, sem valor anterior, o buraco
+    existe. Esta documentado em teste.
+    """
+    # 1) Yield pronto, em fracao, coerente com o preco do proprio Yahoo.
     fracao = _primeiro(info, "trailingAnnualDividendYield")
     if fracao is not None:
-        return fracao * 100
+        convertido = fracao * 100
+        if fracao == 0 or _yield_plausivel(convertido):
+            return convertido
 
+    # 2) Calculo explicito. Vulneravel a razao de ADR; pega erro grosseiro.
+    taxa = _primeiro(info, "trailingAnnualDividendRate", "dividendRate")
+    if taxa is not None and preco:
+        calculado = taxa / preco * 100
+        if taxa == 0 or _yield_plausivel(calculado):
+            return calculado
+
+    # 3) Campo ambiguo, desambiguado por magnitude: nenhuma major de oleo e gas
+    #    paga menos de 0,5% nem mais de 50%, entao <= 0.5 so pode ser fracao.
     bruto = _primeiro(info, "dividendYield")
     if bruto is None:
         return None
-    # Desambiguacao por magnitude: nenhuma major de oleo e gas paga menos de
-    # 0,5% nem mais de 50%, entao <= 0.5 so pode ser fracao.
     return bruto * 100 if bruto <= 0.5 else bruto
 
 
@@ -207,7 +251,6 @@ def extrai_campos(info: dict[str, Any]) -> dict[str, float | None]:
         "market_cap": market_cap / 1e6 if market_cap is not None else None,
         "pe": _primeiro(info, "trailingPE"),
         "dividend_yield_pct": normaliza_yield(info, preco),
-        "ev_ebitda": _primeiro(info, "enterpriseToEbitda"),
     }
 
 

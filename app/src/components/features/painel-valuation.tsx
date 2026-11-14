@@ -15,7 +15,7 @@ export function PainelValuation() {
       (data?.empresas ?? [])
         .map((e) => ({
           rotulo: e.ticker,
-          x: e.mercado.ev_ebitda,
+          x: e.fy2025.derivados.ev_ebitda_x,
           y: e.fy2025.roe_pct,
           z: e.mercado.market_cap,
         }))

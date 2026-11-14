@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useIndicadores } from '@/hooks/use-indicadores';
+import { useDados } from '@/hooks/use-dados';
 import { Card, CardNote, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CelulaAlavancagem } from './celula-alavancagem';
@@ -7,7 +7,11 @@ import { alavancagem, faixaHistorica, serieDoHistorico } from '@/lib/derivacoes'
 import { milhoes, percentual, multiplo, trimestreCurto, data, AUSENTE } from '@/lib/formatters';
 
 export function PainelComparativo() {
-  const { data: payload, isPending, error } = useIndicadores();
+  // Payload ENRIQUECIDO, nao o curado. A coluna EV/EBITDA precisa de
+  // `derivados.ev_ebitda_x`, que so o build_dashboard.py calcula; derivar a
+  // formula aqui em TS criaria a segunda implementacao que o derivacoes.ts
+  // proibe de proposito. Os outros quatro paineis ja usam este hook.
+  const { data: payload, isPending, error } = useDados();
 
   const linhas = useMemo(
     () =>
@@ -105,7 +109,7 @@ export function PainelComparativo() {
                     <CelulaAlavancagem a={alav} />
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums">
-                    {multiplo(e.mercado.ev_ebitda)}
+                    {multiplo(e.fy2025.derivados.ev_ebitda_x)}
                   </td>
                   <td className="px-3 py-2 text-left">
                     {/* O rotulo do trimestre e DE CADA EMPRESA: no payload elas

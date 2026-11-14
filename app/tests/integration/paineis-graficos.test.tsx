@@ -75,6 +75,37 @@ describe('PainelEficiencia', () => {
     expect(await screen.findByText(/não existe um único/)).toBeInTheDocument();
   });
 
+  it('avisa quando a producao do denominador e de outro trimestre', async () => {
+    render(envolve(<PainelEficiencia />));
+    await screen.findByText('Eficiência operacional');
+    await userEvent.click(screen.getByRole('radio', { name: 'trimestre' }));
+    // BP, SHEL e EQNR estao em Q3 2026 nos fundamentos com producao do Q2 2026.
+    const aviso = await screen.findByText(/Produção de outro trimestre em/);
+    expect(aviso).toHaveTextContent('BP (Q2 2026)');
+    expect(aviso).toHaveTextContent('SHEL (Q2 2026)');
+  });
+
+  it('nao acusa defasagem na XOM, cuja producao e do trimestre exibido', async () => {
+    render(envolve(<PainelEficiencia />));
+    await screen.findByText('Eficiência operacional');
+    await userEvent.click(screen.getByRole('radio', { name: 'trimestre' }));
+    const aviso = await screen.findByText(/Produção de outro trimestre em/);
+    expect(aviso).not.toHaveTextContent('XOM');
+  });
+
+  it('o aviso de trimestres distintos LE os rotulos do payload, nao os escreve', async () => {
+    // Estavam fixos no codigo ("Q2 2026 e Q3 2026"). Um rotulo escrito a mao
+    // envelhece sozinho: no dia em que as sete convergirem, o aviso continuaria
+    // afirmando uma divergencia que deixou de existir.
+    render(envolve(<PainelEficiencia />));
+    await screen.findByText('Eficiência operacional');
+    await userEvent.click(screen.getByRole('radio', { name: 'trimestre' }));
+    const aviso = await screen.findByText(/não existe um único/);
+    expect(aviso).toHaveTextContent('Q2 2026');
+    expect(aviso).toHaveTextContent('Q3 2026');
+    expect(aviso).toHaveTextContent('2 trimestres ao mesmo tempo');
+  });
+
   it('registra que a Shell publica duas bases de producao', async () => {
     render(envolve(<PainelEficiencia />));
     await screen.findByText('Produção');
