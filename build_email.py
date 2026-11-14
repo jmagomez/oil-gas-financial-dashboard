@@ -39,14 +39,13 @@ CAMPOS = [
     ("preco_acao", "Preço<br><span style='font-weight:400;color:#888'>US$</span>", 2, "mercado"),
     ("market_cap", "Market cap<br><span style='font-weight:400;color:#888'>US$ mi</span>", 0, "mercado"),
     ("pe", "P/E", 2, "mercado"),
-    ("ev_ebitda", "EV/EBITDA", 2, "mercado"),
     ("dividend_yield_pct", "Div. yield<br><span style='font-weight:400;color:#888'>%</span>", 2, "mercado"),
     ("fcf_yield_pct", "FCF yield<br><span style='font-weight:400;color:#888'>% · FY2025</span>", 2, "derivado"),
 ]
 
 # Colunas em que a mediana do grupo ajuda a julgar o valor individual.
 # Preco e market cap nao entram: mediana de escala nao diz nada.
-COM_MEDIANA = {"pe", "ev_ebitda", "dividend_yield_pct", "fcf_yield_pct"}
+COM_MEDIANA = {"pe", "dividend_yield_pct", "fcf_yield_pct"}
 
 BORDA = "border-bottom:1px solid #eee"
 

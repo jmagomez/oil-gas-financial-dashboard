@@ -72,13 +72,15 @@ CSV_HEADER = [
     "margem_liquida_fonte_pct",
     "fco_musd", "fcf_musd", "capex_musd", "divida_liquida_musd",
     "divida_patrimonio_pct", "roe_pct", "roa_pct", "producao_kboed",
-    "market_cap_musd", "pe", "ev_ebitda", "dividend_yield_pct", "preco_acao_usd",
+    "market_cap_musd", "pe", "dividend_yield_pct", "preco_acao_usd",
     # --- derivados ---
     "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
-    "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_por_boed_usd",
+    "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_ebitda_x", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
+    # Produção de OUTRO trimestre: existe, mas não é a do período da linha.
+    "producao_defasada",
 ]
 
 
@@ -172,6 +174,29 @@ def derivar_periodo(empresa, period_key, ttm=None):
         prod = empresa["q_recente"].get("producao_kboed")
         prod_proxy = prod is not None
 
+    # De QUE trimestre e a producao que entrou no denominador.
+    #
+    # `producao_proxy` acima responde outra pergunta -- "faltou produção neste
+    # periodo?" -- e por isso nao cobre o caso que motivou este campo: a
+    # producao EXISTE, so nao e do trimestre.
+    #
+    # Como isso acontece: `producao_kboed` nao sai de demonstracao financeira,
+    # entao `update_fundamentals.py` nao a deriva. Ao promover um trimestre
+    # novo ele CARREGA a producao do anterior e registra a origem em
+    # `proveniencia.producao_kboed.trimestre_do_dado`. Ate aqui, correto e
+    # honesto. O problema era que esse registro nao tinha nenhum leitor: em
+    # 13/11/2026 as SETE empresas carregavam producao do 2T26, quatro delas ja
+    # com fundamentos do 3T26, e o dashboard exibia US$/boe com cara de preciso.
+    #
+    # Fica so no trimestre: no bloco anual a producao e anual por definicao.
+    prod_periodo = None
+    prod_defasada = False
+    if period_key == "q_recente" and prod is not None and not prod_proxy:
+        prod_periodo = (
+            (empresa.get("proveniencia") or {}).get("producao_kboed") or {}
+        ).get("trimestre_do_dado")
+        prod_defasada = bool(prod_periodo) and prod_periodo != p.get("trimestre")
+
     # Base de 12 meses. TTM quando disponivel; x4 so como fallback explicito,
     # e o campo `base_12m` registra qual foi usada para o leitor saber.
     usa_ttm = period_key == "q_recente" and ttm is not None
@@ -216,12 +241,25 @@ def derivar_periodo(empresa, period_key, ttm=None):
         "receita_por_boe_usd": arred(div(None if receita is None else receita * 1e6, boe_periodo)),
         "ebitda_por_boe_usd": arred(div(None if ebitda is None else ebitda * 1e6, boe_periodo)),
         "producao_proxy": prod_proxy,
+        # Trimestre a que pertence a producao usada, e se ele difere do periodo.
+        "producao_periodo_do_dado": prod_periodo,
+        "producao_defasada": prod_defasada,
         # Produção efetivamente usada nos indicadores por boe. Sem isso o CSV
         # mostrava a coluna de produção VAZIA ao lado de um US$/boe calculado
         # com o proxy do trimestre — quem lesse a planilha não teria como saber.
         "producao_usada_kboed": prod,
         "dias_periodo": dias,
         "ev": arred(ev, 0),
+        # EV / EBITDA calculado aqui, e nao lido do Yahoo. O Yahoo publica um
+        # `enterpriseToEbitda` cujo denominador nao e o nosso EBITDA e cujo
+        # numerador nao e o nosso EV -- e as duas definicoes conviviam sob o
+        # MESMO rotulo "EV / EBITDA" na tela. Na carga de 08/11/2026 elas
+        # divergiam de +6% (XOM, CVX) a -52% (EQNR) e +100% (PBR, onde o 1,78x
+        # do Yahoo e incompativel com EV de US$ 180 bi sobre EBITDA de US$ 50
+        # bi). Derivando, o numero passa a ser auditavel: sai de `ev` e de
+        # `ebitda_anual`, que estao os dois no payload, na MESMA base de 12
+        # meses registrada em `base_12m_ebitda` -- a mesma do `nd_ebitda_x`.
+        "ev_ebitda_x": arred(div(ev, ebitda_anual)),
         # US$ de EV por barril/dia de produção — "quanto o mercado paga pela capacidade".
         "ev_por_boed_usd": arred(div(None if ev is None else ev * 1e6, boed), 0),
         # Retorno de caixa implícito sobre o valor de mercado.
@@ -320,7 +358,7 @@ EIXOS_PERFIL = [
     ("Rentabilidade", lambda e: e["q_recente"]["derivados"]["margem_ebitda_pct"], True),
     ("Geração de caixa", lambda e: e["fy2025"]["derivados"]["conversao_fcf_pct"], True),
     ("Solidez", lambda e: e["fy2025"]["derivados"]["nd_ebitda_x"], False),
-    ("Valuation", lambda e: e["mercado"]["ev_ebitda"], False),
+    ("Valuation", lambda e: e["q_recente"]["derivados"]["ev_ebitda_x"], False),
     ("Retorno ao acionista", lambda e: e["mercado"]["dividend_yield_pct"], True),
     ("Escala", lambda e: e["q_recente"]["producao_kboed"], True),
 ]
@@ -479,12 +517,14 @@ def build_csv(data):
                 p["fluxo_caixa_operacional"], p["fcf"], p["capex"], p["divida_liquida"],
                 p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"],
                 p["derivados"]["producao_usada_kboed"],
-                e["mercado"]["market_cap"], e["mercado"]["pe"], e["mercado"]["ev_ebitda"],
+                e["mercado"]["market_cap"], e["mercado"]["pe"],
                 e["mercado"]["dividend_yield_pct"], e["mercado"]["preco_acao"],
                 d["margem_ebitda_pct"], d["nd_ebitda_x"], d["conversao_fcf_pct"], d["capex_fco_pct"],
-                d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_por_boed_usd"],
+                d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_ebitda_x"],
+                d["ev_por_boed_usd"],
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"],
                 "sim" if d["producao_proxy"] else "nao",
+                "sim" if d["producao_defasada"] else "nao",
             ])
     # lineterminator="\n": o padrão do módulo csv é \r\n, o que deixava o
     # arquivo com CRLF e o diff sensível à plataforma. Com LF explícito o build

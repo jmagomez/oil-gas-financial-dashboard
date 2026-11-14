@@ -123,6 +123,83 @@ FAIXAS: dict[str, tuple[float, float]] = {
 
 TOLERANCIA_COERENCIA = 0.02  # 2% de folga nas identidades contabeis
 
+# Moeda em que o JSON declara estar: "USD (milhoes)" em `referencia.moeda`.
+MOEDA_DEMONSTRACOES = "USD"
+
+# Fator alem do qual a receita de um trimestre vira suspeita de troca de UNIDADE
+# ou de MOEDA, e nao de desempenho.
+#
+# Calibragem, medida na propria serie do repositorio. A maior variacao trimestral
+# de receita observada nas sete e +43% (PBR, 1T26 -> 2T26: 23.540 -> 33.607);
+# depois vem +38% (XOM) e +36% (SHEL). Nenhuma chega perto de 2,5x. Do outro
+# lado, a conversao BRL->USD da Petrobras e um fator de ~5,3x. A folga entre 1,43
+# e 5,3 e grande o bastante para o limite nao ser arbitrario.
+VARIACAO_RECEITA_MAX = 2.5
+
+
+def valida_moeda(moeda: str | None) -> str | None:
+    """Devolve o motivo da rejeicao, ou None se a moeda estiver certa.
+
+    POR QUE ISTO EXISTE, e por que as outras checagens nao bastavam.
+
+    O arquivo declara "USD (milhoes)". A Petrobras publica em BRL -- o lucro do
+    3T26, por exemplo, saiu como R$ 39,8 bilhoes -- e a fonte devolve as
+    demonstracoes na moeda funcional da empresa, nao na moeda do ADR.
+
+    O perigo e que NENHUMA das cinco checagens de `valida_coerencia` pega isso:
+    EBITDA <= receita, lucro <= receita, FCF = FCO + capex, margem = lucro/receita
+    e capex < 0 sao todas INVARIANTES A ESCALA. Um balanco inteiro em BRL passa
+    nas cinco.
+
+    Sobrava so `valida_campos`, e ela nao resolve por dois motivos. Primeiro,
+    porque a maior parte dos campos da PBR em BRL cabe nas faixas: receita
+    (~R$ 178 bi), lucro (R$ 39,8 bi) e EBITDA (~R$ 102 bi) passam todos. Segundo,
+    e pior, porque um campo fora de faixa e ANULADO e o trimestre segue: so a
+    divida liquida (~R$ 318 bi) estouraria o teto, e o resultado seria um
+    trimestre em BRL promovido como se fosse USD, com a divida nula. A Petrobras
+    apareceria com EBITDA por barril e FCF yield ~5,3x inflados e EV/EBITDA ~5,3x
+    menor -- numeros errados com cara de precisos.
+
+    Por isso a rejeicao aqui e da EMPRESA INTEIRA, como na incoerencia: meio
+    balanco na moeda errada e pior que nenhum.
+    """
+    if moeda is None:
+        return None  # sem metadado nao da para afirmar nada; ver `valida_escala`
+    if moeda.upper() != MOEDA_DEMONSTRACOES:
+        return f"demonstracoes em {moeda.upper()}, e o arquivo declara {MOEDA_DEMONSTRACOES}"
+    return None
+
+
+def valida_escala(receita_nova: float | None, receita_atual: float | None) -> str | None:
+    """Segunda linha de defesa, para quando a moeda vem sem metadado.
+
+    `valida_moeda` depende de a fonte informar a moeda. Se ela parar de informar
+    -- ou mudar o nome do campo numa atualizacao de biblioteca --, a guarda
+    silenciosamente deixa de guardar, que e o modo de falha mais perigoso que
+    existe: o que nao aparece.
+
+    Esta checagem nao depende de metadado nenhum. Compara a receita do trimestre
+    novo com a do trimestre que ja esta curado: trocar a moeda multiplica a
+    receita por um fator que desempenho operacional nao produz.
+
+    Ela tambem pega o que a guarda de moeda NAO pega: mudanca de unidade
+    (milhoes para milhares), troca de significado de um rotulo da fonte, ou
+    consolidacao de uma aquisicao grande. Nos dois ultimos casos a rejeicao
+    tambem e o certo -- o numero precisa de curadoria, nao de promocao
+    automatica.
+    """
+    if receita_nova is None or not receita_atual:
+        return None
+    razao = receita_nova / receita_atual
+    if razao > VARIACAO_RECEITA_MAX or razao < 1 / VARIACAO_RECEITA_MAX:
+        return (
+            f"receita saltou {razao:.2f}x em um trimestre "
+            f"({receita_atual:,.0f} -> {receita_nova:,.0f}); "
+            "suspeita de moeda ou unidade, nao de desempenho"
+        ).replace(",", ".")
+    return None
+
+
 # Ordem dos campos de um item de `historico`, para a escrita cirurgica.
 ORDEM_HISTORICO = [
     "periodo",
@@ -241,6 +318,20 @@ def busca_fundamentos(tickers: list[str]) -> dict[str, dict[str, Any]]:
                 papel.quarterly_cashflow,
                 papel.quarterly_balance_sheet,
             )
+            if bruto is not None:
+                # `financialCurrency` e a moeda das DEMONSTRACOES, diferente de
+                # `currency`, que e a moeda da COTACAO. Para a Petrobras as duas
+                # divergem: demonstracoes em BRL, ADR cotado em USD -- e e
+                # justamente essa diferenca que `valida_moeda` precisa ver.
+                #
+                # Em chamada propria porque `.info` e uma requisicao separada e
+                # falha com mais frequencia que as demonstracoes. Se ela cair, a
+                # moeda fica None e a defesa passa a ser `valida_escala`.
+                try:
+                    bruto["moeda"] = papel.info.get("financialCurrency")
+                except Exception as exc:  # pragma: no cover - depende da rede
+                    print(f"  ! {ticker}: moeda indisponivel ({exc.__class__.__name__})")
+                    bruto["moeda"] = None
         except Exception as exc:  # pragma: no cover - depende da rede
             print(f"  ! {ticker}: falha ao consultar ({exc.__class__.__name__}: {exc})")
             continue
@@ -468,8 +559,22 @@ def aplica_fundamentos(
             rel.falhas.append({"ticker": ticker, "detalhe": "sem resposta da fonte; bloco mantido"})
             continue
 
+        # Moeda antes de qualquer outra coisa: um bloco na moeda errada passa em
+        # todas as demais checagens, porque elas sao invariantes a escala.
+        motivo_moeda = valida_moeda(bruto.get("moeda"))
+        if motivo_moeda:
+            rel.rejeicoes.append({"ticker": ticker, "campo": "moeda", "motivo": motivo_moeda})
+            rel.falhas.append({"ticker": ticker, "detalhe": f"{motivo_moeda}; trimestre descartado"})
+            continue
+
         novo = monta_trimestre(bruto, ttm=bruto.get("ttm"))
         rotulo = novo["trimestre"]
+
+        motivo_escala = valida_escala(novo.get("receita"), atual.get("receita"))
+        if motivo_escala:
+            rel.rejeicoes.append({"ticker": ticker, "campo": "escala", "motivo": motivo_escala})
+            rel.falhas.append({"ticker": ticker, "detalhe": f"{motivo_escala}; trimestre descartado"})
+            continue
 
         if not e_mais_novo(rotulo, atual["trimestre"]):
             # Mesmo trimestre: nao sobrescreve, mas confere e reporta.
