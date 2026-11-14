@@ -28,7 +28,7 @@ def empresa_sintetica(receita, lucro, margem):
     return {
         "ticker": "TST", "nome": "Teste", "pais": "X",
         "fy2025": dict(periodo), "q_recente": dict(periodo),
-        "mercado": {"market_cap": 1000.0, "pe": 10.0, "ev_ebitda": 5.0,
+        "mercado": {"market_cap": 1000.0, "pe": 10.0,
                     "dividend_yield_pct": 2.0, "preco_acao": 50.0},
         "fontes": ["teste"],
     }
@@ -101,6 +101,119 @@ def test_enterprise_value_soma_divida_liquida(dados):
     for e in dados["empresas"]:
         p = e["fy2025"]
         assert p["derivados"]["ev"] == round(e["mercado"]["market_cap"] + p["divida_liquida"])
+
+
+def test_producao_defasada_marca_quando_o_denominador_e_de_outro_trimestre(dados):
+    """O descasamento que o `producao_proxy` nao via.
+
+    `producao_proxy` responde "faltou producao?". Quando o pipeline promove um
+    trimestre novo ele CARREGA a producao do anterior -- ela existe, so nao e
+    daquele trimestre --, entao `producao_proxy` fica False e, ate este campo,
+    nada na tela dizia que receita e EBITDA por barril estavam dividindo o
+    resultado de um trimestre pela producao de outro.
+    """
+    for e in dados["empresas"]:
+        q = e["q_recente"]
+        d = q["derivados"]
+        origem = ((e.get("proveniencia") or {}).get("producao_kboed") or {}).get(
+            "trimestre_do_dado"
+        )
+        assert d["producao_periodo_do_dado"] == origem, e["ticker"]
+        assert d["producao_defasada"] == (bool(origem) and origem != q["trimestre"]), e["ticker"]
+
+
+def test_producao_defasada_e_marcada_quando_a_origem_diverge_do_trimestre():
+    """Constroi o descasamento, em vez de esperar encontra-lo numa fixture.
+
+    A primeira versao deste teste afirmava a regra contra `dados`, e passava com
+    a derivacao SEMPRE devolvendo False: a fixture nao tinha nenhuma empresa com
+    producao de outro trimestre, entao o caso nunca era exercitado. Um teste que
+    so confirma a ausencia do fenomeno nao testa a deteccao dele.
+    """
+    e = empresa_sintetica(100.0, 10.0, 10.0)
+    e["q_recente"]["trimestre"] = "Q3 2026"
+    e["proveniencia"] = {"producao_kboed": {"trimestre_do_dado": "Q2 2026"}}
+    d = bd.derivar_periodo(e, "q_recente")
+    assert d["producao_periodo_do_dado"] == "Q2 2026"
+    assert d["producao_defasada"] is True
+
+
+def test_producao_em_dia_nao_e_marcada():
+    e = empresa_sintetica(100.0, 10.0, 10.0)
+    e["q_recente"]["trimestre"] = "Q3 2026"
+    e["proveniencia"] = {"producao_kboed": {"trimestre_do_dado": "Q3 2026"}}
+    d = bd.derivar_periodo(e, "q_recente")
+    assert d["producao_defasada"] is False
+
+
+def test_sem_proveniencia_nao_se_afirma_defasagem():
+    """Ausencia de registro nao e prova de descasamento -- nem do contrario."""
+    e = empresa_sintetica(100.0, 10.0, 10.0)
+    e["q_recente"]["trimestre"] = "Q3 2026"
+    d = bd.derivar_periodo(e, "q_recente")
+    assert d["producao_periodo_do_dado"] is None
+    assert d["producao_defasada"] is False
+
+
+def test_producao_defasada_nao_se_confunde_com_producao_proxy(dados):
+    """Sao perguntas diferentes, e o payload tem de poder responder as duas.
+
+    Proxy = nao havia producao no periodo e usou-se a de outro.
+    Defasada = havia, mas e de outro trimestre.
+    """
+    for e in dados["empresas"]:
+        d = e["q_recente"]["derivados"]
+        if d["producao_proxy"]:
+            # Com proxy nao faz sentido afirmar o trimestre de origem.
+            assert d["producao_periodo_do_dado"] is None, e["ticker"]
+            assert d["producao_defasada"] is False, e["ticker"]
+
+
+def test_bloco_anual_nunca_e_marcado_como_defasado(dados):
+    """No ano a producao e anual por definicao; o conceito nao se aplica."""
+    for e in dados["empresas"]:
+        d = e["fy2025"]["derivados"]
+        assert d["producao_defasada"] is False, e["ticker"]
+        assert d["producao_periodo_do_dado"] is None, e["ticker"]
+
+
+def test_ev_ebitda_sai_do_ev_e_do_ebitda_do_proprio_payload(dados):
+    """O multiplo tem de ser reconstituivel a partir de campos publicados.
+
+    Era isso que o numero do Yahoo nao permitia: nao havia como mostrar de onde
+    ele vinha, e ele divergia do nosso `ev` sobre o nosso `ebitda`.
+    """
+    for e in dados["empresas"]:
+        p = e["fy2025"]
+        esperado = round(p["derivados"]["ev"] / p["ebitda"], 2)
+        assert p["derivados"]["ev_ebitda_x"] == esperado, e["ticker"]
+
+
+def test_ev_ebitda_e_nd_ebitda_usam_a_MESMA_base_de_12_meses(dados):
+    """Dois multiplos com o mesmo denominador nao podem divergir de base.
+
+    Se um usasse TTM e o outro trimestre x4, a tela mostraria uma alavancagem
+    e um valuation calculados sobre EBITDAs diferentes -- e nada na interface
+    avisaria.
+
+    O teste afirma a base DIRETAMENTE, reconstruindo o `ebitda_anual` a partir
+    de `base_12m_ebitda`. A versao obvia (dividir `ev` pelo multiplo e comparar
+    com `divida_liquida` dividida pelo outro) nao serve: os multiplos vem
+    arredondados em 2 casas e, num ND/EBITDA de 0,43x, meio centesimo e 1,2% --
+    o resultado media o arredondamento, nao a base.
+    """
+    for e in dados["empresas"]:
+        q = e["q_recente"]
+        d = q["derivados"]
+        base = d["base_12m_ebitda"]
+        if base == "ttm":
+            ebitda_anual = e["ttm"]["ebitda"]
+        elif base == "x4":
+            ebitda_anual = q["ebitda"] * 4
+        else:
+            raise AssertionError(f"{e['ticker']}: base inesperada {base!r}")
+        assert d["ev_ebitda_x"] == round(d["ev"] / ebitda_anual, 2), e["ticker"]
+        assert d["nd_ebitda_x"] == round(q["divida_liquida"] / ebitda_anual, 2), e["ticker"]
 
 
 def test_caixa_liquido_gera_ev_menor_que_market_cap(dados):
@@ -224,7 +337,7 @@ def test_scores_do_radar_ficam_entre_0_e_100_com_extremos(dados):
 
 def test_score_de_valuation_premia_multiplo_menor(dados):
     """Menor EV/EBITDA do grupo deve receber score 100 no eixo Valuation."""
-    barata = min(dados["empresas"], key=lambda e: e["mercado"]["ev_ebitda"])
+    barata = min(dados["empresas"], key=lambda e: e["q_recente"]["derivados"]["ev_ebitda_x"])
     assert barata["perfil"]["Valuation"] == 100
 
 

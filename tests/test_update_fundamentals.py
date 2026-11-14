@@ -380,3 +380,187 @@ def test_backfill_descarta_trimestre_incoerente(dados):
     coletado["XOM"]["anteriores"][0]["linhas"]["fcf"] = 999_999
     saida, _ = uf.aplica_fundamentos(dados, coletado)
     assert [h["periodo"] for h in saida["empresas"][0]["historico"]] == ["2026-Q1"]
+
+
+# ---------------------------------------------------------------------------
+# Moeda: a guarda que as outras checagens nao davam
+# ---------------------------------------------------------------------------
+#
+# Cenario CONSTRUIDO, nao um trimestre real: sao os numeros curados do 2T26 da
+# Petrobras (em US$ milhoes) multiplicados por 5,3 e carimbados com fim em
+# 30/09/2026. Isola exatamente a variavel sob teste -- a moeda -- sem inventar
+# demonstracao nenhuma.
+#
+# A ancora de realidade existe e e publica: a Petrobras divulgou lucro liquido
+# de R$ 39,8 bilhoes no 3T26. A fonte devolve a moeda FUNCIONAL da empresa, e a
+# da Petrobras e o real.
+TAXA_BRL = 5.3
+
+PBR_Q2_2026_USD = {
+    "receita": 33_607,
+    "lucro_liquido": 10_428,
+    "ebit": 14_717,
+    "depreciacao": 4_566,
+    "fco": 12_300,
+    "capex": -4_566,
+    "fcf": 7_734,
+    "divida_total": 71_008,
+    "caixa": 10_588,
+}
+
+
+def _pbr_em_brl():
+    return {k: round(v * TAXA_BRL) for k, v in PBR_Q2_2026_USD.items()}
+
+
+def _bruto_pbr_brl(moeda="BRL"):
+    return {"PBR": {"fim": date(2026, 9, 30), "linhas": _pbr_em_brl(), "ttm": None, "moeda": moeda}}
+
+
+def test_as_checagens_de_coerencia_sao_CEGAS_a_moeda():
+    """A demonstracao do porque a guarda precisou existir.
+
+    As cinco identidades de `valida_coerencia` comparam campos ENTRE SI. Nenhuma
+    compara com o mundo externo, entao todas sobrevivem a multiplicar o balanco
+    inteiro por uma constante. Este teste afirma essa cegueira de proposito: se
+    alguem um dia achar que a coerencia ja protege contra moeda, o nome do teste
+    responde.
+    """
+    bloco = uf.monta_trimestre({"fim": date(2026, 9, 30), "linhas": _pbr_em_brl(), "ttm": None})
+    assert uf.valida_coerencia(bloco) == []
+
+
+def test_a_faixa_sozinha_deixaria_passar_quase_tudo_em_BRL():
+    """E o segundo motivo: campo fora de faixa e ANULADO, nao descarta a empresa.
+
+    Em BRL, receita (~R$ 178 bi), lucro (~R$ 55 bi) e EBITDA passam nas faixas.
+    So a divida liquida estoura. Sem a guarda de moeda, o trimestre entraria
+    como USD com a divida nula -- e a Petrobras apareceria ~5,3x mais eficiente
+    por barril e ~5,3x mais barata no EV/EBITDA.
+    """
+    bloco = uf.monta_trimestre({"fim": date(2026, 9, 30), "linhas": _pbr_em_brl(), "ttm": None})
+    reprovados = {campo for campo, _ in uf.valida_campos(bloco)}
+    assert "receita" not in reprovados
+    assert "ebitda" not in reprovados
+    assert "divida_liquida" in reprovados
+
+
+def test_moeda_diferente_de_usd_descarta_a_empresa_inteira(dados):
+    _, rel = uf.aplica_fundamentos(dados, _bruto_pbr_brl(), hoje=date(2026, 11, 13))
+    assert not rel.novos, "trimestre em BRL nao pode ser promovido"
+    assert any(r["campo"] == "moeda" for r in rel.rejeicoes)
+    assert any("BRL" in f["detalhe"] for f in rel.falhas)
+
+
+def test_trimestre_em_brl_nao_altera_o_json(dados):
+    """Rejeitar nao basta: o bloco curado tem de ficar intacto."""
+    antes = json.loads(json.dumps(dados))
+    saida, _ = uf.aplica_fundamentos(dados, _bruto_pbr_brl(), hoje=date(2026, 11, 13))
+    pbr_antes = next(e for e in antes["empresas"] if e["ticker"] == "PBR")
+    pbr_depois = next(e for e in saida["empresas"] if e["ticker"] == "PBR")
+    assert pbr_antes["q_recente"] == pbr_depois["q_recente"]
+    assert pbr_antes["historico"] == pbr_depois["historico"]
+
+
+def test_usd_passa_pela_guarda_de_moeda():
+    assert uf.valida_moeda("USD") is None
+    assert uf.valida_moeda("usd") is None
+
+
+def test_sem_metadado_de_moeda_a_guarda_nao_opina():
+    """None nao e 'moeda errada': e 'nao sei'. Quem cobre esse caso e a escala."""
+    assert uf.valida_moeda(None) is None
+
+
+# ---------------------------------------------------------------------------
+# Escala: a defesa para quando o metadado de moeda some
+# ---------------------------------------------------------------------------
+def test_escala_pega_o_salto_de_moeda_mesmo_sem_metadado(dados):
+    """O modo de falha mais perigoso e a guarda que para de guardar em silencio.
+
+    Aqui a fonte nao informa a moeda (`moeda=None`), entao `valida_moeda` se
+    cala -- e o trimestre em BRL tem de morrer na escala.
+    """
+    _, rel = uf.aplica_fundamentos(dados, _bruto_pbr_brl(moeda=None), hoje=date(2026, 11, 13))
+    assert not rel.novos
+    assert any(r["campo"] == "escala" for r in rel.rejeicoes)
+
+
+def test_escala_nao_barra_a_maior_variacao_real_da_serie():
+    """Calibragem contra o dado de verdade, nao contra um numero escolhido a dedo.
+
+    O maior salto trimestral de receita das sete e o da propria Petrobras,
+    1T26 -> 2T26: 23.540 -> 33.607, ou +42,8%. Se o limite reprovasse isso, ele
+    estaria reprovando desempenho.
+    """
+    assert uf.valida_escala(33_607, 23_540) is None
+
+
+def test_escala_nao_opina_sem_base_de_comparacao():
+    assert uf.valida_escala(100_000, None) is None
+    assert uf.valida_escala(100_000, 0) is None
+    assert uf.valida_escala(None, 23_540) is None
+
+
+def test_escala_tambem_pega_queda_absurda():
+    """Simetrica: milhoes virando bilhoes erra para o outro lado."""
+    assert uf.valida_escala(33, 33_607) is not None
+
+
+# ---------------------------------------------------------------------------
+# O caso que a escala NAO pega -- e que por isso e o mais perigoso
+# ---------------------------------------------------------------------------
+#
+# O BRL se denuncia pelo tamanho: 5,3x nao passa despercebido. O EUR nao. Uma
+# demonstracao devolvida em euros em vez de dolares erra por ~8% -- pequeno
+# demais para qualquer checagem de magnitude, grande demais para nao corromper
+# toda comparacao entre as sete.
+#
+# O cenario e plausivel: a TotalEnergies e uma companhia francesa que REPORTA em
+# dolares. Basta a fonte passar a devolver a moeda local para o payload inteiro
+# ficar 8% errado so para ela -- e nada na tela avisaria.
+TAXA_EUR = 0.92
+
+TTE_Q1_2026_USD = {
+    "receita": 49_516,
+    "lucro_liquido": 5_810,
+    "ebit": 9_683,
+    "depreciacao": 4_621,
+    "fco": 3_361,
+    "capex": -4_621,
+    "fcf": -1_260,
+    "divida_total": 40_000,
+    "caixa": 74_142,
+}
+
+
+def _bruto_tte_em_eur():
+    linhas = {k: round(v * TAXA_EUR) for k, v in TTE_Q1_2026_USD.items()}
+    return {"TTE": {"fim": date(2026, 9, 30), "linhas": linhas, "ttm": None, "moeda": "EUR"}}
+
+
+def test_moeda_errada_por_margem_PEQUENA_ainda_assim_descarta(dados):
+    """Isola a guarda de moeda da guarda de escala.
+
+    Em euros a receita fica em 0,92x -- dentro de qualquer limite de variacao
+    razoavel, e portanto INVISIVEL para `valida_escala`. Se a rejeicao por moeda
+    nao interromper o processamento da empresa, este trimestre e promovido com
+    todos os valores 8% menores, e nenhuma outra checagem reclama.
+
+    Este teste existe porque a versao anterior dele nao existia: removendo o
+    `continue` da guarda de moeda, a suite inteira continuava verde -- a
+    rejeicao por ESCALA do caso BRL mascarava a falta. Um teste que so sabe
+    reprovar quando duas defesas caem juntas nao testa nenhuma das duas.
+    """
+    # Primeiro a premissa: a escala realmente nao ve nada de errado aqui.
+    assert uf.valida_escala(round(49_516 * TAXA_EUR), 49_516) is None
+
+    saida, rel = uf.aplica_fundamentos(dados, _bruto_tte_em_eur(), hoje=date(2026, 11, 13))
+    assert not rel.novos, "trimestre em EUR nao pode ser promovido"
+    assert any(r["campo"] == "moeda" and "EUR" in r["motivo"] for r in rel.rejeicoes)
+    assert not any(r["campo"] == "escala" for r in rel.rejeicoes), (
+        "a escala nao deve ser quem barra aqui -- se for, o teste parou de isolar a moeda"
+    )
+    tte = next(e for e in saida["empresas"] if e["ticker"] == "TTE")
+    assert tte["q_recente"]["trimestre"] == "Q1 2026"
+

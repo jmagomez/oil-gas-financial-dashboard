@@ -32,7 +32,7 @@ def relatorio():
             {"ticker": "XOM", "campo": "preco_acao", "antes": 159.75, "depois": 161.20, "var_pct": 0.91},
             {"ticker": "PBR", "campo": "preco_acao", "antes": 17.76, "depois": 17.31, "var_pct": -2.53},
         ],
-        "rejeicoes": [{"ticker": "BP", "campo": "ev_ebitda", "valor": 12.68,
+        "rejeicoes": [{"ticker": "BP", "campo": "pe", "valor": 12.68,
                        "motivo": "variacao acima do limite", "mantido": 4.90}],
         "falhas": [],
     }
