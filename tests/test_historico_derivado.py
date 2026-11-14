@@ -28,7 +28,7 @@ def _empresa(historico):
     return {"ticker": "TST", "nome": "Teste", "pais": "X",
             "fy2025": _tri("FY2025"),
             "q_recente": dict(_tri("x"), trimestre="Q2 2026"),
-            "mercado": {"market_cap": 1000, "pe": 10.0, "ev_ebitda": 5.0,
+            "mercado": {"market_cap": 1000, "pe": 10.0,
                         "dividend_yield_pct": 2.0, "preco_acao": 20.0},
             "historico": historico, "fontes": ["x"]}
 
