@@ -3,7 +3,7 @@
     "data_consulta": "2026-07-20",
     "moeda": "USD (milhões, exceto onde indicado)",
     "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
-    "periodo_trimestral": "Q3 2026 para Shell, BP, Equinor e TotalEnergies; Q2 2026 para ExxonMobil, Chevron e Petrobras, cujos balanços ainda não foram promovidos pelo pipeline",
+    "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
     "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
     "notas": [
       "Produção trimestral: atualizada à mão a partir do release de cada empresa, porque não sai de demonstração financeira. No 3T26 vieram dos releases oficiais — ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL 511) e Petrobras 3.512 (produção própria). Cada número foi conferido contra o trimestre anterior já presente neste arquivo antes de ser aceito.",
@@ -30,29 +30,31 @@
     {
       "ticker": "XOM", "nome": "ExxonMobil", "pais": "EUA",
       "fy2025": {"receita": 323910, "lucro_liquido": 29760, "ebitda": 59530, "margem_liquida_pct": 9.19, "fluxo_caixa_operacional": 51970, "fcf": 23610, "capex": -28360, "divida_liquida": 32860, "divida_patrimonio_pct": 16.3, "roe_pct": 11.1, "roa_pct": 6.6, "producao_kboed": 4740},
-      "q_recente": {"trimestre": "Q2 2026", "receita": 114529, "lucro_liquido": 14525, "ebitda": 28340, "margem_liquida_pct": 12.68, "fluxo_caixa_operacional": 23555, "fcf": 17028, "capex": -6527, "divida_liquida": 31780, "divida_patrimonio_pct": 16.3, "roe_pct": 12.63, "roa_pct": 7.05, "producao_kboed": 4514},
+      "q_recente": {"trimestre": "Q3 2026", "receita": 110503, "lucro_liquido": 15413, "ebitda": 28222, "margem_liquida_pct": 13.95, "fluxo_caixa_operacional": 25650, "fcf": 18472, "capex": -7178, "divida_liquida": 22097, "divida_patrimonio_pct": 12.9, "roe_pct": 15.28, "roa_pct": 8.63, "producao_kboed": 4514},
       "mercado": {"market_cap": 695875, "pe": 17.55, "dividend_yield_pct": 2.42, "preco_acao": 170.59},
       "historico": [
         {"periodo": "2025-Q2", "receita": 79477, "lucro_liquido": 7082, "ebitda": 16951, "fluxo_caixa_operacional": 11550, "fcf": 5267, "capex": -6283, "divida_liquida": 24637, "producao_kboed": 4630},
         {"periodo": "2025-Q3", "receita": 83331, "lucro_liquido": 7548, "ebitda": 17497, "fluxo_caixa_operacional": 14788, "fcf": 6061, "capex": -8727, "divida_liquida": 28222, "producao_kboed": 4769},
         {"periodo": "2025-Q4", "receita": 80039, "lucro_liquido": 6501, "ebitda": 15909, "fluxo_caixa_operacional": 12679, "fcf": 5229, "capex": -7450, "divida_liquida": 32856, "producao_kboed": 4988},
-        {"periodo": "2026-Q1", "receita": 83160, "lucro_liquido": 4470, "ebitda": 12060, "fluxo_caixa_operacional": 8710, "fcf": 2240, "capex": -6470, "divida_liquida": 39230, "producao_kboed": 4590}
+        {"periodo": "2026-Q1", "receita": 83160, "lucro_liquido": 4470, "ebitda": 12060, "fluxo_caixa_operacional": 8710, "fcf": 2240, "capex": -6470, "divida_liquida": 39230, "producao_kboed": 4590},
+        {"periodo": "2026-Q2", "receita": 114529, "lucro_liquido": 14525, "ebitda": 28340, "fluxo_caixa_operacional": 23555, "fcf": 17028, "capex": -6527, "divida_liquida": 31780, "producao_kboed": 4514}
       ],
-      "proveniencia": {"fundamentos": {"fonte": "Yahoo Finance (demonstracoes trimestrais)", "coletado_em": "2026-08-13", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"]}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "release 2T26 (4,514 Mboe/d); historico 2025 do ATTACHMENT III dos releases trimestrais"}},
+      "proveniencia": {"fundamentos": {"fonte": "Yahoo Finance (demonstracoes trimestrais)", "coletado_em": "2026-11-14", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"]}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "carregado do trimestre anterior; atualizar a mao com o release"}},
       "fontes": ["https://stockanalysis.com/stocks/xom/financials/", "https://stockanalysis.com/stocks/xom/financials/balance-sheet/", "https://stockanalysis.com/stocks/xom/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/xom/statistics/", "https://stockanalysis.com/stocks/xom/financials/metrics/"]
     },
     {
       "ticker": "CVX", "nome": "Chevron", "pais": "EUA",
       "fy2025": {"receita": 184430, "lucro_liquido": 12490, "ebitda": 36490, "margem_liquida_pct": 6.77, "fluxo_caixa_operacional": 33940, "fcf": 16590, "capex": -17350, "divida_liquida": 34460, "divida_patrimonio_pct": 21.2, "roe_pct": 7.1, "roa_pct": 4.2, "producao_kboed": 3720},
-      "q_recente": {"trimestre": "Q2 2026", "receita": 67199, "lucro_liquido": 12072, "ebitda": 23034, "margem_liquida_pct": 17.96, "fluxo_caixa_operacional": 22633, "fcf": 18095, "capex": -4538, "divida_liquida": 28545, "divida_patrimonio_pct": 19.5, "roe_pct": 10.84, "roa_pct": 6.24, "producao_kboed": 4070},
+      "q_recente": {"trimestre": "Q3 2026", "receita": 65237, "lucro_liquido": 9924, "ebitda": 20404, "margem_liquida_pct": 15.21, "fluxo_caixa_operacional": 16014, "fcf": 12003, "capex": -4011, "divida_liquida": 20730, "divida_patrimonio_pct": 17.3, "roe_pct": 13.88, "roa_pct": 8.08, "producao_kboed": 4070},
       "mercado": {"market_cap": 429061, "pe": 16.14, "dividend_yield_pct": 3.21, "preco_acao": 219.89},
       "historico": [
         {"periodo": "2025-Q2", "receita": 44375, "lucro_liquido": 2490, "ebitda": 8653, "fluxo_caixa_operacional": 8576, "fcf": 4864, "capex": -3712, "divida_liquida": 25401, "producao_kboed": 3396},
         {"periodo": "2025-Q3", "receita": 48169, "lucro_liquido": 3539, "ebitda": 11810, "fluxo_caixa_operacional": 9385, "fcf": 4941, "capex": -4444, "divida_liquida": 33817, "producao_kboed": 4086},
         {"periodo": "2025-Q4", "receita": 45787, "lucro_liquido": 2770, "ebitda": 10924, "fluxo_caixa_operacional": 10789, "fcf": 5525, "capex": -5264, "divida_liquida": 34461, "producao_kboed": 4045},
-        {"periodo": "2026-Q1", "receita": 47560, "lucro_liquido": 2290, "ebitda": 9050, "fluxo_caixa_operacional": 2510, "fcf": -1550, "capex": -4060, "divida_liquida": 40100, "producao_kboed": 3860}
+        {"periodo": "2026-Q1", "receita": 47560, "lucro_liquido": 2290, "ebitda": 9050, "fluxo_caixa_operacional": 2510, "fcf": -1550, "capex": -4060, "divida_liquida": 40100, "producao_kboed": 3860},
+        {"periodo": "2026-Q2", "receita": 67199, "lucro_liquido": 12072, "ebitda": 23034, "fluxo_caixa_operacional": 22633, "fcf": 18095, "capex": -4538, "divida_liquida": 28545, "producao_kboed": 4070}
       ],
-      "proveniencia": {"fundamentos": {"fonte": "Yahoo Finance (demonstracoes trimestrais)", "coletado_em": "2026-08-13", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"]}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "release 2T26, recorde trimestral (4,070 Mboe/d); historico 2025 de Net Oil-Equivalent Production (MBOED). Salto no 3T25 = aquisicao da Hess, fechada em julho/2025"}},
+      "proveniencia": {"fundamentos": {"fonte": "Yahoo Finance (demonstracoes trimestrais)", "coletado_em": "2026-11-14", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"]}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "carregado do trimestre anterior; atualizar a mao com o release"}},
       "fontes": ["https://stockanalysis.com/stocks/cvx/financials/", "https://stockanalysis.com/stocks/cvx/financials/balance-sheet/", "https://stockanalysis.com/stocks/cvx/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/cvx/statistics/", "https://stockanalysis.com/stocks/cvx/financials/metrics/"]
     },
     {
