@@ -6,6 +6,8 @@
   "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
   "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
   "notas": [
+   "O campo periodo_trimestral traz um rótulo único, escrito por atualiza_referencia, mas as empresas nem sempre estão no mesmo trimestre: hoje seis estão no Q3 2026 e a Petrobras no Q2 2026. Quem compara deve olhar o trimestre DE CADA empresa — o dashboard lê esses rótulos do próprio payload, e não do cabeçalho.",
+   "Petrobras no Q2 2026, e não no Q3: a fonte devolve as demonstrações dela em BRL (o lucro do 3T26 foi de R$ 39,8 bilhões) e este arquivo declara USD. A guarda de moeda de update_fundamentals.py descartou o trimestre inteiro em vez de promovê-lo com os valores na moeda errada — nenhuma das checagens de coerência pegaria isso, porque todas são invariantes a escala. Promover a Petrobras exige converter a demonstração pela taxa do período, o que é curadoria, não automação.",
    "Produção trimestral: atualizada à mão a partir do release de cada empresa, porque não sai de demonstração financeira. No 3T26 vieram dos releases oficiais — ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL 511) e Petrobras 3.512 (produção própria). Cada número foi conferido contra o trimestre anterior já presente neste arquivo antes de ser aceito.",
    "Quando o balanço de um trimestre é promovido antes de a produção ser atualizada, o denominador dos indicadores por barril fica no trimestre anterior. O payload registra isso em derivados.producao_periodo_do_dado e derivados.producao_defasada, e o dashboard avisa — não é o mesmo que producao_proxy, que marca ausência total de produção.",
    "Shell 3T26: a aquisição da ARC Resources foi concluída no trimestre e soma cerca de 370 kboe/d. O salto do Integrated Gas de 631 para 772 kboe/d não é crescimento orgânico.",
@@ -82,7 +84,7 @@
     "divida_patrimonio_pct": 12.9,
     "roe_pct": 15.28,
     "roa_pct": 8.63,
-    "producao_kboed": 4514,
+    "producao_kboed": 4496,
     "derivados": {
      "margem_liquida_calc_pct": 13.95,
      "margem_ebitda_pct": 25.54,
@@ -97,16 +99,16 @@
      "nd_ebitda_x": 0.26,
      "conversao_fcf_pct": 65.45,
      "capex_fco_pct": 27.98,
-     "receita_por_boe_usd": 266.09,
-     "ebitda_por_boe_usd": 67.96,
+     "receita_por_boe_usd": 267.15,
+     "ebitda_por_boe_usd": 68.23,
      "producao_proxy": false,
-     "producao_periodo_do_dado": "Q2 2026",
-     "producao_defasada": true,
-     "producao_usada_kboed": 4514,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 4496,
      "dias_periodo": 92,
      "ev": 717972,
      "ev_ebitda_x": 8.49,
-     "ev_por_boed_usd": 159054.0,
+     "ev_por_boed_usd": 159691.0,
      "fcf_yield_pct": 6.17,
      "dividendos_estimados": 16840.0,
      "cobertura_dividendo_x": 2.55
@@ -236,8 +238,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "Upstream Production (koebd) do release do 3T26; coluna do trimestre identificada pelo lucro ajustado de US$ 17.505 M. Divulgado sob ExxonMobil Holdings Corporation (CIK 2115436) apos reorganizacao societaria -- a serie pelo ticker se manteve continua, conferida pelo lucro GAAP de 15.413"
     }
    },
    "fontes": [
@@ -254,7 +256,7 @@
     "fluxo_caixa_operacional": 70594,
     "fcf": 42969,
     "capex": -27625,
-    "producao_kboed": 4651.5,
+    "producao_kboed": 4647.0,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -329,7 +331,7 @@
     "divida_patrimonio_pct": 17.3,
     "roe_pct": 13.88,
     "roa_pct": 8.08,
-    "producao_kboed": 4070,
+    "producao_kboed": 3980,
     "derivados": {
      "margem_liquida_calc_pct": 15.21,
      "margem_ebitda_pct": 31.28,
@@ -344,16 +346,16 @@
      "nd_ebitda_x": 0.33,
      "conversao_fcf_pct": 58.83,
      "capex_fco_pct": 25.05,
-     "receita_por_boe_usd": 174.23,
-     "ebitda_por_boe_usd": 54.49,
+     "receita_por_boe_usd": 178.17,
+     "ebitda_por_boe_usd": 55.72,
      "producao_proxy": false,
-     "producao_periodo_do_dado": "Q2 2026",
-     "producao_defasada": true,
-     "producao_usada_kboed": 4070,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 3980,
      "dias_periodo": 92,
      "ev": 449791,
      "ev_ebitda_x": 7.09,
-     "ev_por_boed_usd": 110514.0,
+     "ev_por_boed_usd": 113013.0,
      "fcf_yield_pct": 7.94,
      "dividendos_estimados": 13773.0,
      "cobertura_dividendo_x": 2.47
@@ -483,8 +485,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "Net Oil-Equivalent Production (MBOED) mundial do release do 3T26; US 2.043 + internacional 1.937 fecha em 3.980. Queda ante o 2T26 por menores entitlements e pelo conflito no Oriente Medio"
     }
    },
    "fontes": [
@@ -501,7 +503,7 @@
     "fluxo_caixa_operacional": 51946,
     "fcf": 34073,
     "capex": -17873,
-    "producao_kboed": 4011.25,
+    "producao_kboed": 3988.75,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -518,7 +520,7 @@
     "Solidez": 26.4,
     "Valuation": 21.9,
     "Retorno ao acionista": 43.7,
-    "Escala": 81.1
+    "Escala": 77.9
    }
   },
   {
@@ -764,7 +766,7 @@
     "Solidez": 29.6,
     "Valuation": 68.0,
     "Retorno ao acionista": 0.0,
-    "Escala": 17.4
+    "Escala": 17.5
    }
   },
   {
@@ -1502,7 +1504,7 @@
     "Solidez": 100.0,
     "Valuation": 68.3,
     "Retorno ao acionista": 77.2,
-    "Escala": 13.1
+    "Escala": 13.2
    }
   },
   {
@@ -1729,7 +1731,7 @@
     "Solidez": 0.0,
     "Valuation": 77.2,
     "Retorno ao acionista": 100.0,
-    "Escala": 50.0
+    "Escala": 50.4
    }
   }
  ],
