@@ -586,7 +586,7 @@ const METRICAS = {
   market_cap:         {label:'Market cap',                    grupo:'Mercado',     tipo:'money', fluxo:false, dec:0, get:(e)=>e.mercado.market_cap, melhor:'alto'},
   ev:                 {label:'Enterprise value',              grupo:'Mercado',     tipo:'money', fluxo:false, dec:0, derivado:true, get:(e,p)=>p.derivados.ev, melhor:'alto'},
   pe:                 {label:'P/E',                           grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, get:(e)=>e.mercado.pe, melhor:'baixo'},
-  ev_ebitda:          {label:'EV / EBITDA',                   grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, get:(e)=>e.mercado.ev_ebitda, melhor:'baixo'},
+  ev_ebitda_x:        {label:'EV / EBITDA',                   grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.ev_ebitda_x, melhor:'baixo'},
   ev_por_boed_usd:    {label:'EV por boe/d',                  grupo:'Mercado',     tipo:'usd',   fluxo:false, dec:0, derivado:true, get:(e,p)=>p.derivados.ev_por_boed_usd, melhor:'baixo'},
   dividend_yield_pct: {label:'Dividend yield',                grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, get:(e)=>e.mercado.dividend_yield_pct, melhor:'alto'},
   fcf_yield_pct:      {label:'FCF yield',                     grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.fcf_yield_pct, melhor:'alto'},
@@ -854,7 +854,7 @@ function renderKpis(){
         <div class="kpi-row"><span>ND / EBITDA</span><b class="num">${fmt(d.nd_ebitda_x, 2)}x</b></div>
         <div class="kpi-row"><span>FCF yield</span><b class="num">${fmt(d.fcf_yield_pct, 1)}%</b></div>
         <div class="kpi-row"><span>Div. yield</span><b class="num">${fmt(e.mercado.dividend_yield_pct, 2)}%</b></div>
-        <div class="kpi-row"><span>EV / EBITDA</span><b class="num">${fmt(e.mercado.ev_ebitda, 2)}x</b></div>
+        <div class="kpi-row"><span>EV / EBITDA</span><b class="num">${fmt(valor('ev_ebitda_x', e), 2)}x</b></div>
       </div>`;
     grid.appendChild(c);
   });
@@ -1032,7 +1032,7 @@ function renderSecoesComparativas(){
   grafSimples('chConversao','conversao_fcf_pct',{fmtEixo:(v) => fmt(v, 0) + '%'});
   grafSimples('chCapex','capex_fco_pct',{fmtEixo:(v) => fmt(v, 0) + '%'});
   grafDuplo('chProd','producao_kboed');
-  grafDuas('chMultiples',['pe','ev_ebitda'],{fmtEixo:(v) => fmt(v, 0) + 'x'});
+  grafDuas('chMultiples',['pe','ev_ebitda_x'],{fmtEixo:(v) => fmt(v, 0) + 'x'});
   grafSimples('chEvBoed','ev_por_boed_usd',{fmtEixo:(v) => fmt(v / 1000, 0) + 'k'});
 }
 
@@ -1150,7 +1150,7 @@ function renderValuation(){
     type:'bubble',
     data:{datasets: vis.map(e => ({
       label:e.ticker,
-      data:[{x:e.mercado.ev_ebitda, y:valor('roe_pct', e), r: 8 + Math.sqrt(e.mercado.market_cap / maxMc) * 26}],
+      data:[{x:valor('ev_ebitda_x', e), y:valor('roe_pct', e), r: 8 + Math.sqrt(e.mercado.market_cap / maxMc) * 26}],
       backgroundColor:hex2rgba(COLORS[e.ticker], .45),
       borderColor:COLORS[e.ticker], borderWidth:2,
     }))},
@@ -1251,7 +1251,7 @@ function renderRadar(){
 /* ==========================================================================
    Matriz de ranking (heatmap)
    ========================================================================== */
-const HEAT_METRICAS = ['margem_ebitda_pct','conversao_fcf_pct','capex_fco_pct','nd_ebitda_x','roe_pct','ebitda_por_boe_usd','ev_ebitda','fcf_yield_pct','dividend_yield_pct'];
+const HEAT_METRICAS = ['margem_ebitda_pct','conversao_fcf_pct','capex_fco_pct','nd_ebitda_x','roe_pct','ebitda_por_boe_usd','ev_ebitda_x','fcf_yield_pct','dividend_yield_pct'];
 
 function renderHeat(){
   const vis = empresasVisiveis();

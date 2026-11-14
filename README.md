@@ -1,6 +1,6 @@
 # Dashboard Financeiro — Óleo & Gás
 
-Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 17 primários e 10 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
+Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 16 primários e 11 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
 
 Períodos cobertos: ano fiscal **FY2025** (encerrado em 31/12/2025) e o trimestre mais recente divulgado, **Q2 2026** (encerrado em 30/06/2026), com os quatro trimestres anteriores na série histórica. Os fundamentos foram coletados em 20/07/2026 e revisados a cada balanço; a data do último snapshot de mercado está no rodapé do dashboard.
 
@@ -107,6 +107,7 @@ Para editar à mão:
 | Receita por boe | receita ÷ (produção × dias do período) | Preço realizado por barril (inflado por downstream) |
 | EBITDA por boe | EBITDA ÷ (produção × dias do período) | Margem por barril — a leitura comparável entre pares |
 | Enterprise value | market cap + dívida líquida | Valor da firma, neutro à estrutura de capital |
+| EV / EBITDA | EV ÷ EBITDA dos últimos 12 meses (TTM) | Múltiplo de valuation neutro à estrutura de capital. **Calculado aqui, não lido do Yahoo**: o `enterpriseToEbitda` da fonte usa outro numerador e outro denominador, e as duas definições divergiam de +6% a +100% sob o mesmo rótulo. Mesma base de 12 meses do ND / EBITDA |
 | EV por boe/d | EV ÷ produção diária | Quanto o mercado paga pela capacidade instalada |
 | FCF yield | FCF dos últimos 12 meses (TTM) ÷ market cap | Retorno de caixa implícito no preço |
 | Cobertura do dividendo | FCF dos últimos 12 meses (TTM) ÷ (market cap × dividend yield) | Se o dividendo cabe no caixa gerado. O payout sobre FCF é `100 ÷ cobertura` e não existe como indicador próprio — seria a mesma informação em duas colunas |

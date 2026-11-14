@@ -72,10 +72,10 @@ CSV_HEADER = [
     "margem_liquida_fonte_pct",
     "fco_musd", "fcf_musd", "capex_musd", "divida_liquida_musd",
     "divida_patrimonio_pct", "roe_pct", "roa_pct", "producao_kboed",
-    "market_cap_musd", "pe", "ev_ebitda", "dividend_yield_pct", "preco_acao_usd",
+    "market_cap_musd", "pe", "dividend_yield_pct", "preco_acao_usd",
     # --- derivados ---
     "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
-    "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_por_boed_usd",
+    "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_ebitda_x", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
@@ -222,6 +222,16 @@ def derivar_periodo(empresa, period_key, ttm=None):
         "producao_usada_kboed": prod,
         "dias_periodo": dias,
         "ev": arred(ev, 0),
+        # EV / EBITDA calculado aqui, e nao lido do Yahoo. O Yahoo publica um
+        # `enterpriseToEbitda` cujo denominador nao e o nosso EBITDA e cujo
+        # numerador nao e o nosso EV -- e as duas definicoes conviviam sob o
+        # MESMO rotulo "EV / EBITDA" na tela. Na carga de 08/11/2026 elas
+        # divergiam de +6% (XOM, CVX) a -52% (EQNR) e +100% (PBR, onde o 1,78x
+        # do Yahoo e incompativel com EV de US$ 180 bi sobre EBITDA de US$ 50
+        # bi). Derivando, o numero passa a ser auditavel: sai de `ev` e de
+        # `ebitda_anual`, que estao os dois no payload, na MESMA base de 12
+        # meses registrada em `base_12m_ebitda` -- a mesma do `nd_ebitda_x`.
+        "ev_ebitda_x": arred(div(ev, ebitda_anual)),
         # US$ de EV por barril/dia de produção — "quanto o mercado paga pela capacidade".
         "ev_por_boed_usd": arred(div(None if ev is None else ev * 1e6, boed), 0),
         # Retorno de caixa implícito sobre o valor de mercado.
@@ -320,7 +330,7 @@ EIXOS_PERFIL = [
     ("Rentabilidade", lambda e: e["q_recente"]["derivados"]["margem_ebitda_pct"], True),
     ("Geração de caixa", lambda e: e["fy2025"]["derivados"]["conversao_fcf_pct"], True),
     ("Solidez", lambda e: e["fy2025"]["derivados"]["nd_ebitda_x"], False),
-    ("Valuation", lambda e: e["mercado"]["ev_ebitda"], False),
+    ("Valuation", lambda e: e["q_recente"]["derivados"]["ev_ebitda_x"], False),
     ("Retorno ao acionista", lambda e: e["mercado"]["dividend_yield_pct"], True),
     ("Escala", lambda e: e["q_recente"]["producao_kboed"], True),
 ]
@@ -479,10 +489,11 @@ def build_csv(data):
                 p["fluxo_caixa_operacional"], p["fcf"], p["capex"], p["divida_liquida"],
                 p["divida_patrimonio_pct"], p["roe_pct"], p["roa_pct"],
                 p["derivados"]["producao_usada_kboed"],
-                e["mercado"]["market_cap"], e["mercado"]["pe"], e["mercado"]["ev_ebitda"],
+                e["mercado"]["market_cap"], e["mercado"]["pe"],
                 e["mercado"]["dividend_yield_pct"], e["mercado"]["preco_acao"],
                 d["margem_ebitda_pct"], d["nd_ebitda_x"], d["conversao_fcf_pct"], d["capex_fco_pct"],
-                d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_por_boed_usd"],
+                d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_ebitda_x"],
+                d["ev_por_boed_usd"],
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"],
                 "sim" if d["producao_proxy"] else "nao",
             ])
