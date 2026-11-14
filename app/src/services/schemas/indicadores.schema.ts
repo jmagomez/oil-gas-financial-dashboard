@@ -48,7 +48,6 @@ export const trimestreSchema = z.object({
 export const mercadoSchema = z.object({
   market_cap: num,
   pe: num,
-  ev_ebitda: num,
   dividend_yield_pct: num,
   preco_acao: num,
 });

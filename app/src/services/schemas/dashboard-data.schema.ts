@@ -51,6 +51,8 @@ const derivadosPeriodoSchema = z.object({
   receita_por_boe_usd: num,
   ebitda_por_boe_usd: num,
   ev: num,
+  /** Derivado de ev / ebitda_anual, na base de `base_12m_ebitda`. */
+  ev_ebitda_x: num,
   ev_por_boed_usd: num,
   fcf_yield_pct: num,
   dividendos_estimados: num,
