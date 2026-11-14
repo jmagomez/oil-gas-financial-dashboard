@@ -3,9 +3,13 @@
   "data_consulta": "2026-07-20",
   "moeda": "USD (milhões, exceto onde indicado)",
   "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
-  "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
+  "periodo_trimestral": "Q3 2026 para Shell, BP, Equinor e TotalEnergies; Q2 2026 para ExxonMobil, Chevron e Petrobras, cujos balanços ainda não foram promovidos pelo pipeline",
   "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
   "notas": [
+   "Produção trimestral: atualizada à mão a partir do release de cada empresa, porque não sai de demonstração financeira. No 3T26 vieram dos releases oficiais — ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL 511) e Petrobras 3.512 (produção própria). Cada número foi conferido contra o trimestre anterior já presente neste arquivo antes de ser aceito.",
+   "Quando o balanço de um trimestre é promovido antes de a produção ser atualizada, o denominador dos indicadores por barril fica no trimestre anterior. O payload registra isso em derivados.producao_periodo_do_dado e derivados.producao_defasada, e o dashboard avisa — não é o mesmo que producao_proxy, que marca ausência total de produção.",
+   "Shell 3T26: a aquisição da ARC Resources foi concluída no trimestre e soma cerca de 370 kboe/d. O salto do Integrated Gas de 631 para 772 kboe/d não é crescimento orgânico.",
+   "Chevron 3T26: queda de 4.070 para 3.980 MBOED por menores entitlements (preço mais alto) e pelo conflito no Oriente Médio; a Venezuela entrou com um mês após a mudança para equivalência patrimonial.",
    "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
    "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total.",
    "BP FY2025: lucro líquido atribuível aos acionistas próximo de zero (US$ 55 milhões) por itens não-recorrentes; margem líquida quase nula no ano.",
@@ -52,9 +56,12 @@
      "receita_por_boe_usd": 187.22,
      "ebitda_por_boe_usd": 34.41,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 4740,
      "dias_periodo": 365,
      "ev": 728735,
+     "ev_ebitda_x": 12.24,
      "ev_por_boed_usd": 153742.0,
      "fcf_yield_pct": 3.39,
      "dividendos_estimados": 16840.0,
@@ -93,9 +100,12 @@
      "receita_por_boe_usd": 278.81,
      "ebitda_por_boe_usd": 68.99,
      "producao_proxy": false,
+     "producao_periodo_do_dado": "Q2 2026",
+     "producao_defasada": false,
      "producao_usada_kboed": 4514,
      "dias_periodo": 91,
      "ev": 727655,
+     "ev_ebitda_x": 9.86,
      "ev_por_boed_usd": 161200.0,
      "fcf_yield_pct": 4.39,
      "dividendos_estimados": 16840.0,
@@ -106,7 +116,6 @@
    "mercado": {
     "market_cap": 695875,
     "pe": 17.55,
-    "ev_ebitda": 9.29,
     "dividend_yield_pct": 2.42,
     "preco_acao": 170.59
    },
@@ -275,9 +284,12 @@
      "receita_por_boe_usd": 135.83,
      "ebitda_por_boe_usd": 26.87,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 3720,
      "dias_periodo": 365,
      "ev": 463521,
+     "ev_ebitda_x": 12.7,
      "ev_por_boed_usd": 124602.0,
      "fcf_yield_pct": 3.87,
      "dividendos_estimados": 13773.0,
@@ -316,9 +328,12 @@
      "receita_por_boe_usd": 181.44,
      "ebitda_por_boe_usd": 62.19,
      "producao_proxy": false,
+     "producao_periodo_do_dado": "Q2 2026",
+     "producao_defasada": false,
      "producao_usada_kboed": 4070,
      "dias_periodo": 91,
      "ev": 457606,
+     "ev_ebitda_x": 8.35,
      "ev_por_boed_usd": 112434.0,
      "fcf_yield_pct": 6.3,
      "dividendos_estimados": 13773.0,
@@ -329,7 +344,6 @@
    "mercado": {
     "market_cap": 429061,
     "pe": 16.14,
-    "ev_ebitda": 7.84,
     "dividend_yield_pct": 3.21,
     "preco_acao": 219.89
    },
@@ -464,7 +478,7 @@
     "Rentabilidade": 37.2,
     "Geração de caixa": 100.0,
     "Solidez": 26.4,
-    "Valuation": 19.3,
+    "Valuation": 19.4,
     "Retorno ao acionista": 43.7,
     "Escala": 81.1
    }
@@ -498,9 +512,12 @@
      "receita_por_boe_usd": 261.14,
      "ebitda_por_boe_usd": 51.74,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 2800,
      "dias_periodo": 365,
      "ev": 325851,
+     "ev_ebitda_x": 6.16,
      "ev_por_boed_usd": 116375.0,
      "fcf_yield_pct": 8.54,
      "dividendos_estimados": 4371.0,
@@ -521,7 +538,7 @@
     "divida_patrimonio_pct": 38.3,
     "roe_pct": 16.48,
     "roa_pct": 7.78,
-    "producao_kboed": 2455,
+    "producao_kboed": 2574,
     "derivados": {
      "margem_liquida_calc_pct": 12.99,
      "margem_ebitda_pct": 26.73,
@@ -536,13 +553,16 @@
      "nd_ebitda_x": 0.51,
      "conversao_fcf_pct": 54.25,
      "capex_fco_pct": 36.01,
-     "receita_por_boe_usd": 411.09,
-     "ebitda_por_boe_usd": 109.9,
+     "receita_por_boe_usd": 392.08,
+     "ebitda_por_boe_usd": 104.82,
      "producao_proxy": false,
-     "producao_usada_kboed": 2455,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 2574,
      "dias_periodo": 92,
      "ev": 319814,
-     "ev_por_boed_usd": 130270.0,
+     "ev_ebitda_x": 4.14,
+     "ev_por_boed_usd": 124248.0,
      "fcf_yield_pct": 13.34,
      "dividendos_estimados": 4371.0,
      "cobertura_dividendo_x": 8.55
@@ -552,7 +572,6 @@
    "mercado": {
     "market_cap": 280164,
     "pe": 8.6,
-    "ev_ebitda": 4.8,
     "dividend_yield_pct": 1.56,
     "preco_acao": 99.08
    },
@@ -673,8 +692,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "soma Upstream (1.802) + Integrated Gas (772) do release do 3T26; a aquisicao da ARC Resources, concluida no trimestre, soma ~370 kboe/d -- o degrau no Integrated Gas (631 -> 772) nao e organico"
     }
    },
    "fontes": [
@@ -690,7 +709,7 @@
     "fluxo_caixa_operacional": 57975,
     "fcf": 37360,
     "capex": -20615,
-    "producao_kboed": 2625.5,
+    "producao_kboed": 2655.25,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -705,9 +724,9 @@
     "Rentabilidade": 16.7,
     "Geração de caixa": 99.2,
     "Solidez": 29.6,
-    "Valuation": 59.7,
+    "Valuation": 73.6,
     "Retorno ao acionista": 0.0,
-    "Escala": 12.3
+    "Escala": 17.4
    }
   },
   {
@@ -739,9 +758,12 @@
      "receita_por_boe_usd": 224.56,
      "ebitda_por_boe_usd": 33.49,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 2310,
      "dias_periodo": 365,
      "ev": 139907,
+     "ev_ebitda_x": 4.95,
      "ev_por_boed_usd": 60566.0,
      "fcf_yield_pct": 9.58,
      "dividendos_estimados": 5544.0,
@@ -762,7 +784,7 @@
     "divida_patrimonio_pct": 112.0,
     "roe_pct": 14.52,
     "roa_pct": 2.97,
-    "producao_kboed": 2201,
+    "producao_kboed": 2220,
     "derivados": {
      "margem_liquida_calc_pct": 6.87,
      "margem_ebitda_pct": 20.59,
@@ -777,13 +799,16 @@
      "nd_ebitda_x": 0.6,
      "conversao_fcf_pct": 84.23,
      "capex_fco_pct": 19.99,
-     "receita_por_boe_usd": 337.79,
-     "ebitda_por_boe_usd": 69.56,
+     "receita_por_boe_usd": 334.9,
+     "ebitda_por_boe_usd": 68.97,
      "producao_proxy": false,
-     "producao_usada_kboed": 2201,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 2220,
      "dias_periodo": 92,
      "ev": 144270,
-     "ev_por_boed_usd": 65547.0,
+     "ev_ebitda_x": 3.28,
+     "ev_por_boed_usd": 64986.0,
      "fcf_yield_pct": 19.87,
      "dividendos_estimados": 5544.0,
      "cobertura_dividendo_x": 4.22
@@ -793,7 +818,6 @@
    "mercado": {
     "market_cap": 117707,
     "pe": 22.29,
-    "ev_ebitda": 4.9,
     "dividend_yield_pct": 4.71,
     "preco_acao": 45.7
    },
@@ -914,8 +938,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "producao reportada do upstream no release do 3T26 (2.220 mboe/d), dentro do guidance de 2.190-2.240 do trading statement de outubro"
     }
    },
    "fontes": [
@@ -931,7 +955,7 @@
     "fluxo_caixa_operacional": 36149,
     "fcf": 23393,
     "capex": -12756,
-    "producao_kboed": 2272.5,
+    "producao_kboed": 2277.25,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -946,9 +970,9 @@
     "Rentabilidade": 0.0,
     "Geração de caixa": 81.3,
     "Solidez": 32.4,
-    "Valuation": 58.4,
+    "Valuation": 84.7,
     "Retorno ao acionista": 83.3,
-    "Escala": 1.5
+    "Escala": 2.3
    }
   },
   {
@@ -977,13 +1001,16 @@
      "nd_ebitda_x": -0.31,
      "conversao_fcf_pct": 15.8,
      "capex_fco_pct": 70.07,
-     "receita_por_boe_usd": 134.72,
-     "ebitda_por_boe_usd": 47.87,
+     "receita_por_boe_usd": 134.66,
+     "ebitda_por_boe_usd": 47.85,
      "producao_proxy": true,
-     "producao_usada_kboed": 2165,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
+     "producao_usada_kboed": 2166,
      "dias_periodo": 365,
      "ev": 89739,
-     "ev_por_boed_usd": 41450.0,
+     "ev_ebitda_x": 2.37,
+     "ev_por_boed_usd": 41431.0,
      "fcf_yield_pct": 5.88,
      "dividendos_estimados": 3689.0,
      "cobertura_dividendo_x": 1.62
@@ -1003,7 +1030,7 @@
     "divida_patrimonio_pct": 66.0,
     "roe_pct": 26.28,
     "roa_pct": 8.02,
-    "producao_kboed": 2165,
+    "producao_kboed": 2166,
     "derivados": {
      "margem_liquida_calc_pct": 7.7,
      "margem_ebitda_pct": 45.01,
@@ -1018,13 +1045,16 @@
      "nd_ebitda_x": 0.11,
      "conversao_fcf_pct": 31.53,
      "capex_fco_pct": 38.05,
-     "receita_por_boe_usd": 165.36,
-     "ebitda_por_boe_usd": 74.44,
+     "receita_por_boe_usd": 165.28,
+     "ebitda_por_boe_usd": 74.4,
      "producao_proxy": false,
-     "producao_usada_kboed": 2165,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 2166,
      "dias_periodo": 92,
      "ev": 107294,
-     "ev_por_boed_usd": 49558.0,
+     "ev_ebitda_x": 2.09,
+     "ev_por_boed_usd": 49536.0,
      "fcf_yield_pct": 11.15,
      "dividendos_estimados": 3689.0,
      "cobertura_dividendo_x": 3.07
@@ -1034,7 +1064,6 @@
    "mercado": {
     "market_cap": 101627,
     "pe": 8.91,
-    "ev_ebitda": 4.36,
     "dividend_yield_pct": 3.63,
     "preco_acao": 42.95
    },
@@ -1155,8 +1184,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "total equity liquids and gas production do financial statements do 3T26; a media de 9M26 (2.214) confere com a serie 1T-3T deste arquivo"
     }
    },
    "fontes": [
@@ -1172,7 +1201,7 @@
     "fluxo_caixa_operacional": 24336,
     "fcf": 11330,
     "capex": -13006,
-    "producao_kboed": 2210.25,
+    "producao_kboed": 2210.5,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -1187,7 +1216,7 @@
     "Rentabilidade": 66.4,
     "Geração de caixa": 0.0,
     "Solidez": 76.4,
-    "Valuation": 65.6,
+    "Valuation": 100.0,
     "Retorno ao acionista": 54.8,
     "Escala": 0.0
    }
@@ -1221,9 +1250,12 @@
      "receita_por_boe_usd": 197.46,
      "ebitda_por_boe_usd": 37.69,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 2530,
      "dias_periodo": 365,
      "ev": 167502,
+     "ev_ebitda_x": 4.81,
      "ev_por_boed_usd": 66206.0,
      "fcf_yield_pct": 5.22,
      "dividendos_estimados": 8915.0,
@@ -1244,7 +1276,7 @@
     "divida_patrimonio_pct": 47.5,
     "roe_pct": 16.89,
     "roa_pct": 6.56,
-    "producao_kboed": 2395,
+    "producao_kboed": 2474,
     "derivados": {
      "margem_liquida_calc_pct": 13.36,
      "margem_ebitda_pct": 30.08,
@@ -1259,13 +1291,16 @@
      "nd_ebitda_x": 0.46,
      "conversao_fcf_pct": 58.19,
      "capex_fco_pct": 29.65,
-     "receita_por_boe_usd": 280.74,
-     "ebitda_por_boe_usd": 84.44,
+     "receita_por_boe_usd": 271.78,
+     "ebitda_por_boe_usd": 81.75,
      "producao_proxy": false,
-     "producao_usada_kboed": 2395,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 2474,
      "dias_periodo": 92,
      "ev": 224189,
-     "ev_por_boed_usd": 93607.0,
+     "ev_ebitda_x": 4.12,
+     "ev_por_boed_usd": 90618.0,
      "fcf_yield_pct": 11.31,
      "dividendos_estimados": 8915.0,
      "cobertura_dividendo_x": 2.53
@@ -1275,7 +1310,6 @@
    "mercado": {
     "market_cap": 199001,
     "pe": 9.06,
-    "ev_ebitda": 4.73,
     "dividend_yield_pct": 4.48,
     "preco_acao": 90.74
    },
@@ -1396,8 +1430,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "producao de hidrocarbonetos do 3T26 (E&P 1.963 + GNL integrado 511); conflito no Oriente Medio cortou ~5% do trimestre"
     }
    },
    "fontes": [
@@ -1413,7 +1447,7 @@
     "fluxo_caixa_operacional": 40080,
     "fcf": 22511,
     "capex": -17569,
-    "producao_kboed": 2472.0,
+    "producao_kboed": 2491.75,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -1428,9 +1462,9 @@
     "Rentabilidade": 25.8,
     "Geração de caixa": 47.4,
     "Solidez": 100.0,
-    "Valuation": 60.6,
+    "Valuation": 73.9,
     "Retorno ao acionista": 77.2,
-    "Escala": 9.8
+    "Escala": 13.1
    }
   },
   {
@@ -1462,9 +1496,12 @@
      "receita_por_boe_usd": 81.73,
      "ebitda_por_boe_usd": 34.19,
      "producao_proxy": false,
+     "producao_periodo_do_dado": null,
+     "producao_defasada": false,
      "producao_usada_kboed": 2990,
      "dias_periodo": 365,
      "ev": 177950,
+     "ev_ebitda_x": 4.77,
      "ev_por_boed_usd": 59515.0,
      "fcf_yield_pct": 13.89,
      "dividendos_estimados": 6311.0,
@@ -1503,9 +1540,12 @@
      "receita_por_boe_usd": 110.57,
      "ebitda_por_boe_usd": 63.44,
      "producao_proxy": false,
+     "producao_periodo_do_dado": "Q2 2026",
+     "producao_defasada": false,
      "producao_usada_kboed": 3340,
      "dias_periodo": 91,
      "ev": 178610,
+     "ev_ebitda_x": 3.55,
      "ev_por_boed_usd": 53476.0,
      "fcf_yield_pct": 17.03,
      "dividendos_estimados": 6311.0,
@@ -1516,7 +1556,6 @@
    "mercado": {
     "market_cap": 118190,
     "pe": 4.35,
-    "ev_ebitda": 1.77,
     "dividend_yield_pct": 5.34,
     "preco_acao": 18.34
    },
@@ -1650,7 +1689,7 @@
     "Rentabilidade": 100.0,
     "Geração de caixa": 95.1,
     "Solidez": 0.0,
-    "Valuation": 100.0,
+    "Valuation": 81.2,
     "Retorno ao acionista": 100.0,
     "Escala": 50.0
    }

@@ -6,7 +6,7 @@ Períodos cobertos: ano fiscal **FY2025** (encerrado em 31/12/2025) e o trimestr
 
 **Dashboard ao vivo (GitHub Pages):** https://jmagomez.github.io/oil-gas-financial-dashboard/
 
-Os dados de mercado (cotação, market cap, P/E, dividend yield e EV/EBITDA) são atualizados **automaticamente todo dia útil**, após o fechamento de Nova York.
+Os dados de mercado (cotação, market cap, P/E e dividend yield) são atualizados **automaticamente todo dia útil**, após o fechamento de Nova York.
 
 ## Arquivos
 
@@ -45,7 +45,7 @@ Os dados têm dois regimes, e é essa separação que sustenta a automação:
 
 | | Fundamentos | Mercado |
 |---|---|---|
-| Campos | receita, EBITDA, capex, dívida líquida, produção, margens, ROE/ROA | preço, market cap, P/E, dividend yield, EV/EBITDA |
+| Campos | receita, EBITDA, capex, dívida líquida, produção, margens, ROE/ROA | preço, market cap, P/E, dividend yield |
 | Muda quando | sai um balanço (trimestral) | todo pregão |
 | Como atualiza | rotina mensal + revisão à mão, com fonte citada | rotina automática diária |
 
@@ -94,7 +94,7 @@ Para editar à mão:
 
 ## Indicadores
 
-**Primários** (direto da fonte): receita, lucro líquido, EBITDA, margem líquida, fluxo de caixa operacional, free cash flow, capex, dívida líquida, dívida/patrimônio, ROE, ROA, produção, market cap, P/E, EV/EBITDA, dividend yield e preço da ação.
+**Primários** (direto da fonte): receita, lucro líquido, EBITDA, margem líquida, fluxo de caixa operacional, free cash flow, capex, dívida líquida, dívida/patrimônio, ROE, ROA, produção, market cap, P/E, dividend yield e preço da ação. O **EV/EBITDA saiu desta lista**: deixou de ser lido da fonte e passou a ser derivado de `ev ÷ EBITDA`.
 
 **Derivados** (calculados em `build_dashboard.py`, nunca gravados no JSON):
 
@@ -172,4 +172,4 @@ Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapsho
 - **Produção**: não sai de demonstração financeira, e sim dos relatórios de produção. A rotina automática carrega o valor do trimestre anterior e marca isso em `proveniencia`; a atualização é manual, rastreada release por release. **Enquanto a produção não é atualizada, o denominador dos indicadores por barril fica um trimestre atrás do numerador** — e agora isso aparece na tela: `derivados.producao_defasada` dispara um aviso no painel de eficiência, dizendo de que trimestre veio a produção. Não confundir com `producao_proxy`, que marca ausência total.
 - **Produção do 3T26** (cada número conferido contra o trimestre anterior já presente no JSON antes de ser aceito): ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL integrado 511), Petrobras 3.512 (produção própria, não a operada de 5,08 MMboed). O salto do Integrated Gas da Shell (631 → 772) é a aquisição da ARC Resources, não crescimento orgânico.
 
-⚠️ Os dados de mercado são atualizados automaticamente todo dia útil (a data do último snapshot está no rodapé do dashboard). Os **fundamentos** continuam ancorados em FY2025 e no trimestre mais recente **de cada empresa** — que nem sempre é o mesmo — e só mudam quando sai um balanço novo — ou seja, múltiplos como P/E e EV/EBITDA combinam preço de hoje com lucro de ontem, que é como o mercado os calcula mesmo. Conteúdo informativo, não é recomendação de investimento.
+⚠️ Os dados de mercado são atualizados automaticamente todo dia útil (a data do último snapshot está no rodapé do dashboard). Os **fundamentos** continuam ancorados em FY2025 e no trimestre mais recente **de cada empresa** — que nem sempre é o mesmo — e só mudam quando sai um balanço novo — ou seja, múltiplos como P/E e EV/EBITDA combinam preço de hoje com lucro de ontem (no EV/EBITDA, com o EBITDA de 12 meses do próprio payload), que é como o mercado os calcula mesmo. Conteúdo informativo, não é recomendação de investimento.
