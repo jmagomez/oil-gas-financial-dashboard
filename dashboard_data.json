@@ -6,9 +6,8 @@
   "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
   "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
   "notas": [
+   "Petrobras a partir do 3T26: coletada do ITR da CVM e convertida pela PTAX do Banco Central (fluxos pela média de 5,1366; saldos pelo fechamento de 5,1809 em 30/09/2026). Conferido contra o 6-K em dólar da própria companhia: lucro 7.739 vs 7.740, EBITDA 16.065 vs 16.061, FCO 12.028 vs 12.026, capex 5.402 vs 5.402, dívida líquida 57.880 vs 57.847. O EBITDA é o da Resolução CVM 156; o EBITDA AJUSTADO que a companhia destaca (16.703) soma de volta US$ 710 milhões de resultado com baixa de ativos e exclui equivalência patrimonial. As sete empresas estão no Q3 2026.",
    "Petrobras — EBITDA da série trimestral (2T25 a 2T26) rebaseado para a definição da Resolução CVM 156 (LAIR − resultado financeiro + D&A), que é a que a companhia divulga, convertido pela PTAX média de cada trimestre. Os valores anteriores vinham do agregador, que soma de volta só a despesa de juros, e divergiam de −18% a +27% por trimestre. No 2T26: US$ 18,6 bi no release, 18.588 aqui, 19.283 no agregador. A partir do 3T26 a Petrobras é coletada direto da CVM nessa mesma definição; sem o rebase, a base de 12 meses misturaria duas. O total FY2025 continua vindo do agregador e não é diretamente comparável à soma dos trimestres.",
-   "O campo periodo_trimestral traz um rótulo único, escrito por atualiza_referencia, mas as empresas nem sempre estão no mesmo trimestre: hoje seis estão no Q3 2026 e a Petrobras no Q2 2026. Quem compara deve olhar o trimestre DE CADA empresa — o dashboard lê esses rótulos do próprio payload, e não do cabeçalho.",
-   "Petrobras no Q2 2026, e não no Q3: a fonte devolve as demonstrações dela em BRL (o lucro do 3T26 foi de R$ 39,8 bilhões) e este arquivo declara USD. A guarda de moeda de update_fundamentals.py descartou o trimestre inteiro em vez de promovê-lo com os valores na moeda errada — nenhuma das checagens de coerência pegaria isso, porque todas são invariantes a escala. Promover a Petrobras exige converter a demonstração pela taxa do período, o que é curadoria, não automação.",
    "Produção trimestral: atualizada à mão a partir do release de cada empresa, porque não sai de demonstração financeira. No 3T26 vieram dos releases oficiais — ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL 511) e Petrobras 3.512 (produção própria). Cada número foi conferido contra o trimestre anterior já presente neste arquivo antes de ser aceito.",
    "Quando o balanço de um trimestre é promovido antes de a produção ser atualizada, o denominador dos indicadores por barril fica no trimestre anterior. O payload registra isso em derivados.producao_periodo_do_dado e derivados.producao_defasada, e o dashboard avisa — não é o mesmo que producao_proxy, que marca ausência total de produção.",
    "Shell 3T26: a aquisição da ARC Resources foi concluída no trimestre e soma cerca de 370 kboe/d. O salto do Integrated Gas de 631 para 772 kboe/d não é crescimento orgânico.",
@@ -1563,7 +1562,7 @@
     "divida_patrimonio_pct": 71.7,
     "roe_pct": 27.89,
     "roa_pct": 10.63,
-    "producao_kboed": 3340,
+    "producao_kboed": 3512,
     "derivados": {
      "margem_liquida_calc_pct": 23.47,
      "margem_ebitda_pct": 48.73,
@@ -1578,16 +1577,16 @@
      "nd_ebitda_x": 1.03,
      "conversao_fcf_pct": 41.24,
      "capex_fco_pct": 44.91,
-     "receita_por_boe_usd": 107.3,
-     "ebitda_por_boe_usd": 52.28,
+     "receita_por_boe_usd": 102.04,
+     "ebitda_por_boe_usd": 49.72,
      "producao_proxy": false,
-     "producao_periodo_do_dado": "Q2 2026",
-     "producao_defasada": true,
-     "producao_usada_kboed": 3340,
+     "producao_periodo_do_dado": "Q3 2026",
+     "producao_defasada": false,
+     "producao_usada_kboed": 3512,
      "dias_periodo": 92,
      "ev": 176070,
      "ev_ebitda_x": 3.15,
-     "ev_por_boed_usd": 52716.0,
+     "ev_por_boed_usd": 50134.0,
      "fcf_yield_pct": 18.43,
      "dividendos_estimados": 6311.0,
      "cobertura_dividendo_x": 3.45
@@ -1726,8 +1725,8 @@
     },
     "producao_kboed": {
      "fonte": "release da empresa",
-     "trimestre_do_dado": "Q2 2026",
-     "observacao": "carregado do trimestre anterior; atualizar a mao com o release"
+     "trimestre_do_dado": "Q3 2026",
+     "observacao": "producao propria ('Total production') do Relatorio de Producao e Vendas do 3T26: 3,512 MMboed, recorde, +5,3% sobre o 2T26 -- nao a operada (5,08 MMboed). Ramp-up de P-78 e P-79 em Buzios"
     }
    },
    "fontes": [
@@ -1743,7 +1742,7 @@
     "fluxo_caixa_operacional": 42860,
     "fcf": 21784,
     "capex": -21076,
-    "producao_kboed": 3247.75,
+    "producao_kboed": 3290.75,
     "janela": [
      "2025-Q4",
      "2026-Q1",
@@ -1760,7 +1759,7 @@
     "Solidez": 0.0,
     "Valuation": 83.4,
     "Retorno ao acionista": 100.0,
-    "Escala": 50.4
+    "Escala": 57.8
    }
   }
  ],

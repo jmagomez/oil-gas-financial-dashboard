@@ -75,7 +75,12 @@ jobs:
 
       - uses: ./.github/actions/publica-artefatos
         with:
-          mensagem: "${{ inputs.dry_run && '' || format('dados: atualiza mercado ({0})', steps.resumo.outputs.data) }}"
+          # `!= true`, e nao `inputs.dry_run && '' || '...'`: em expressao do
+          # Actions a string vazia e FALSA, entao aquela forma devolvia sempre
+          # a mensagem e a simulacao comitava. Ficou invisivel enquanto a
+          # simulacao nao escrevia arquivo nenhum; em 15/11/2026 um dry-run
+          # comitou 95 linhas de PTAX na main.
+          mensagem: "${{ inputs.dry_run != true && format('dados: atualiza mercado ({0})', steps.resumo.outputs.data) || '' }}"
           corpo: ${{ steps.resumo.outputs.texto }}
 
       - name: Gera o corpo do e-mail
