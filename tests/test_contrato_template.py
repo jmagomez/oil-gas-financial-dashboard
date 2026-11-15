@@ -117,3 +117,31 @@ def test_arquivo_vivo_nao_traz_mais_o_ev_ebitda_do_yahoo():
 def test_cabecalho_do_csv_so_tem_o_multiplo_derivado():
     assert "ev_ebitda" not in bd.CSV_HEADER
     assert "ev_ebitda_x" in bd.CSV_HEADER
+
+
+def test_ev_ebitda_nao_e_mais_chamado_de_snapshot():
+    """Sobra da migracao: o multiplo virou derivado e os rotulos continuaram dizendo "snapshot".
+
+    Snapshot e o que vale igual para as duas colunas de periodo. O EV/EBITDA
+    deixou de ser isso quando passou a sair de `ev / ebitda` de cada periodo --
+    e o titulo do grafico e a nota do rodape seguiram afirmando o contrario.
+    """
+    template = (ROOT / "dashboard_template.html").read_text(encoding="utf-8")
+    assert "EV/EBITDA (x) · snapshot" not in template
+    raw = json.loads((ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8"))
+    nota = next(n for n in raw["referencia"]["notas"] if "'snapshot' de mercado em" in n)
+    antes_do_ponto = nota.split(".")[0]
+    assert "EV/EBITDA" not in antes_do_ponto, "EV/EBITDA listado entre os campos de snapshot"
+    assert "NÃO é snapshot" in nota
+
+
+def test_nota_de_snapshot_continua_reescrevivel_pela_rotina_diaria():
+    """A rotina de mercado acha a nota por regex para trocar a data; o texto novo nao pode quebra-la."""
+    from datetime import date
+
+    import update_market_data as umd
+
+    bruto = (ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
+    novo = umd.atualiza_datas(bruto, date(2031, 2, 3))
+    assert "snapshot' de mercado em 03/02/2031" in novo
+    assert novo.count("03/02/2031") == 1, "a data do snapshot deve aparecer numa nota so"
