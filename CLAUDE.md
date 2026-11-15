@@ -10,6 +10,7 @@ Manter um dashboard comparativo de **27 indicadores** (16 primários, 11 derivad
 
 - **Mercado** — `yfinance` (Yahoo Finance), coletado por `update_market_data.py`. Automático, sem revisão humana.
 - **Fundamentos** — `yfinance` também devolve os números, mas `update_fundamentals.py` só promove um trimestre novo depois de passar por checagens de coerência contábil (ver abaixo); a divulgação em si ainda é conferida à mão antes de rodar sem `--dry-run` em produção. É por isso que mercado roda diário sem supervisão e fundamentos não.
+- **Petrobras — CVM + PTAX, não Yahoo.** É a única que publica em reais. `coleta_cvm.py` lê o ITR/DFP consolidado do Portal de Dados Abertos da CVM (a demonstração que a própria companhia entrega ao regulador) e `ptax.py` converte: **fluxo pela PTAX média do trimestre, saldo pela PTAX de fechamento**. A regra não é escolha nossa — é a que reproduz o que a Petrobras divulga em dólar: a dívida líquida convertida pelo fechamento bate com a do release em seis trimestres seguidos (tolerância de 0,5%), e lucro, EBITDA e FCO do 2T26 pela média batem com os US$ 10,4 / 18,6 / 12,3 bi divulgados. `ptax/raw.txt` fica versionado de propósito: número convertido cuja taxa não está no repositório não pode ser refeito por quem audita. O portal da CVM é regenerado **semanalmente**, então um balanço divulgado no meio da semana só aparece na coleta no fim de semana seguinte.
 - **`indicadores_oleo_gas.json`** é a fonte única de verdade. `dashboard_oleo_gas.html` e `indicadores_oleo_gas.csv` são **gerados** por `build_dashboard.py` — nunca editados à mão, e nenhum indicador derivado é gravado no JSON.
 
 ## Convenções
@@ -30,6 +31,9 @@ Manter um dashboard comparativo de **27 indicadores** (16 primários, 11 derivad
 build_dashboard.py       deriva indicadores, valida, gera HTML + CSV (único ponto que calcula derivados)
 update_market_data.py    rotina diária: mercado (cotação, market cap, P/E, dividend yield, EV/EBITDA)
 update_fundamentals.py   rotina mensal: fundamentos, promove trimestre novo, checa coerência contábil
+coleta_cvm.py            Petrobras: ITR/DFP da CVM -> trimestre em US$, no formato de update_fundamentals
+ptax.py                  PTAX média e de fechamento por trimestre; recusa converter com série incompleta
+ptax/raw.txt             cotações diárias do Banco Central (versionado: é o que torna a conversão auditável)
 escrita_cirurgica.py     primitivas de escrita compartilhadas pelas duas rotinas acima
 build_email.py           corpo do e-mail diário, reaproveita build_dashboard.enriquecer()/validate()
 dashboard_template.html  esqueleto HTML/CSS/JS com o placeholder __DATA_JSON__
@@ -46,7 +50,7 @@ tests/                   pytest — fórmulas derivadas, as duas rotinas de escr
 app/                     camada de apresentação em React + Vite (ver app/README.md)
 .github/workflows/
   atualiza-mercado.yml      seg-sex 22:00 UTC — mercado, publica pelo gate, e-mail
-  atualiza-fundamentos.yml  dia 5 do mês — fundamentos, publica pelo gate
+  atualiza-fundamentos.yml  dia 5 do mês — atualiza a PTAX, fundamentos (Yahoo + CVM), publica pelo gate
   build-dashboard.yml       on push (json/template/build/assets) — rede de segurança para edição manual
   ci.yml                    ruff check bloqueante + pytest, em PR e nos pushes que build-dashboard não cobre
   deploy.yml                on push main — gate do app + publica Pages (raiz = HTML atual, /app = React)
@@ -74,6 +78,9 @@ suíte inteira rodava duas vezes em paralelo. Ao mexer em um, mexa no outro.
 - **Moeda é checada antes de tudo, e rejeita a empresa inteira.** O arquivo declara "USD (milhões)" e a Petrobras publica em BRL — o lucro do 3T26 saiu como R$ 39,8 bilhões. O perigo é que **nenhuma** das cinco checagens de coerência pega isso: EBITDA ≤ receita, lucro ≤ receita, FCF = FCO + capex, margem = lucro/receita e capex < 0 são todas invariantes a escala, e um balanço inteiro em BRL passa nas cinco. As faixas também não resolviam, por dois motivos: em BRL a receita (~R$ 178 bi), o lucro e o EBITDA cabem nelas, e — pior — campo fora de faixa é **anulado**, não descarta a empresa, então só a dívida líquida estouraria e o trimestre entraria como USD com a dívida nula. `valida_moeda` lê o `financialCurrency` (a moeda das **demonstrações**, diferente de `currency`, que é a da **cotação**) e descarta a empresa inteira, como na incoerência.
 - **`valida_escala` é a segunda linha, para quando o metadado some.** Uma guarda que depende de metadado para de guardar em silêncio se a fonte parar de informá-lo — o modo de falha mais perigoso, porque não aparece. A escala não depende de metadado nenhum: compara a receita do trimestre novo com a do curado e rejeita saltos acima de 2,5×. A calibragem saiu da própria série: a maior variação trimestral real é +43% (Petrobras, 1T26→2T26), e a conversão BRL→USD é ~5,3×. Ela também pega troca de unidade e consolidação de aquisição grande — casos em que a rejeição também é o certo, porque pedem curadoria, não promoção automática.
 - **O caso que a escala não pega.** O BRL se denuncia pelo tamanho; o EUR não. Uma demonstração em euros erra por ~8%: pequeno demais para qualquer checagem de magnitude, grande o bastante para corromper toda comparação. É por isso que as duas guardas existem, e é esse o cenário de `test_moeda_errada_por_margem_PEQUENA_ainda_assim_descarta` — sem ele, remover o `continue` da guarda de moeda deixava a suíte verde, porque a rejeição por escala do caso BRL mascarava a falta.
+- **Fonte primária não é salvo-conduto.** O que sai de `coleta_cvm` passa pelas mesmas guardas que o Yahoo. Em particular, uma conversão esquecida (reais carimbados como "USD") engana `valida_moeda`, que acredita no carimbo — quem barra é `valida_escala`, porque R$ 169 bi sobre US$ 23 bi é um salto de 7×. Está em `test_conversao_ESQUECIDA_morre_na_escala`.
+- **Sem PTAX completa, não há conversão.** `ptax.taxas` recusa um trimestre com menos de 55 dias úteis ou cujo último dia esteja a mais de 4 dias do fim. Média de meio trimestre e "fechamento" de três semanas antes produzem números plausíveis e errados; recusar faz a Petrobras simplesmente não ser promovida naquele run.
+- **O EBITDA da Petrobras é o da Resolução CVM 156** (LAIR − resultado financeiro + D&A), que é o que a companhia divulga. O agregador que alimentava a série antiga soma de volta só a despesa de juros, e por trimestre as duas definições divergiam de −18% a +27%. A série trimestral curada (2T25–2T26) foi rebaseada para a definição da CVM — senão a base de 12 meses misturaria duas a partir do 3T26. O total FY2025 continua do agregador.
 - Divergência acima de 5% entre o dado curado e o que a fonte devolve vira aviso no relatório, não bloqueio.
 
 ### Escrita no JSON

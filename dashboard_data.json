@@ -6,6 +6,7 @@
   "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
   "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
   "notas": [
+   "Petrobras — EBITDA da série trimestral (2T25 a 2T26) rebaseado para a definição da Resolução CVM 156 (LAIR − resultado financeiro + D&A), que é a que a companhia divulga, convertido pela PTAX média de cada trimestre. Os valores anteriores vinham do agregador, que soma de volta só a despesa de juros, e divergiam de −18% a +27% por trimestre. No 2T26: US$ 18,6 bi no release, 18.588 aqui, 19.283 no agregador. A partir do 3T26 a Petrobras é coletada direto da CVM nessa mesma definição; sem o rebase, a base de 12 meses misturaria duas. O total FY2025 continua vindo do agregador e não é diretamente comparável à soma dos trimestres.",
    "O campo periodo_trimestral traz um rótulo único, escrito por atualiza_referencia, mas as empresas nem sempre estão no mesmo trimestre: hoje seis estão no Q3 2026 e a Petrobras no Q2 2026. Quem compara deve olhar o trimestre DE CADA empresa — o dashboard lê esses rótulos do próprio payload, e não do cabeçalho.",
    "Petrobras no Q2 2026, e não no Q3: a fonte devolve as demonstrações dela em BRL (o lucro do 3T26 foi de R$ 39,8 bilhões) e este arquivo declara USD. A guarda de moeda de update_fundamentals.py descartou o trimestre inteiro em vez de promovê-lo com os valores na moeda errada — nenhuma das checagens de coerência pegaria isso, porque todas são invariantes a escala. Promover a Petrobras exige converter a demonstração pela taxa do período, o que é curadoria, não automação.",
    "Produção trimestral: atualizada à mão a partir do release de cada empresa, porque não sai de demonstração financeira. No 3T26 vieram dos releases oficiais — ExxonMobil 4.496 koebd, Chevron 3.980 MBOED, Shell 2.574 (Upstream 1.802 + Integrated Gas 772), BP 2.220, Equinor 2.166, TotalEnergies 2.474 (E&P 1.963 + GNL 511) e Petrobras 3.512 (produção própria). Cada número foi conferido contra o trimestre anterior já presente neste arquivo antes de ser aceito.",
@@ -268,7 +269,7 @@
     "run_rate_ebitda_pct": 89.63
    },
    "perfil": {
-    "Rentabilidade": 13.5,
+    "Rentabilidade": 14.3,
     "Geração de caixa": 80.4,
     "Solidez": 42.0,
     "Valuation": 0.0,
@@ -515,7 +516,7 @@
     "run_rate_ebitda_pct": 123.67
    },
    "perfil": {
-    "Rentabilidade": 29.1,
+    "Rentabilidade": 30.8,
     "Geração de caixa": 100.0,
     "Solidez": 26.4,
     "Valuation": 21.9,
@@ -761,7 +762,7 @@
     "run_rate_ebitda_pct": 87.76
    },
    "perfil": {
-    "Rentabilidade": 16.7,
+    "Rentabilidade": 17.7,
     "Geração de caixa": 99.2,
     "Solidez": 29.6,
     "Valuation": 68.0,
@@ -1253,7 +1254,7 @@
     "run_rate_ebitda_pct": 56.78
    },
    "perfil": {
-    "Rentabilidade": 66.4,
+    "Rentabilidade": 70.3,
     "Geração de caixa": 0.0,
     "Solidez": 76.4,
     "Valuation": 100.0,
@@ -1499,7 +1500,7 @@
     "run_rate_ebitda_pct": 113.83
    },
    "perfil": {
-    "Rentabilidade": 25.8,
+    "Rentabilidade": 27.3,
     "Geração de caixa": 47.4,
     "Solidez": 100.0,
     "Valuation": 68.3,
@@ -1553,7 +1554,7 @@
     "trimestre": "Q2 2026",
     "receita": 33607,
     "lucro_liquido": 10428,
-    "ebitda": 19283,
+    "ebitda": 18588,
     "margem_liquida_pct": 31.03,
     "fluxo_caixa_operacional": 12300,
     "fcf": 7734,
@@ -1565,7 +1566,7 @@
     "producao_kboed": 3340,
     "derivados": {
      "margem_liquida_calc_pct": 31.03,
-     "margem_ebitda_pct": 57.38,
+     "margem_ebitda_pct": 55.31,
      "base_12m_ebitda": "ttm",
      "base_12m_fcf": "ttm",
      "janela_ttm": [
@@ -1574,18 +1575,18 @@
       "2026-Q1",
       "Q2 2026"
      ],
-     "nd_ebitda_x": 1.2,
-     "conversao_fcf_pct": 40.11,
+     "nd_ebitda_x": 1.16,
+     "conversao_fcf_pct": 41.61,
      "capex_fco_pct": 37.12,
      "receita_por_boe_usd": 110.57,
-     "ebitda_por_boe_usd": 63.44,
+     "ebitda_por_boe_usd": 61.16,
      "producao_proxy": false,
      "producao_periodo_do_dado": "Q2 2026",
      "producao_defasada": false,
      "producao_usada_kboed": 3340,
      "dias_periodo": 91,
      "ev": 178610,
-     "ev_ebitda_x": 3.55,
+     "ev_ebitda_x": 3.43,
      "ev_por_boed_usd": 53476.0,
      "fcf_yield_pct": 17.03,
      "dividendos_estimados": 6311.0,
@@ -1604,76 +1605,76 @@
      "periodo": "2025-Q2",
      "receita": 21037,
      "lucro_liquido": 4734,
-     "ebitda": 11093,
+     "ebitda": 9075,
      "fluxo_caixa_operacional": 7465,
      "fcf": 3463,
      "capex": -4002,
      "divida_liquida": 58563,
      "producao_kboed": 2909,
      "derivados": {
-      "margem_ebitda_pct": 52.73,
+      "margem_ebitda_pct": 43.14,
       "margem_liquida_pct": 22.5,
-      "conversao_fcf_pct": 31.22,
+      "conversao_fcf_pct": 38.16,
       "capex_fco_pct": 53.61,
       "receita_por_boe_usd": 79.47,
-      "ebitda_por_boe_usd": 41.9
+      "ebitda_por_boe_usd": 34.28
      }
     },
     {
      "periodo": "2025-Q3",
      "receita": 23477,
      "lucro_liquido": 6027,
-     "ebitda": 13470,
+     "ebitda": 12117,
      "fluxo_caixa_operacional": 9856,
      "fcf": 4969,
      "capex": -4887,
      "divida_liquida": 59053,
      "producao_kboed": 3140,
      "derivados": {
-      "margem_ebitda_pct": 57.38,
+      "margem_ebitda_pct": 51.61,
       "margem_liquida_pct": 25.67,
-      "conversao_fcf_pct": 36.89,
+      "conversao_fcf_pct": 41.01,
       "capex_fco_pct": 49.58,
       "receita_por_boe_usd": 81.27,
-      "ebitda_por_boe_usd": 46.63
+      "ebitda_por_boe_usd": 41.94
      }
     },
     {
      "periodo": "2025-Q4",
      "receita": 23608,
      "lucro_liquido": 2899,
-     "ebitda": 8117,
+     "ebitda": 9373,
      "fluxo_caixa_operacional": 10162,
      "fcf": 3574,
      "capex": -6588,
      "divida_liquida": 60596,
      "producao_kboed": 3081,
      "derivados": {
-      "margem_ebitda_pct": 34.38,
+      "margem_ebitda_pct": 39.7,
       "margem_liquida_pct": 12.28,
-      "conversao_fcf_pct": 44.03,
+      "conversao_fcf_pct": 38.13,
       "capex_fco_pct": 64.83,
       "receita_por_boe_usd": 83.29,
-      "ebitda_por_boe_usd": 28.64
+      "ebitda_por_boe_usd": 33.07
      }
     },
     {
      "periodo": "2026-Q1",
      "receita": 23540,
      "lucro_liquido": 6220,
-     "ebitda": 9430,
+     "ebitda": 11957,
      "fluxo_caixa_operacional": 8370,
      "fcf": 3850,
      "capex": -4520,
      "divida_liquida": 61680,
      "producao_kboed": 3230,
      "derivados": {
-      "margem_ebitda_pct": 40.06,
+      "margem_ebitda_pct": 50.79,
       "margem_liquida_pct": 26.42,
-      "conversao_fcf_pct": 40.83,
+      "conversao_fcf_pct": 32.2,
       "capex_fco_pct": 54.0,
       "receita_por_boe_usd": 80.98,
-      "ebitda_por_boe_usd": 32.44
+      "ebitda_por_boe_usd": 41.13
      }
     }
    ],
@@ -1710,7 +1711,7 @@
    "ttm": {
     "receita": 104232,
     "lucro_liquido": 25574,
-    "ebitda": 50300,
+    "ebitda": 52035,
     "fluxo_caixa_operacional": 40688,
     "fcf": 20127,
     "capex": -20561,
@@ -1723,13 +1724,13 @@
     ]
    },
    "derivados": {
-    "run_rate_ebitda_pct": 106.73
+    "run_rate_ebitda_pct": 99.28
    },
    "perfil": {
     "Rentabilidade": 100.0,
     "Geração de caixa": 95.1,
     "Solidez": 0.0,
-    "Valuation": 77.2,
+    "Valuation": 79.1,
     "Retorno ao acionista": 100.0,
     "Escala": 50.4
    }

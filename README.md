@@ -19,6 +19,8 @@ Os dados de mercado (cotação, market cap, P/E e dividend yield) são atualizad
 - `build_dashboard.py` — calcula os derivados, valida os números e gera o HTML e o CSV.
 - `update_market_data.py` — rotina que atualiza só os dados de mercado (ver abaixo).
 - `update_fundamentals.py` — rotina que rotaciona o trimestre quando sai um balanço novo.
+- `coleta_cvm.py` — coleta da Petrobras direto do ITR/DFP da CVM, já convertida para dólar.
+- `ptax.py` e `ptax/raw.txt` — PTAX do Banco Central (média e fechamento por trimestre) e a série diária que as gera.
 - `escrita_cirurgica.py` — primitivas de escrita compartilhadas pelas duas rotinas acima: achar cada ticker no JSON, serializar um bloco em uma linha na ordem canônica, sincronizar `atualizado_em`. Existe para que o diff de uma atualização continue pequeno (algumas linhas, não o arquivo inteiro reformatado).
 - `build_email.py` — corpo do e-mail diário com o retrato do fechamento.
 - `requirements-market.txt` — dependência das rotinas de dados (`yfinance`).
@@ -63,7 +65,7 @@ A rotina é deliberadamente desconfiada da fonte: valor fora de faixa de plausib
 
 ### Fundamentos — rotina mensal, revisão à mão
 
-O workflow `atualiza-fundamentos.yml` roda no dia 5 de cada mês e **só age em trimestre novo**: se a fonte devolve o mesmo trimestre que já está no arquivo, nada é tocado, e divergência acima de 5% vira aviso. Antes de gravar, confere **coerência entre as demonstrações** (FCF = FCO + capex, EBITDA ≤ receita, margem batendo com lucro/receita), não só faixa por campo — um número plausível no campo errado passa na faixa mas não na identidade contábil. O disparo manual vem com *simular* marcado por padrão.
+O workflow `atualiza-fundamentos.yml` roda no dia 5 de cada mês — seis empresas pelo Yahoo, a Petrobras pela CVM com conversão por PTAX — e **só age em trimestre novo**: se a fonte devolve o mesmo trimestre que já está no arquivo, nada é tocado, e divergência acima de 5% vira aviso. Antes de gravar, confere **coerência entre as demonstrações** (FCF = FCO + capex, EBITDA ≤ receita, margem batendo com lucro/receita), não só faixa por campo — um número plausível no campo errado passa na faixa mas não na identidade contábil. O disparo manual vem com *simular* marcado por padrão.
 
 Para editar à mão:
 
@@ -160,7 +162,7 @@ Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapsho
 ## Metodologia e fontes
 
 - Fonte principal: [stockanalysis.com](https://stockanalysis.com), complementada por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção. Os dados de mercado passam a vir do Yahoo Finance a partir da automação diária.
-- **Petrobras**: demonstrações originais em BRL, convertidas para USD. FY2025 e Q1 2026 usam taxa média implícita curada (~R$5,58 e ~R$5,25/US$); o Q2 2026 veio da fonte já em USD, a ~R$5,04/US$ implícito — conferido em duas linhas independentes (receita de R$ 169,53 bi e lucro de R$ 52,44 bi). Métricas de mercado já nativas em USD (ADR na NYSE).
+- **Petrobras**: publica em reais; é coletada do ITR/DFP consolidado da **CVM** e convertida pela **PTAX** do Banco Central — fluxos (receita, lucro, EBITDA, FCO, capex) pela média do trimestre, saldos (dívida, caixa, patrimônio, ativos) pelo fechamento do último dia útil. É a regra que reproduz o que a companhia divulga em dólar: a dívida líquida convertida bate com a do release em seis trimestres seguidos, dentro de 0,5%. As taxas usadas ficam gravadas em `proveniencia.fundamentos.conversao`, e a série diária em `ptax/raw.txt`. O **EBITDA** é o da Resolução CVM 156 (LAIR − resultado financeiro + D&A); a série trimestral 2T25–2T26 foi rebaseada para essa definição, que diverge da do agregador em até 27% por trimestre. FY2025 e os demais campos dos trimestres anteriores ao 3T26 vêm da curadoria original, que difere da conversão por PTAX em menos de 1%. Métricas de mercado já nativas em USD (ADR na NYSE).
 - **BP/Shell**: dívida líquida e gearing na metodologia oficial (não-IFRS) de cada empresa.
 - **BP FY2025**: lucro líquido atribuível próximo de zero (US$ 55 milhões) por itens não recorrentes.
 - **Equinor e TotalEnergies**: caixa líquido positivo (dívida líquida negativa) nos dois períodos.
