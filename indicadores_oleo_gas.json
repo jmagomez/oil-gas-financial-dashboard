@@ -26,7 +26,7 @@
       "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%."
     ],
     "versao_dados": "1.2",
-    "atualizado_em": "2026-11-14",
+    "atualizado_em": "2026-11-15",
     "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
   },
   "empresas": [
@@ -123,15 +123,16 @@
     {
       "ticker": "PBR", "nome": "Petrobras", "pais": "Brasil",
       "fy2025": {"receita": 89200, "lucro_liquido": 19740, "ebitda": 37310, "margem_liquida_pct": 22.13, "fluxo_caixa_operacional": 35910, "fcf": 16420, "capex": -19490, "divida_liquida": 59760, "divida_patrimonio_pct": 91.96, "roe_pct": 28.1, "roa_pct": 9.4, "producao_kboed": 2990},
-      "q_recente": {"trimestre": "Q2 2026", "receita": 33607, "lucro_liquido": 10428, "ebitda": 18588, "margem_liquida_pct": 31.03, "fluxo_caixa_operacional": 12300, "fcf": 7734, "capex": -4566, "divida_liquida": 60420, "divida_patrimonio_pct": 76.2, "roe_pct": 27.51, "roa_pct": 10.34, "producao_kboed": 3340},
+      "q_recente": {"trimestre": "Q3 2026", "receita": 32970, "lucro_liquido": 7739, "ebitda": 16065, "margem_liquida_pct": 23.47, "fluxo_caixa_operacional": 12028, "fcf": 6626, "capex": -5402, "divida_liquida": 57880, "divida_patrimonio_pct": 71.7, "roe_pct": 27.89, "roa_pct": 10.63, "producao_kboed": 3340},
       "mercado": {"market_cap": 118190, "pe": 4.35, "dividend_yield_pct": 5.34, "preco_acao": 18.34},
       "historico": [
         {"periodo": "2025-Q2", "receita": 21037, "lucro_liquido": 4734, "ebitda": 9075, "fluxo_caixa_operacional": 7465, "fcf": 3463, "capex": -4002, "divida_liquida": 58563, "producao_kboed": 2909},
         {"periodo": "2025-Q3", "receita": 23477, "lucro_liquido": 6027, "ebitda": 12117, "fluxo_caixa_operacional": 9856, "fcf": 4969, "capex": -4887, "divida_liquida": 59053, "producao_kboed": 3140},
         {"periodo": "2025-Q4", "receita": 23608, "lucro_liquido": 2899, "ebitda": 9373, "fluxo_caixa_operacional": 10162, "fcf": 3574, "capex": -6588, "divida_liquida": 60596, "producao_kboed": 3081},
-        {"periodo": "2026-Q1", "receita": 23540, "lucro_liquido": 6220, "ebitda": 11957, "fluxo_caixa_operacional": 8370, "fcf": 3850, "capex": -4520, "divida_liquida": 61680, "producao_kboed": 3230}
+        {"periodo": "2026-Q1", "receita": 23540, "lucro_liquido": 6220, "ebitda": 11957, "fluxo_caixa_operacional": 8370, "fcf": 3850, "capex": -4520, "divida_liquida": 61680, "producao_kboed": 3230},
+        {"periodo": "2026-Q2", "receita": 33607, "lucro_liquido": 10428, "ebitda": 18588, "fluxo_caixa_operacional": 12300, "fcf": 7734, "capex": -4566, "divida_liquida": 60420, "producao_kboed": 3340}
       ],
-      "proveniencia": {"fundamentos": {"fonte": "Yahoo Finance (demonstracoes trimestrais)", "coletado_em": "2026-08-13", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"]}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "'Total production' do relatorio de producao e vendas -- nao 'total operated' nem 'commercial'. 2T26 3,340 Mboe/d"}},
+      "proveniencia": {"fundamentos": {"fonte": "CVM Dados Abertos (ITR/DFP consolidado), convertido pela PTAX do Banco Central", "coletado_em": "2026-11-15", "campos": ["receita", "lucro_liquido", "ebitda", "margem_liquida_pct", "fluxo_caixa_operacional", "fcf", "capex", "divida_liquida", "divida_patrimonio_pct", "roe_pct", "roa_pct"], "conversao": {"moeda_origem": "BRL", "ptax_media": 5.1366, "ptax_fechamento": 5.1809, "data_fechamento": "2026-09-30", "regra": "fluxos pela media do trimestre; saldos pelo fechamento do ultimo dia util", "receita_brl": 169353, "lucro_liquido_brl": 39750}}, "producao_kboed": {"fonte": "release da empresa", "trimestre_do_dado": "Q2 2026", "observacao": "carregado do trimestre anterior; atualizar a mao com o release"}},
       "fontes": ["https://stockanalysis.com/stocks/pbr/financials/", "https://stockanalysis.com/stocks/pbr/financials/cash-flow-statement/", "https://stockanalysis.com/stocks/pbr/statistics/", "https://stockanalysis.com/stocks/pbr/financials/metrics/"]
     }
   ]
