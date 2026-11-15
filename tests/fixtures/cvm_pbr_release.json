@@ -1,0 +1,91 @@
+{
+ "_origem": "Valores em R$ milhoes dos releases 'Desempenho Financeiro' da Petrobras (1T25 a 2T26), coletados e conferidos contra o ITR/DFP da CVM na branch poc-benchmarking-trimestral (poc/coleta/PBR.json). divida_liquida_usd e o numero que a PROPRIA companhia divulga em dolar -- e a ancora externa da regra de conversao. usd_divulgado_bi_2026_Q2 idem, para os fluxos.",
+ "_construido": "O release nao abre a divida bruta em financiamentos/arrendamentos nem traz patrimonio e ativo total. Para montar um ITR sintetico os testes REPARTEM a divida (campos de 'balanco_construido'); so o TOTAL liquido e real. Nenhum teste afirma os componentes.",
+ "trimestres": {
+  "2025-Q1": {
+   "receita_brl": 123144,
+   "lucro_liquido_brl": 35209,
+   "lair_brl": 53635,
+   "resultado_financeiro_brl": 10595,
+   "da_brl": 18976,
+   "ebitda_brl": 62016,
+   "fco_brl": 49338,
+   "capex_brl": 23297,
+   "divida_liquida_brl": 321748,
+   "divida_liquida_usd": 56034
+  },
+  "2025-Q2": {
+   "receita_brl": 119128,
+   "lucro_liquido_brl": 26652,
+   "lair_brl": 36040,
+   "resultado_financeiro_brl": 5572,
+   "da_brl": 20952,
+   "ebitda_brl": 51420,
+   "fco_brl": 42424,
+   "capex_brl": 23170,
+   "divida_liquida_brl": 319590,
+   "divida_liquida_usd": 58563
+  },
+  "2025-Q3": {
+   "receita_brl": 127906,
+   "lucro_liquido_brl": 32705,
+   "lair_brl": 44951,
+   "resultado_financeiro_brl": 1316,
+   "da_brl": 22389,
+   "ebitda_brl": 66024,
+   "fco_brl": 53655,
+   "capex_brl": 26629,
+   "divida_liquida_brl": 314082,
+   "divida_liquida_usd": 59053
+  },
+  "2025-Q4": {
+   "receita_brl": 127371,
+   "lucro_liquido_brl": 15563,
+   "lair_brl": 15973,
+   "resultado_financeiro_brl": -12512,
+   "da_brl": 22071,
+   "ebitda_brl": 50556,
+   "fco_brl": 54916,
+   "capex_brl": 35618,
+   "divida_liquida_brl": 333403,
+   "divida_liquida_usd": 60593
+  },
+  "2026-Q1": {
+   "receita_brl": 123686,
+   "lucro_liquido_brl": 32663,
+   "lair_brl": 49136,
+   "resultado_financeiro_brl": 7866,
+   "da_brl": 21614,
+   "ebitda_brl": 62884,
+   "fco_brl": 43975,
+   "capex_brl": 23734,
+   "divida_liquida_brl": 324078,
+   "divida_liquida_usd": 62093
+  },
+  "2026-Q2": {
+   "receita_brl": 169530,
+   "lucro_liquido_brl": 52445,
+   "lair_brl": 70830,
+   "resultado_financeiro_brl": -1526,
+   "da_brl": 21503,
+   "ebitda_brl": 93859,
+   "fco_brl": 61813,
+   "capex_brl": 23040,
+   "divida_liquida_brl": 312602,
+   "divida_liquida_usd": 60388
+  }
+ },
+ "usd_divulgado_bi_2026_Q2": {
+  "lucro_liquido": 10.4,
+  "ebitda_ajustado": 18.6,
+  "fco": 12.3
+ },
+ "balanco_construido": {
+  "arrendamentos": 190000,
+  "caixa": 30000,
+  "titulos_cp": 15000,
+  "titulos_lp": 5000,
+  "patrimonio": 481000,
+  "ativos": 1280000
+ }
+}
