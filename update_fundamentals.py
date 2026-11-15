@@ -46,7 +46,9 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import coleta_cvm
 import escrita_cirurgica as ec
+import ptax
 
 RAIZ = Path(__file__).resolve().parent
 JSON_DADOS = RAIZ / "indicadores_oleo_gas.json"
@@ -298,8 +300,38 @@ class Relatorio:
 # ---------------------------------------------------------------------------
 # Camada de rede (unico ponto que fala com a internet)
 # ---------------------------------------------------------------------------
+# Tickers que NAO saem do Yahoo, e de onde saem.
+#
+# A Petrobras publica em reais. O Yahoo devolve a demonstracao dela na moeda
+# funcional, `valida_moeda` a descarta (corretamente) e a empresa ficaria parada
+# para sempre no ultimo trimestre curado a mao. O caminho dela e a propria
+# demonstracao entregue a CVM, convertida pela PTAX com regra declarada -- ver
+# `coleta_cvm.py` e `ptax.py`.
+#
+# O que sai daqui passa pelas MESMAS guardas que o resto: moeda, escala, faixa e
+# coerencia. Fonte primaria nao e salvo-conduto. Em particular, `valida_escala`
+# e o que pegaria uma conversao esquecida: reais tratados como dolares saltam
+# ~5x de um trimestre para o outro.
+FONTES_PRIMARIAS = {"PBR": coleta_cvm.coleta}
+
+
+def busca_primaria(ticker: str) -> dict[str, Any] | None:
+    """Coleta de fonte primaria. Nunca levanta: falha vira ausencia, com motivo."""
+    try:
+        return FONTES_PRIMARIAS[ticker]()
+    except ptax.PtaxIncompleta as exc:
+        # Sem a PTAX do trimestre inteiro nao ha taxa media nem fechamento, e
+        # converter com um pedaco da serie produziria numero plausivel e errado.
+        print(f"  ! {ticker}: {exc}; trimestre nao convertido")
+    except Exception as exc:  # pragma: no cover - depende da rede
+        print(f"  ! {ticker}: falha na fonte primaria ({exc.__class__.__name__}: {exc})")
+    return None
+
+
 def busca_fundamentos(tickers: list[str]) -> dict[str, dict[str, Any]]:
-    """Le as demonstracoes trimestrais de cada ticker via yfinance.
+    """Le as demonstracoes trimestrais de cada ticker.
+
+    Yahoo (yfinance) para todos, exceto os de `FONTES_PRIMARIAS`.
 
     Devolve {ticker: {"fim": date, "linhas": {chave: valor}}} com os valores ja
     em US$ milhoes. Ticker ausente = falha; nunca levanta por ticker isolado.
@@ -311,6 +343,11 @@ def busca_fundamentos(tickers: list[str]) -> dict[str, dict[str, Any]]:
 
     saida: dict[str, dict[str, Any]] = {}
     for ticker in tickers:
+        if ticker in FONTES_PRIMARIAS:
+            bruto = busca_primaria(ticker)
+            if bruto:
+                saida[ticker] = bruto
+            continue
         try:
             papel = yfinance.Ticker(ticker)
             bruto = coleta_bruto(
@@ -638,12 +675,18 @@ def aplica_fundamentos(
         empresa["historico"] = historico
 
         empresa["q_recente"] = {c: novo.get(c, atual.get(c)) for c in CAMPOS_TRIMESTRE}
+        fundamentos = {
+            "fonte": bruto.get("fonte") or "Yahoo Finance (demonstracoes trimestrais)",
+            "coletado_em": hoje.isoformat(),
+            "campos": CAMPOS_DERIVAVEIS,
+        }
+        # Quando houve conversao de moeda, as taxas usadas ficam gravadas ao
+        # lado do numero. Um valor convertido sem a taxa e um valor que ninguem
+        # consegue refazer.
+        if bruto.get("conversao"):
+            fundamentos["conversao"] = bruto["conversao"]
         empresa["proveniencia"] = {
-            "fundamentos": {
-                "fonte": "Yahoo Finance (demonstracoes trimestrais)",
-                "coletado_em": hoje.isoformat(),
-                "campos": CAMPOS_DERIVAVEIS,
-            },
+            "fundamentos": fundamentos,
             "producao_kboed": {
                 "fonte": "release da empresa",
                 "trimestre_do_dado": atual["trimestre"],

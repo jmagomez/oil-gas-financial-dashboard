@@ -47,8 +47,11 @@ runs:
         # ele envelhece em silencio enquanto HTML e CSV seguem frescos --
         # e o `git pull --rebase --autostash` abaixo esconderia a mudanca
         # nao preparada em vez de comita-la.
+        # ptax/raw.txt entra pelo mesmo motivo: e a serie que converteu o
+        # balanco da Petrobras, e um numero convertido cuja taxa nao esta no
+        # repositorio nao pode ser refeito por quem audita.
         git add indicadores_oleo_gas.json dashboard_oleo_gas.html \
-          indicadores_oleo_gas.csv dashboard_data.json
+          indicadores_oleo_gas.csv dashboard_data.json ptax/raw.txt
         if git diff --cached --quiet; then
           echo "Nada mudou -- nenhum commit."
           exit 0

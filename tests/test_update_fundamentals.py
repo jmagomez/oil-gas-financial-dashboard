@@ -564,3 +564,108 @@ def test_moeda_errada_por_margem_PEQUENA_ainda_assim_descarta(dados):
     tte = next(e for e in saida["empresas"] if e["ticker"] == "TTE")
     assert tte["q_recente"]["trimestre"] == "Q1 2026"
 
+
+
+# ---------------------------------------------------------------------------
+# Fonte primaria: a Petrobras sai da CVM, nao do Yahoo
+# ---------------------------------------------------------------------------
+import ptax  # noqa: E402
+
+_REL = json.loads((Path(__file__).parent / "fixtures" / "cvm_pbr_release.json").read_text(encoding="utf-8"))
+_PBR_2T26 = _REL["trimestres"]["2026-Q2"]
+
+
+def _bruto_cvm(convertido=True):
+    """2T26 da Petrobras com os reais do release e a PTAX do arquivo de verdade."""
+    t = ptax.taxas("2026-Q2")
+    m, f = (t["media"], t["fechamento"]) if convertido else (1.0, 1.0)
+    v = _PBR_2T26
+    return {
+        "fim": date(2026, 6, 30),
+        "linhas": {
+            "receita": v["receita_brl"] / m,
+            "lucro_liquido": v["lucro_liquido_brl"] / m,
+            "ebitda": v["ebitda_brl"] / m,
+            "fco": v["fco_brl"] / m,
+            "capex": v["capex_brl"] / m,
+            "divida_total": (v["divida_liquida_brl"] + 50_000) / f,
+            "caixa": 50_000 / f,
+            "patrimonio": 481_000 / f,
+            "ativos": 1_280_000 / f,
+        },
+        "ttm": {"lucro_liquido": 25_000},
+        "anteriores": [],
+        "moeda": "USD",
+        "fonte": "CVM Dados Abertos (ITR/DFP consolidado), convertido pela PTAX do Banco Central",
+        "conversao": {"moeda_origem": "BRL", "ptax_media": t["media"], "ptax_fechamento": t["fechamento"]},
+    }
+
+
+def test_petrobras_convertida_e_promovida_com_a_divida_que_a_empresa_divulga(dados):
+    saida, rel = uf.aplica_fundamentos(dados, {"PBR": _bruto_cvm()}, hoje=date(2026, 11, 14))
+    assert [n["ticker"] for n in rel.novos] == ["PBR"]
+    q = next(e for e in saida["empresas"] if e["ticker"] == "PBR")["q_recente"]
+    assert q["trimestre"] == "Q2 2026"
+    # US$ 60.388 milhoes e o numero do release da companhia.
+    assert q["divida_liquida"] == pytest.approx(_PBR_2T26["divida_liquida_usd"], abs=1)
+    assert q["fcf"] == q["fluxo_caixa_operacional"] + q["capex"]
+
+
+def test_proveniencia_registra_a_fonte_real_e_as_taxas_usadas(dados):
+    """Valor convertido sem a taxa ao lado e valor que ninguem consegue refazer."""
+    saida, _ = uf.aplica_fundamentos(dados, {"PBR": _bruto_cvm()}, hoje=date(2026, 11, 14))
+    prov = next(e for e in saida["empresas"] if e["ticker"] == "PBR")["proveniencia"]["fundamentos"]
+    assert "CVM" in prov["fonte"] and "Yahoo" not in prov["fonte"]
+    assert prov["conversao"]["ptax_media"] == 5.0494
+    assert prov["conversao"]["ptax_fechamento"] == 5.1766
+
+
+def test_as_outras_empresas_continuam_declarando_o_yahoo(dados):
+    saida, _ = uf.aplica_fundamentos(dados, _coletado(), hoje=date(2026, 11, 14))
+    prov = next(e for e in saida["empresas"] if e["ticker"] == "XOM")["proveniencia"]["fundamentos"]
+    assert prov["fonte"].startswith("Yahoo Finance")
+    assert "conversao" not in prov
+
+
+def test_conversao_ESQUECIDA_morre_na_escala(dados):
+    """Fonte primaria nao e salvo-conduto.
+
+    Aqui a coleta entrega reais carimbados como "USD" -- o erro que uma mudanca
+    descuidada em `coleta_cvm` produziria. A guarda de moeda acredita no carimbo;
+    quem barra e a escala: R$ 169.530 mi sobre os US$ 23.540 mi do trimestre
+    curado e um salto de 7x.
+    """
+    _, rel = uf.aplica_fundamentos(dados, {"PBR": _bruto_cvm(convertido=False)}, hoje=date(2026, 11, 14))
+    assert not rel.novos
+    assert any(r["campo"] == "escala" for r in rel.rejeicoes)
+
+
+def test_pbr_vai_para_a_fonte_primaria_e_nunca_para_o_yahoo(monkeypatch):
+    consultados = []
+
+    class _Papel:
+        quarterly_income_stmt = quarterly_cashflow = quarterly_balance_sheet = None
+        info = {}
+
+    class _Yf:
+        @staticmethod
+        def Ticker(t):
+            consultados.append(t)
+            return _Papel()
+
+    monkeypatch.setitem(sys.modules, "yfinance", _Yf)
+    monkeypatch.setitem(uf.FONTES_PRIMARIAS, "PBR", lambda: _bruto_cvm())
+    coletado = uf.busca_fundamentos(["XOM", "PBR"])
+    assert consultados == ["XOM"]
+    assert coletado["PBR"]["moeda"] == "USD"
+
+
+def test_ptax_incompleta_vira_ausencia_e_nao_excecao(monkeypatch, capsys):
+    """Balanco ja na CVM mas trimestre sem PTAX completa: nada e promovido, e o motivo aparece."""
+
+    def _sem_ptax():
+        raise ptax.PtaxIncompleta("PTAX de 2026-Q3 com 12 dias uteis (minimo 55)")
+
+    monkeypatch.setitem(uf.FONTES_PRIMARIAS, "PBR", _sem_ptax)
+    assert uf.busca_primaria("PBR") is None
+    assert "12 dias uteis" in capsys.readouterr().out

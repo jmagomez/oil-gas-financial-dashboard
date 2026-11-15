@@ -37,6 +37,22 @@ jobs:
         with:
           coleta: "true"
 
+      # A Petrobras e convertida de reais pela PTAX (ver ptax.py), e a conversao
+      # exige a serie COMPLETA do trimestre. Este passo traz do Banco Central os
+      # dias que faltam em ptax/raw.txt.
+      #
+      # Falha aqui NAO derruba o job: as outras seis empresas nao dependem de
+      # cambio. Sem PTAX nova, `ptax.taxas` recusa o trimestre e a Petrobras
+      # simplesmente nao e promovida neste run -- que e o comportamento seguro.
+      - name: Atualiza a PTAX (Banco Central)
+        run: |
+          # pipefail: sem ele o status do pipe seria o do `tee`, e a falha da
+          # coleta passaria por sucesso sem deixar aviso nenhum.
+          set -o pipefail
+          if ! python ptax.py --atualizar | tee ptax.txt; then
+            echo "::warning::PTAX nao atualizada; a Petrobras nao sera convertida neste run"
+          fi
+
       - name: Atualiza fundamentos
         run: |
           # bash -e sozinho nao propaga falha atraves do pipe para o tee:
@@ -54,4 +70,8 @@ jobs:
           echo "### Atualizacao de fundamentos" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
           cat saida.txt >> "$GITHUB_STEP_SUMMARY" || echo "(sem saida)" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          echo "### PTAX" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          tail -n 4 ptax.txt >> "$GITHUB_STEP_SUMMARY" || echo "(sem saida)" >> "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
