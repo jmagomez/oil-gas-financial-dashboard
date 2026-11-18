@@ -16,6 +16,6 @@
 # mudanca deliberada, com o diff junto, em vez de surpresa no meio de outro
 # trabalho. 0.17.4 e a versao em que `ruff check .` passa limpo hoje --
 # verificado antes de pinar.
-ruff==0.17.4
+ruff==0.17.5
 pytest>=9.1.1
 pandas>=2.0
