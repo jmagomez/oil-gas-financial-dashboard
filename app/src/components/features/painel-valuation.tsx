@@ -58,8 +58,10 @@ export function PainelValuation() {
       <Card>
         <CardTitle>Valuation e retorno ao acionista</CardTitle>
         <CardNote className="mt-1">
-          Múltiplos de mercado são <i>snapshot</i> de {fmtData(data.referencia.atualizado_em)} e
-          valem igualmente para as duas colunas de período — não são do fechamento do ano fiscal.
+          Preço, market cap e dividend yield são <i>snapshot</i> de{' '}
+          {fmtData(data.referencia.atualizado_em)} e valem igualmente para as duas colunas de
+          período — não são do fechamento do ano fiscal. O EV/EBITDA não é snapshot: é derivado, e
+          combina o market cap dessa data com a dívida líquida e o EBITDA do período exibido.
         </CardNote>
       </Card>
 
