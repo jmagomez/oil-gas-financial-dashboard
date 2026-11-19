@@ -169,6 +169,18 @@ input.ctl::placeholder{color:var(--text-3);}
    KPI cards
    =========================================================================== */
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:14px;margin-bottom:8px;}
+/* Em tela larga, uma coluna por empresa visivel (--n vem de renderKpis). Com
+   auto-fit e minimo de 212px cabiam seis, e a setima empresa caia sozinha numa
+   segunda linha -- o que quebra justamente a leitura lado a lado que a faixa de
+   cartoes existe para dar. O minimo de 4 colunas evita que um filtro com uma ou
+   duas empresas estique os cartoes pela tela inteira. Abaixo de 1180px volta o
+   auto-fit, porque sete colunas ficariam estreitas demais para os numeros. */
+@media (min-width:1180px){
+  .kpi-grid{grid-template-columns:repeat(max(var(--n,7),4),minmax(0,1fr));gap:12px;}
+  .kpi-card{padding:15px 14px 13px;}
+  .kpi-hero{font-size:21px;}
+  .kpi-hero small{display:block;margin:3px 0 0;}
+}
 .kpi-card{
   position:relative;overflow:hidden;
   background:linear-gradient(180deg,var(--surface-2),var(--surface));
@@ -453,7 +465,7 @@ footer a:hover{text-decoration:underline;}
   <div class="charts-grid" id="gridValuation">
     <div class="card"><div class="card-head"><div><h3>Múltiplo vs. retorno</h3><p class="note">EV/EBITDA (x) × ROE (%) · área da bolha = market cap</p></div><div class="card-tools"><button class="btn icon" data-png="chBubble">PNG</button></div></div><div class="canvas-box tall"><canvas id="chBubble"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Dividend yield vs. FCF yield</h3><p class="note">Derivado · acima da diagonal, o caixa livre cobre o dividendo</p></div><div class="card-tools"><button class="btn icon" data-png="chYieldScatter">PNG</button></div></div><div class="canvas-box tall"><canvas id="chYieldScatter"></canvas></div></div>
-    <div class="card"><div class="card-head"><div><h3>Múltiplos de mercado</h3><p class="note">P/E e EV/EBITDA (x) · snapshot</p></div><div class="card-tools"><button class="btn icon" data-png="chMultiples">PNG</button></div></div><div class="canvas-box"><canvas id="chMultiples"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><h3>Múltiplos de valuation</h3><p class="note">P/E (x) · snapshot de mercado &nbsp;|&nbsp; EV/EBITDA (x) · derivado, muda com o período</p></div><div class="card-tools"><button class="btn icon" data-png="chMultiples">PNG</button></div></div><div class="canvas-box"><canvas id="chMultiples"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Valor da capacidade instalada</h3><p class="note">Derivado · enterprise value por barril/dia de produção (US$)</p></div><div class="card-tools"><button class="btn icon" data-png="chEvBoed">PNG</button></div></div><div class="canvas-box"><canvas id="chEvBoed"></canvas></div></div>
   </div>
 </section>
@@ -835,6 +847,7 @@ function renderKpis(){
     grid.innerHTML = '<div class="empty">Nenhuma empresa selecionada — use os filtros acima para escolher ao menos uma.</div>';
     return;
   }
+  grid.style.setProperty('--n', vis.length);
   vis.forEach((e, i) => {
     const p = e[STATE.period], d = p.derivados;
     const rr = e.derivados.run_rate_ebitda_pct;

@@ -26,6 +26,27 @@ export function PainelComparativo() {
     [payload],
   );
 
+  /**
+   * Trimestres e tamanhos de janela lidos do DADO, nao escritos na nota.
+   *
+   * As duas notas abaixo afirmavam "ha companhias em Q2 2026 e outras em Q3
+   * 2026" e "janelas irregulares (4 ou 5 trimestres)" como texto fixo. As duas
+   * frases ficaram falsas no dia em que as sete convergiram para o 3T26 com
+   * cinco trimestres de historico -- e a tela continuou afirmando. Mesmo
+   * defeito, e mesma correcao, do painel de eficiencia.
+   */
+  const trimestres = useMemo(
+    () => [...new Set(linhas.map((l) => l.empresa.q_recente.trimestre))].sort(),
+    [linhas],
+  );
+  const janelas = useMemo(
+    () =>
+      [...new Set(linhas.flatMap((l) => (l.faixaEbitda ? [l.faixaEbitda.n] : [])))].sort(
+        (a, b) => a - b,
+      ),
+    [linhas],
+  );
+
   if (isPending) {
     return (
       <div role="status" aria-live="polite" aria-busy="true" className="grid gap-4">
@@ -145,13 +166,20 @@ export function PainelComparativo() {
         <CardNote className="mt-2">
           <b>Faixa histórica.</b> Posição do EBITDA do último trimestre entre o mínimo e o máximo
           dos trimestres disponíveis <i>da própria empresa</i> — é o que separa nível de momento do
-          ciclo. As janelas são irregulares (4 ou 5 trimestres), então o <code>n</code> vem junto;
-          comparar a posição entre empresas sem olhar o <code>n</code> compara janelas diferentes.
+          ciclo.{' '}
+          {janelas.length > 1
+            ? `As janelas são irregulares (${janelas.join(' ou ')} trimestres)`
+            : `Hoje todas as janelas têm ${janelas[0] ?? 0} trimestres, mas nem sempre é assim`}
+          , então o <code>n</code> vem junto; comparar a posição entre empresas sem olhar o{' '}
+          <code>n</code> compara janelas diferentes. Acima de 100%, o trimestre superou o máximo da
+          janela.
         </CardNote>
         <CardNote className="mt-2">
-          <b>Trimestres diferentes.</b> As empresas divulgam em datas distintas: neste payload há
-          companhias em Q2 2026 e outras em Q3 2026. Cada linha mostra o trimestre dela — não existe
-          um trimestre único para rotular a coluna.
+          <b>Trimestre de cada empresa.</b> As empresas divulgam em datas distintas
+          {trimestres.length > 1
+            ? `: neste payload há companhias em ${trimestres.join(' e em ')}`
+            : `; hoje todas estão em ${trimestres[0] ?? '—'}, mas isso muda a cada temporada de balanços`}
+          . Cada linha mostra o trimestre dela — a coluna não é rotulada com um trimestre único.
         </CardNote>
       </Card>
     </div>
