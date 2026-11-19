@@ -1,4 +1,5 @@
 import type { BlocoFinanceiro, HistoricoItem, Valor } from '@/types/indicadores';
+import { percentual } from '@/lib/formatters';
 
 /**
  * Derivacoes de LEITURA, nao de negocio.
@@ -74,7 +75,9 @@ export function alavancagem(b: BlocoFinanceiro): Alavancagem {
       tipo: 'indisponivel',
       motivo:
         b.roe_pct !== null && Math.abs(b.roe_pct) < LIMIAR_ROE_CONFIAVEL_PCT
-          ? `ROE de ${b.roe_pct}% é baixo demais para estimar patrimônio`
+          ? // percentual(): em pt-BR o separador decimal e virgula. A interpolacao
+            // direta do numero escrevia "0.1%" numa tela em que todo o resto e "0,1%".
+            `ROE de ${percentual(b.roe_pct, 1)} é baixo demais para estimar patrimônio`
           : 'patrimônio não estimável',
     };
   }
