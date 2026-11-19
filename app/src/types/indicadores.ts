@@ -79,8 +79,6 @@ export interface Referencia {
   data_consulta: string;
   moeda: string;
   periodo_anual: string;
-  /** Rotulo global que NAO bate com todas as empresas. A tela nao o usa. */
-  periodo_trimestral: string;
   fonte_principal: string;
   notas: string[];
   versao_dados: string;
