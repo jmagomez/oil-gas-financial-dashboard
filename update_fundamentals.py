@@ -762,21 +762,16 @@ def fim_do_trimestre(rotulo: str) -> date | None:
 
 
 def atualiza_referencia(bruto: str, trimestre: str, hoje: date) -> str:
-    """Sincroniza o cabecalho com o trimestre novo.
+    """Sincroniza a data de revisao do arquivo.
 
-    Sem isto, o dashboard passaria a exibir dados de Q2 2026 sob um rotulo que
-    ainda diz Q1 2026 -- e a nota de referencia continuaria afirmando que
-    nenhuma empresa havia divulgado o trimestre seguinte.
+    Ate 11/2026 isto tambem reescrevia `referencia.periodo_trimestral` com o
+    trimestre de quem acabara de ser promovido -- e o arquivo passava a afirmar
+    esse trimestre para as SETE empresas, inclusive as que ainda nao tinham
+    divulgado. O campo foi removido: o trimestre e de cada empresa e e
+    derivado no build (`build_dashboard.trimestres_recentes`). `trimestre` fica
+    na assinatura so por compatibilidade com quem chama.
     """
-    fim = fim_do_trimestre(trimestre)
-    if fim is not None:
-        texto = f"{trimestre} (trimestre encerrado em {fim.strftime('%d/%m/%Y')})"
-        bruto = re.sub(
-            r'("periodo_trimestral":\s*")[^"]*(")',
-            lambda m: m.group(1) + texto + m.group(2),
-            bruto,
-            count=1,
-        )
+    del trimestre
     return ec.atualiza_campo_data(bruto, hoje)
 
 
@@ -811,9 +806,8 @@ def reescreve_json(bruto: str, saida: dict[str, Any], tickers_novos: set[str], h
         bloco_q = serializa_bloco(empresa["q_recente"], CAMPOS_TRIMESTRE)
         texto = texto[: alvo.start()] + alvo.group(1) + bloco_q + texto[alvo.end():]
 
-    trimestres = {por_ticker[t]["q_recente"]["trimestre"] for t in tickers_novos}
-    if len(trimestres) == 1:
-        texto = atualiza_referencia(texto, trimestres.pop(), hoje)
+    if tickers_novos:
+        texto = atualiza_referencia(texto, "", hoje)
     return texto
 
 

@@ -3,7 +3,6 @@
     "data_consulta": "2026-07-20",
     "moeda": "USD (milhões, exceto onde indicado)",
     "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
-    "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
     "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
     "notas": [
       "Petrobras a partir do 3T26: coletada do ITR da CVM e convertida pela PTAX do Banco Central (fluxos pela média de 5,1366; saldos pelo fechamento de 5,1809 em 30/09/2026). Conferido contra o 6-K em dólar da própria companhia: lucro 7.739 vs 7.740, EBITDA 16.065 vs 16.061, FCO 12.028 vs 12.026, capex 5.402 vs 5.402, dívida líquida 57.880 vs 57.847. O EBITDA é o da Resolução CVM 156; o EBITDA AJUSTADO que a companhia destaca (16.703) soma de volta US$ 710 milhões de resultado com baixa de ativos e exclui equivalência patrimonial. As sete empresas estão no Q3 2026.",

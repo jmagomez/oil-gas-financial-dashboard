@@ -61,6 +61,58 @@ def dias_do_trimestre(rotulo: str) -> int:
     return sum(calendar.monthrange(ano, mes)[1] for mes in meses)
 
 
+def ordem_trimestre(rotulo: str) -> tuple[int, int]:
+    """Chave cronologica de "Q3 2026". Ordenar o TEXTO poe "Q1 2027" antes de "Q3 2026"."""
+    m = re.fullmatch(r"Q([1-4]) (\d{4})", str(rotulo or "").strip())
+    if not m:
+        raise ValueError(f"rotulo de trimestre inesperado: {rotulo!r}")
+    return int(m.group(2)), int(m.group(1))
+
+
+def trimestres_recentes(empresas) -> dict:
+    """O "trimestre mais recente" do payload, derivado das empresas -- nunca armazenado.
+
+    POR QUE ISTO EXISTE. O trimestre e um atributo de CADA empresa
+    (`q_recente.trimestre`), nao do conjunto: as sete divulgam em datas
+    diferentes, e a Petrobras ainda entra dias depois, quando o portal da CVM e
+    regenerado. Ate aqui o dashboard tinha duas fontes erradas para esse rotulo:
+
+    * o template usava `empresas[0].q_recente.trimestre` -- o trimestre da XOM,
+      so por ela ser a primeira da lista -- no cabecalho, no botao de periodo,
+      nos titulos dos graficos e na coluna `periodo` de TODA linha do CSV;
+    * o rodape e o e-mail liam `referencia.periodo_trimestral`, que
+      `update_fundamentals` sobrescrevia com o trimestre de quem acabara de ser
+      promovido: XOM no 4T26 e o arquivo passava a dizer Q4 2026 para as sete.
+
+    Os dois acertavam enquanto as sete estavam no mesmo trimestre, que e
+    justamente quando o rotulo menos importa. Errariam na temporada de
+    balancos, e no sentido que mais engana: o rotulo do lider aplicado aos
+    atrasados.
+
+    `uniforme` e o que os consumidores devem consultar antes de escrever um
+    trimestre unico. `distintos` sai em ordem CRONOLOGICA.
+    """
+    por_empresa = {e["ticker"]: e["q_recente"]["trimestre"] for e in empresas}
+    distintos = sorted(set(por_empresa.values()), key=ordem_trimestre)
+    contagem = {t: sorted(k for k, v in por_empresa.items() if v == t) for t in distintos}
+    return {
+        "por_empresa": por_empresa,
+        "distintos": distintos,
+        "empresas_por_trimestre": contagem,
+        "uniforme": len(distintos) == 1,
+        "mais_recente": distintos[-1] if distintos else None,
+        "mais_antigo": distintos[0] if distintos else None,
+    }
+
+
+def descreve_trimestres(tr: dict) -> str:
+    """Frase para texto corrido (e-mail, rodape). Nunca afirma um trimestre unico que nao existe."""
+    if tr["uniforme"]:
+        return tr["distintos"][0]
+    partes = [f"{t} ({', '.join(tr['empresas_por_trimestre'][t])})" for t in reversed(tr["distintos"])]
+    return "trimestre mais recente de cada empresa: " + "; ".join(partes)
+
+
 def dias_do_ano(rotulo: str) -> int:
     m = re.search(r"(\d{4})", str(rotulo or ""))
     return 366 if (m and calendar.isleap(int(m.group(1)))) else 365
@@ -400,6 +452,7 @@ def enriquecer(data):
         derivar_historico(e)
     calcular_perfil(data["empresas"])
     data["meta_build"] = {
+        "trimestre_recente": trimestres_recentes(data["empresas"]),
         "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
         "dias_periodo": DIAS_PERIODO,
         "fator_anualizacao": FATOR_ANUAL,
@@ -419,6 +472,14 @@ def enriquecer(data):
 def validate(data):
     """Checagens básicas de sanidade antes de publicar."""
     problems = []
+    # Informativo: no dashboard isso vira aviso visivel e rotulo por barra, mas
+    # quem roda o build deve saber que a coluna do trimestre mistura periodos.
+    tr = trimestres_recentes(data["empresas"])
+    if not tr["uniforme"]:
+        problems.append(
+            "trimestres diferentes na coluna do trimestre: "
+            + "; ".join(f"{t} = {', '.join(ts)}" for t, ts in tr["empresas_por_trimestre"].items())
+        )
     for e in data["empresas"]:
         for period_key in ("fy2025", "q_recente"):
             p = e[period_key]
