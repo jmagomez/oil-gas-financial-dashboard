@@ -126,9 +126,18 @@ describe('PainelValuation', () => {
     expect(screen.getByText(/é uma faixa, não um número/)).toBeInTheDocument();
   });
 
-  it('diz que multiplo de mercado e snapshot, nao fechamento do ano fiscal', async () => {
+  it('diz que os dados de mercado sao snapshot, nao fechamento do ano fiscal', async () => {
     render(envolve(<PainelValuation />));
     expect(await screen.findByText(/não são do fechamento do ano fiscal/)).toBeInTheDocument();
+  });
+
+  it('NAO chama o EV/EBITDA de snapshot: ele e derivado e muda com o periodo', async () => {
+    // Sobra da migracao: o multiplo passou a sair de ev / ebitda de cada periodo
+    // e a nota seguia dizendo que "multiplos de mercado" valiam para as duas colunas.
+    render(envolve(<PainelValuation />));
+    const nota = await screen.findByText(/não são do fechamento do ano fiscal/);
+    expect(nota).toHaveTextContent('O EV/EBITDA não é snapshot');
+    expect(nota).not.toHaveTextContent('Múltiplos de mercado são');
   });
 });
 

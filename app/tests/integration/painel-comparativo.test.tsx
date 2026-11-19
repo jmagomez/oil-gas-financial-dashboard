@@ -55,7 +55,7 @@ describe('PainelComparativo', () => {
   it('a BP mostra alavancagem indisponivel COM o motivo, nao um numero fragil', async () => {
     render(envolve(<PainelComparativo />));
     const l = await linha('BP');
-    expect(within(l).getByText(/ROE de 0\.1% é baixo demais/)).toBeInTheDocument();
+    expect(within(l).getByText(/ROE de 0,1% é baixo demais/)).toBeInTheDocument();
   });
 
   it('a XOM tem gearing calculado', async () => {
@@ -89,9 +89,37 @@ describe('PainelComparativo', () => {
     expect(screen.getByText(/e não líquida/)).toBeInTheDocument();
   });
 
-  it('avisa que as empresas estao em trimestres diferentes', async () => {
+  it('avisa que as empresas estao em trimestres diferentes, LENDO os rotulos do payload', async () => {
     render(envolve(<PainelComparativo />));
     await tabela();
-    expect(screen.getByText(/divulgam em datas distintas/)).toBeInTheDocument();
+    const nota = screen.getByText(/divulgam em datas distintas/);
+    expect(nota).toHaveTextContent('Q2 2026 e em Q3 2026');
+  });
+
+  it('quando todas convergem para o mesmo trimestre, a nota NAO afirma divergencia', async () => {
+    // Era texto fixo ("ha companhias em Q2 2026 e outras em Q3 2026") e ficou
+    // falso em producao no dia em que as sete chegaram ao 3T26.
+    const convergido = structuredClone(payloadReal);
+    for (const e of convergido.empresas) e.q_recente.trimestre = 'Q3 2026';
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve({ ok: true, json: () => Promise.resolve(convergido) } as Response),
+      ),
+    );
+    render(envolve(<PainelComparativo />));
+    await tabela();
+    const nota = screen.getByText(/divulgam em datas distintas/);
+    expect(nota).toHaveTextContent('hoje todas estão em Q3 2026');
+    expect(nota).not.toHaveTextContent('Q2 2026');
+  });
+
+  it('o tamanho das janelas na nota sai do dado', async () => {
+    // Na fixture a XOM tem 4 trimestres de historico e as outras tres, 5.
+    render(envolve(<PainelComparativo />));
+    await tabela();
+    expect(screen.getByText(/compara janelas diferentes/)).toHaveTextContent(
+      'As janelas são irregulares (4 ou 5 trimestres)',
+    );
   });
 });
