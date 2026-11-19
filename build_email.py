@@ -196,10 +196,12 @@ def montar(relatorio, data, pages_url=""):
     variacoes = var_por_ticker(relatorio)
     problemas = bd.validate(data)
     ref = data.get("referencia", {})
-    # periodo_trimestral, e nao data_consulta: este ultimo e a data da coleta
-    # original dos fundamentos e nao acompanha as atualizacoes, entao vinha
-    # afirmando no e-mail uma referencia que ja nao era verdade.
-    periodo = ref.get("periodo_trimestral", "—")
+    # Derivado das empresas, nao de um campo armazenado. Primeiro o e-mail lia
+    # `data_consulta` (a coleta ORIGINAL, que nao acompanha as atualizacoes);
+    # depois `periodo_trimestral`, que o pipeline sobrescrevia com o trimestre
+    # de quem acabara de ser promovido. Os dois afirmavam um periodo unico que,
+    # na temporada de balancos, nao existe.
+    periodo = bd.descreve_trimestres(bd.trimestres_recentes(data["empresas"]))
     atualizado = ref.get("atualizado_em", "—")
     gerado = relatorio.get("gerado_em", dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"))
     link = (

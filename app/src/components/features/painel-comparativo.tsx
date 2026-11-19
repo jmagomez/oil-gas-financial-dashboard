@@ -4,7 +4,15 @@ import { Card, CardNote, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CelulaAlavancagem } from './celula-alavancagem';
 import { alavancagem, faixaHistorica, serieDoHistorico } from '@/lib/derivacoes';
-import { milhoes, percentual, multiplo, trimestreCurto, data, AUSENTE } from '@/lib/formatters';
+import {
+  milhoes,
+  percentual,
+  multiplo,
+  trimestreCurto,
+  data,
+  AUSENTE,
+  ordenaTrimestres,
+} from '@/lib/formatters';
 
 export function PainelComparativo() {
   // Payload ENRIQUECIDO, nao o curado. A coluna EV/EBITDA precisa de
@@ -36,7 +44,7 @@ export function PainelComparativo() {
    * defeito, e mesma correcao, do painel de eficiencia.
    */
   const trimestres = useMemo(
-    () => [...new Set(linhas.map((l) => l.empresa.q_recente.trimestre))].sort(),
+    () => ordenaTrimestres(linhas.map((l) => l.empresa.q_recente.trimestre)),
     [linhas],
   );
   const janelas = useMemo(

@@ -3,7 +3,6 @@
     "data_consulta": "2026-07-20",
     "moeda": "USD (milhões, exceto onde indicado)",
     "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
-    "periodo_trimestral": "Q3 2026 (trimestre encerrado em 30/09/2026)",
     "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
     "notas": [
       "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",

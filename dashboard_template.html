@@ -139,6 +139,12 @@ input.ctl::placeholder{color:var(--text-3);}
 .toolbar.stuck{box-shadow:var(--shadow-3);}
 .toolbar-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
 .toolbar-row + .toolbar-row{margin-top:11px;}
+/* Aviso de periodo misto: so aparece quando a coluna do trimestre junta
+   empresas em trimestres diferentes -- a situacao normal na temporada de
+   balancos, e a unica em que um rotulo unico de trimestre mente. */
+.aviso-trimestre{margin:10px 0 0;padding:8px 12px;border-left:3px solid var(--warn);
+  background:rgba(251,191,36,.08);border-radius:6px;font-size:12.5px;line-height:1.5;color:var(--text-2);}
+.aviso-trimestre b{color:var(--text);}
 .toolbar-label{font-size:10.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text-3);margin-right:2px;}
 .spacer{flex:1 1 auto;}
 
@@ -356,6 +362,7 @@ footer a:hover{text-decoration:underline;}
     <div class="spacer"></div>
     <nav class="section-nav" id="sectionNav"></nav>
   </div>
+  <p class="aviso-trimestre" id="avisoTrimestre" role="status" hidden></p>
 </div>
 
 <div class="kpi-grid" id="kpiGrid"></div>
@@ -532,7 +539,45 @@ const DATA = __DATA_JSON__;
 const COLORS = {XOM:'#e04057',CVX:'#4a90d9',SHEL:'#f2c230',BP:'#3aa76d',EQNR:'#a78bfa',TTE:'#f0883e',PBR:'#2dd4bf'};
 const GRID = 'rgba(120,140,180,.13)';
 const TICK = '#6d7f9f';
-const TRIM = DATA.empresas[0].q_recente.trimestre;
+/* Trimestre mais recente -- de CADA empresa.
+   Derivado no build (build_dashboard.trimestres_recentes), nao lido de uma
+   empresa nem de um campo armazenado. Ate 11/2026 isto era
+   o `q_recente.trimestre` da primeira empresa do array: o da XOM, so por ela ser
+   a primeira da lista, aplicado ao cabecalho, ao botao de periodo, aos titulos
+   dos graficos e a coluna `periodo` de cada linha do CSV. Acertava enquanto as
+   sete estavam no mesmo trimestre -- exatamente quando o rotulo importa menos. */
+const TRI = DATA.meta_build.trimestre_recente;
+function trimCurto(t){ const m = /Q([1-4]) (\d{4})/.exec(t || ''); return m ? `${m[1]}T${m[2].slice(2)}` : (t || ''); }
+function rotuloTrimestre(){ return TRI.uniforme ? TRI.distintos[0] : 'último trimestre de cada empresa'; }
+/* Periodo de UMA empresa: o que vai na linha do CSV e na tabela. */
+function periodoDaLinha(e){
+  if(isFY()) return 'FY2025';
+  const t = e.q_recente.trimestre;
+  return STATE.anualizar ? t + ' · 12m' : t;
+}
+/* Rotulo do eixo: com periodo misto, o trimestre vai junto do ticker, na
+   propria barra. `comTrimestre` forca isso nos graficos que mostram FY e
+   trimestre lado a lado, independentemente do periodo selecionado. */
+function rotuloEmpresa(e, comTrimestre){
+  if(TRI.uniforme || (isFY() && !comTrimestre)) return e.ticker;
+  return [e.ticker, trimCurto(e.q_recente.trimestre)];
+}
+function descreveTrimestres(){
+  if(TRI.uniforme) return `${TRI.distintos[0]} para as ${DATA.empresas.length} empresas`;
+  return TRI.distintos.slice().reverse()
+    .map(t => `<b>${t}</b> (${TRI.empresas_por_trimestre[t].join(', ')})`).join('; ');
+}
+function renderAvisoTrimestre(){
+  const el = document.getElementById('avisoTrimestre');
+  if(!el) return;
+  const mostrar = !TRI.uniforme && !isFY();
+  el.hidden = !mostrar;
+  if(!mostrar) return;
+  el.innerHTML = `<b>Períodos diferentes na mesma coluna.</b> Cada empresa aparece no seu trimestre mais recente: `
+    + descreveTrimestres()
+    + `. Comparar uma barra com a outra é comparar trimestres distintos — com preço de petróleo, câmbio e sazonalidade diferentes. `
+    + `O trimestre de cada uma está sob o ticker em cada gráfico.`;
+}
 
 const STATE = {
   active: new Set(DATA.empresas.map(e => e.ticker)),
@@ -564,7 +609,7 @@ function hex2rgba(hex, a){
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
 function isFY(){ return STATE.period === 'fy2025'; }
-function rotuloPeriodo(){ return isFY() ? 'FY2025' : (STATE.anualizar ? TRIM + ' · 12m' : TRIM); }
+function rotuloPeriodo(){ return isFY() ? 'FY2025' : (STATE.anualizar ? rotuloTrimestre() + ' · 12m' : rotuloTrimestre()); }
 
 /* ==========================================================================
    Registro de indicadores
@@ -793,7 +838,7 @@ function renderMeta(){
   document.getElementById('badgeCobertura').textContent =
     `${DATA.empresas.length} empresas · ${Object.keys(METRICAS).length} indicadores (${nDeriv} derivados)`;
   document.getElementById('subtitleText').textContent =
-    `Comparativo de ${DATA.empresas.map(e => e.nome).join(', ')} no ano fiscal ${ref.periodo_anual.split(' (')[0]} e no trimestre mais recente divulgado (${TRIM}). ` +
+    `Comparativo de ${DATA.empresas.map(e => e.nome).join(', ')} no ano fiscal ${ref.periodo_anual.split(' (')[0]} e ${TRI.uniforme ? `no trimestre mais recente divulgado (${TRI.distintos[0]})` : `no trimestre mais recente de cada empresa (${TRI.distintos.join(' e ')} — as empresas divulgam em datas diferentes)`}. ` +
     `Valores em US$ milhões, exceto onde indicado. Petrobras convertida de BRL para USD; metodologia completa no rodapé.`;
 
   const nav = document.getElementById('sectionNav');
@@ -804,7 +849,10 @@ function renderMeta(){
     a.href = '#' + id; a.textContent = label; a.dataset.sec = id;
     nav.appendChild(a);
   });
-  document.getElementById('btnQ').textContent = TRIM;
+  const btnQ = document.getElementById('btnQ');
+  btnQ.textContent = TRI.uniforme ? TRI.distintos[0] : 'Último trimestre';
+  btnQ.title = TRI.uniforme ? '' : 'Trimestre mais recente de cada empresa: '
+    + TRI.distintos.slice().reverse().map(t => `${t} (${TRI.empresas_por_trimestre[t].join(', ')})`).join('; ');
 }
 
 function sincronizarChips(){
@@ -858,7 +906,7 @@ function renderKpis(){
     const seta = rr === null ? '' : (rr >= 0 ? '▲' : '▼');
     const cls = rr === null ? '' : (rr >= 0 ? 'up' : 'down');
     c.innerHTML = `
-      <div class="kpi-head"><span class="kpi-tk">${e.ticker}</span><span class="kpi-flag">${e.pais}</span></div>
+      <div class="kpi-head"><span class="kpi-tk">${e.ticker}</span><span class="kpi-flag">${e.pais}${(!TRI.uniforme && !isFY()) ? ` · ${trimCurto(e.q_recente.trimestre)}` : ''}</span></div>
       <div class="kpi-nm">${e.nome}</div>
       <div class="kpi-hero num">US$ ${fmt(e.mercado.market_cap / 1000, 1)}<small>bi de market cap</small></div>
       <div class="kpi-delta">EBITDA do trimestre × 4 ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY2025</div>
@@ -898,7 +946,7 @@ function renderSeletorMetricas(){
 function renderExplorador(){
   const chave = STATE.metrica, m = METRICAS[chave];
   const vis = ordenarPor(empresasVisiveis(), chave);
-  const labels = vis.map(e => e.ticker);
+  const labels = vis.map(e => rotuloEmpresa(e));
   const dados = vis.map(e => valor(chave, e));
   const cores = vis.map(e => COLORS[e.ticker]);
 
@@ -979,10 +1027,10 @@ function duplaPeriodo(vis, chave){
 
 function grafDuplo(id, chave, opts = {}){
   const vis = ordenarPor(empresasVisiveis(), chave);
-  const labels = vis.map(e => e.ticker);
+  const labels = vis.map(e => rotuloEmpresa(e, true));
   const cores = vis.map(e => COLORS[e.ticker]);
   const [fy, q] = duplaPeriodo(vis, chave);
-  const rotuloQ = TRIM + (STATE.anualizar && METRICAS[chave].fluxo ? ` (12m · ${baseRotulo(chave)})` : '');
+  const rotuloQ = rotuloTrimestre() + (STATE.anualizar && METRICAS[chave].fluxo ? ` (12m · ${baseRotulo(chave)})` : '');
   make(id, barConfig(labels, [
     {label:'FY2025', data:fy, backgroundColor:cores.map(c => hex2rgba(c, .35)), borderColor:cores.map(c => hex2rgba(c, .6)), borderWidth:1},
     {label:rotuloQ,  data:q,  backgroundColor:cores.map(c => hex2rgba(c, .9)),  borderColor:cores, borderWidth:1},
@@ -996,7 +1044,7 @@ function grafDuplo(id, chave, opts = {}){
 
 function grafDuas(id, chaves, opts = {}){
   const vis = ordenarPor(empresasVisiveis(), chaves[0]);
-  const labels = vis.map(e => e.ticker);
+  const labels = vis.map(e => rotuloEmpresa(e));
   const cores = vis.map(e => COLORS[e.ticker]);
   const ds = chaves.map((k, i) => ({
     label: METRICAS[k].label,
@@ -1016,7 +1064,7 @@ function grafDuas(id, chaves, opts = {}){
 
 function grafSimples(id, chave, opts = {}){
   const vis = ordenarPor(empresasVisiveis(), chave);
-  const labels = vis.map(e => e.ticker);
+  const labels = vis.map(e => rotuloEmpresa(e));
   const cores = vis.map(e => COLORS[e.ticker]);
   make(id, barConfig(labels, [{
     label: METRICAS[chave].label + ' — ' + rotuloPeriodo(),
@@ -1439,7 +1487,8 @@ function renderTable(){
 function baixarCsv(){
   const {cols, rows} = linhasTabela();
   const head = ['periodo'].concat(cols.map(c => c.label));
-  const linhas = rows.map(e => [rotuloPeriodo(), e.ticker + ' — ' + e.nome].concat(
+  // Periodo DA LINHA, nao do conjunto: o CSV circula sem o aviso visual ao lado.
+  const linhas = rows.map(e => [periodoDaLinha(e), e.ticker + ' — ' + e.nome].concat(
     cols.slice(1).map(c => { const v = valor(c.chave, e); return v === null ? '' : v; })
   ));
   const csv = [head, ...linhas].map(r => r.map(c => {
@@ -1475,7 +1524,7 @@ const FORMULAS = [
 
 function renderFooter(){
   const ref = DATA.referencia;
-  let html = `<h4>Metodologia</h4>Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${ref.periodo_trimestral}. Fonte principal: ${ref.fonte_principal}.`;
+  let html = `<h4>Metodologia</h4>Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${descreveTrimestres()} (derivado do trimestre de cada empresa). Fonte principal: ${ref.fonte_principal}.`;
   html += ` Fundamentos coletados em ${ref.data_consulta} e revisados a cada balanço; dados de mercado atualizados em ${ref.atualizado_em} (versão ${ref.versao_dados}).`;
 
   html += '<h4>Indicadores derivados</h4><div class="formula-grid">';
@@ -1510,6 +1559,7 @@ function mostrarErroGraficos(msg){
 }
 
 function renderAll(){
+  renderAvisoTrimestre();
   renderKpis();
   try{
     if(!chartsOk) throw new Error('Chart.js indisponível');

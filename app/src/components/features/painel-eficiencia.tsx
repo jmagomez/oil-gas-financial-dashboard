@@ -6,7 +6,7 @@ import { SeletorPeriodo } from '@/components/ui/seletor-periodo';
 import { ChartContainer } from '@/components/charts/chart-container';
 import { GraficoBarras } from '@/components/charts/grafico-barras';
 import { bloco, type Periodo } from '@/types/dashboard-data';
-import { decimal, percentual, milhoes, AUSENTE } from '@/lib/formatters';
+import { decimal, percentual, milhoes, AUSENTE, ordenaTrimestres } from '@/lib/formatters';
 
 interface Metrica {
   chave: 'ebitda_por_boe_usd' | 'receita_por_boe_usd' | 'conversao_fcf_pct' | 'capex_fco_pct';
@@ -84,7 +84,7 @@ export function PainelEficiencia() {
    * divergencia que deixou de existir -- e ninguem receberia um erro por isso.
    */
   const trimestres = useMemo(
-    () => [...new Set((data?.empresas ?? []).map((e) => e.q_recente.trimestre))].sort(),
+    () => ordenaTrimestres((data?.empresas ?? []).map((e) => e.q_recente.trimestre)),
     [data],
   );
 

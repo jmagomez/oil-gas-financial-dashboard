@@ -123,11 +123,12 @@ export const referenciaSchema = z.object({
   data_consulta: z.string().regex(ISO_DATE),
   moeda: z.string().min(1),
   periodo_anual: z.string().min(1),
-  // DELIBERADAMENTE sem validacao cruzada contra q_recente.trimestre: no
-  // payload real este rotulo diz "Q3 2026" enquanto XOM, CVX e PBR estao em
-  // "Q2 2026". As empresas divulgam em datas diferentes, entao NAO existe um
-  // trimestre global -- e a tela usa o rotulo de cada empresa, nunca este.
-  periodo_trimestral: z.string().min(1),
+  // `periodo_trimestral` foi REMOVIDO do arquivo (11/2026): era um rotulo de
+  // trimestre para o conjunto, e o pipeline o sobrescrevia com o trimestre de
+  // quem acabara de ser promovido. O trimestre e de cada empresa
+  // (`q_recente.trimestre`); o resumo do conjunto e derivado no build, em
+  // `meta_build.trimestre_recente`. Payload antigo que ainda traga o campo
+  // continua valido -- o objeto nao e `.strict()` --, so que ele e ignorado.
   fonte_principal: z.string().min(1),
   notas: z.array(z.string()),
   versao_dados: z.string().min(1),
