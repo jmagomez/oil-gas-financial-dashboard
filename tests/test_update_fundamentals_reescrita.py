@@ -165,11 +165,21 @@ def test_reescrita_continua_json_valido_e_com_as_7_empresas(dados, bruto):
     assert [e["ticker"] for e in novo["empresas"]] == [e["ticker"] for e in dados["empresas"]]
 
 
-def test_reescrita_sincroniza_referencia_quando_um_so_trimestre(dados, bruto):
+def test_reescrita_sincroniza_a_data_mas_NAO_carimba_um_trimestre_para_o_arquivo(dados, bruto):
+    """O defeito que este teste afirmava como correto, agora proibido.
+
+    Antes: promover so a XOM para Q2 2026 reescrevia `periodo_trimestral` com
+    "Q2 2026" -- e o arquivo passava a afirmar esse trimestre para as sete,
+    seis delas ainda em Q1. O trimestre e de cada empresa; o rotulo do conjunto
+    e derivado no build.
+    """
+    assert "periodo_trimestral" in bruto  # o snapshot congelado ainda tem o campo legado
     saida, _ = uf.aplica_fundamentos(dados, _coletado_xom_q2())
     novo_texto = uf.reescreve_json(bruto, saida, {"XOM"}, date(2026, 10, 18))
     assert '"atualizado_em": "2026-10-18"' in novo_texto
-    assert "Q2 2026 (trimestre encerrado em 30/06/2026)" in novo_texto
+    assert "Q2 2026 (trimestre encerrado" not in novo_texto
+    antes = json.loads(bruto)["referencia"]["periodo_trimestral"]
+    assert json.loads(novo_texto)["referencia"]["periodo_trimestral"] == antes
 
 
 def test_reescrita_sem_tickers_novos_nao_toca_referencia(dados, bruto):

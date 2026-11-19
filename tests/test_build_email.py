@@ -77,8 +77,30 @@ def test_referencia_usa_o_trimestre_e_nao_a_data_de_consulta(dados, relatorio):
     """data_consulta e a coleta ORIGINAL dos fundamentos e nao acompanha as
     atualizacoes; o e-mail vinha afirmando uma referencia ja falsa."""
     h = be.montar(relatorio, dados)
-    assert dados["referencia"]["periodo_trimestral"] in h
+    assert dados["empresas"][0]["q_recente"]["trimestre"] in h
     assert dados["referencia"]["data_consulta"] not in h
+
+
+def test_email_nao_afirma_trimestre_unico_quando_as_empresas_divergem(dados, relatorio):
+    """Temporada de balancos: XOM ja no trimestre seguinte, as outras seis nao.
+
+    O e-mail lia `periodo_trimestral`, que o pipeline sobrescrevia com o
+    trimestre de quem acabara de ser promovido -- e o resumo diario passava a
+    afirmar o periodo do lider para as sete.
+    """
+    import copy
+
+    misto = copy.deepcopy(dados)
+    base = misto["empresas"][1]["q_recente"]["trimestre"]
+    misto["empresas"][0]["q_recente"]["trimestre"] = "Q4 2026"
+    h = be.montar(relatorio, misto)
+    assert "trimestre mais recente de cada empresa" in h
+    assert "Q4 2026 (XOM)" in h
+    assert base in h
+    # e nao reaproveita o campo legado, se ele ainda existir no arquivo
+    legado = misto["referencia"].get("periodo_trimestral")
+    if legado:
+        assert legado not in h
 
 
 # ---------------------------------------------------------------------------
