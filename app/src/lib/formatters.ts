@@ -54,6 +54,20 @@ export function trimestreCurto(trimestre: string): string {
   return `${m[1]}T${m[2]!.slice(2)}`;
 }
 
+/**
+ * Trimestres distintos em ordem CRONOLOGICA.
+ *
+ * `.sort()` puro ordena o texto, e na virada do ano isso inverte a ordem:
+ * "Q1 2027" < "Q4 2026". Rotulo fora do formato vai para o fim, sem quebrar.
+ */
+export function ordenaTrimestres(trimestres: Iterable<string>): string[] {
+  const chave = (t: string): number => {
+    const m = /^Q([1-4]) (\d{4})$/.exec(t);
+    return m ? Number(m[2]) * 10 + Number(m[1]) : Number.POSITIVE_INFINITY;
+  };
+  return [...new Set(trimestres)].sort((a, b) => chave(a) - chave(b));
+}
+
 /** ISO para dd/mm/aaaa, sem passar por Date (que desloca por fuso). */
 export function data(iso: string | null | undefined): string {
   if (!iso) return AUSENTE;
