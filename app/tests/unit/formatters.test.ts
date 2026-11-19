@@ -5,6 +5,7 @@ import {
   decimal,
   milhoes,
   multiplo,
+  ordenaTrimestres,
   percentual,
   periodoCurto,
   trimestreCurto,
@@ -53,5 +54,21 @@ describe('formatadores pt-BR', () => {
   it('data nao passa por Date, para o fuso nao deslocar o dia', () => {
     expect(data('2026-11-07')).toBe('07/11/2026');
     expect(data(null)).toBe(AUSENTE);
+  });
+});
+
+describe('ordenaTrimestres', () => {
+  it('ordena cronologicamente, inclusive na virada do ano', () => {
+    // A armadilha: como texto, "Q1 2027" vem antes de "Q4 2026".
+    expect(['Q1 2027', 'Q4 2026'].sort()).toEqual(['Q1 2027', 'Q4 2026']);
+    expect(ordenaTrimestres(['Q1 2027', 'Q4 2026', 'Q1 2027'])).toEqual(['Q4 2026', 'Q1 2027']);
+  });
+
+  it('remove repetidos e manda rotulo fora do formato para o fim', () => {
+    expect(ordenaTrimestres(['Q3 2026', '?', 'Q2 2026', 'Q3 2026'])).toEqual([
+      'Q2 2026',
+      'Q3 2026',
+      '?',
+    ]);
   });
 });
