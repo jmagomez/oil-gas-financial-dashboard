@@ -24,6 +24,8 @@ on:
       - build_dashboard.py
       - assets_a11y.css
       - assets_a11y.js
+      - brent.py
+      - brent/raw.txt
       # Gerados: chegam por commit de bot, nunca sozinhos.
       - dashboard_oleo_gas.html
       - indicadores_oleo_gas.csv

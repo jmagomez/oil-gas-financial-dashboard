@@ -49,6 +49,15 @@ jobs:
           python3 update_market_data.py --relatorio "$RUNNER_TEMP/relatorio-mercado.json" \
             ${{ inputs.dry_run && '--dry-run' || '' }}
 
+      # Brent mensal da EIA, para o contexto de preco de cada periodo. Nao
+      # bloqueia: sem a EIA no ar, o dashboard sai com o Brent ja versionado e
+      # o periodo novo fica sem o numero (null), nunca com um inventado.
+      - name: Atualiza o Brent mensal (EIA)
+        if: ${{ !inputs.dry_run }}
+        env:
+          EIA_API_KEY: ${{ secrets.EIA_API_KEY }}
+        run: python3 brent.py --atualizar || echo "::warning::EIA indisponivel; Brent mantido"
+
       - name: Resume o que mudou
         id: resumo
         run: |

@@ -17,6 +17,8 @@ on:
       - build_dashboard.py
       - assets_a11y.css
       - assets_a11y.js
+      - brent.py
+      - brent/raw.txt
   workflow_dispatch:
 
 permissions:
