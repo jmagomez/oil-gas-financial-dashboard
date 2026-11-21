@@ -49,3 +49,37 @@ def test_grava_e_le_ida_e_volta(tmp_path):
     brent.grava({"2026-10": 123.93, "2026-09": 114.16}, arq)
     assert arq.read_text(encoding="utf-8") == "2026-09;114.16\n2026-10;123.93\n"
     assert brent.le(arq) == {"2026-09": 114.16, "2026-10": 123.93}
+
+
+# ---------------------------------------------------------------------------
+# Captura: preco realizado / Brent do mesmo trimestre
+# ---------------------------------------------------------------------------
+def _vivo():
+    import json
+    from pathlib import Path
+
+    import build_dashboard as bd
+    raiz = Path(__file__).resolve().parent.parent
+    return {e["ticker"]: e for e in bd.enriquecer(json.loads((raiz / "indicadores_oleo_gas.json").read_text(encoding="utf-8")))["empresas"]}
+
+
+def test_captura_e_realizado_sobre_o_brent_do_trimestre():
+    bp = _vivo()["BP"]
+    brent_tri = bp["q_recente"]["derivados"]["brent_medio_usd"]
+    assert bp["q_recente"]["derivados"]["captura_brent_pct"] == round(77.20 / brent_tri * 100)
+
+
+def test_quem_nao_divulga_fica_sem_captura_e_o_ano_fiscal_nao_tem_captura():
+    e = _vivo()
+    assert e["PBR"]["q_recente"]["preco_realizado_liquidos_usd"] is None
+    assert e["PBR"]["q_recente"]["derivados"]["captura_brent_pct"] is None
+    assert all(x["anual"]["derivados"]["captura_brent_pct"] is None for x in e.values())
+
+
+def test_todo_preco_realizado_declara_a_propria_definicao():
+    """As definicoes divergem (Shell so Upstream, XOM sem NGL): numero sem definicao nao entra."""
+    for t, x in _vivo().items():
+        if x["q_recente"].get("preco_realizado_liquidos_usd") is not None:
+            prov = (x.get("proveniencia") or {}).get("preco_realizado") or {}
+            assert prov.get("definicao") and prov.get("fonte"), t
+            assert prov.get("trimestre_do_dado") == x["q_recente"]["trimestre"], t

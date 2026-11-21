@@ -19,10 +19,11 @@
    "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 21/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
    "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
    "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
-   "Produção da Equinor em FY2025 não estava disponível de forma consistente na fonte padronizada; os indicadores por boe do ano fiscal usam a produção do trimestre mais recente como proxy nesse caso.",
+   "Produção da Equinor em FY2025: 2.137 mboe/d, do release do 4T25 e ano de 2025 da própria Equinor (total equity liquids and gas production). Até 11/2026 a fonte padronizada não trazia o número e os indicadores por boe do ano usavam a produção do trimestre como proxy.",
    "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%.",
    "EV inclui a participação de não controladores (saldo do fim do período; no ano fiscal, o do 4T): o EBITDA é consolidado a 100%, então o numerador também precisa ser. Na BP são US$ 17,4 bi em 30/09/2026 (release do 3T26), ~16% do market cap. Enquanto a coleta não traz o saldo de uma empresa, o payload marca derivados.ev_inclui_nao_controladores = false e a seção de valuation lista quem está sem.",
-   "BP — recompras da DFC do release do 3T26 (Net issue (repurchase) of shares): 750 no 3T25, 562 no 1T26 e zero no 2T26 e no 3T26; a BP passou a destinar o caixa excedente a reduzir a dívida. O Yahoo omite a linha quando ela é zero e não trazia o 3T25, o que deixava a BP sem shareholder yield e rebaixava o radar inteiro para a base de dividendos."
+   "BP — recompras da DFC do release do 3T26 (Net issue (repurchase) of shares): 750 no 3T25, 562 no 1T26 e zero no 2T26 e no 3T26; a BP passou a destinar o caixa excedente a reduzir a dívida. O Yahoo omite a linha quando ela é zero e não trazia o 3T25, o que deixava a BP sem shareholder yield e rebaixava o radar inteiro para a base de dividendos.",
+   "Preço realizado de líquidos (US$/bbl), 3T26, do release de cada empresa — e as definições NÃO são iguais, o que está em proveniencia.preco_realizado de cada uma: BP, Chevron, Equinor e TotalEnergies publicam líquidos (petróleo + NGL); a Shell só por segmento (usamos o Upstream); a ExxonMobil só petróleo, sem NGL (média EUA/fora ponderada pela produção); a Petrobras não publica (o E&P vende ao refino em paridade com o Brent) e fica nula. Captura = realizado ÷ Brent médio do mesmo trimestre. Leia a captura dentro de cada empresa ao longo do tempo, não como ranking entre elas: NGL a ~40% do Brent derruba a média de quem o inclui. O campo não é carregado para o trimestre seguinte: ao sair um balanço novo ele fica vazio até a curadoria."
   ],
   "versao_dados": "1.2",
   "atualizado_em": "2026-11-21",
@@ -71,6 +72,7 @@
      "dividendos_estimados": 16903.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -97,6 +99,7 @@
     "roe_pct": 15.28,
     "roa_pct": 8.63,
     "producao_kboed": 4496,
+    "preco_realizado_liquidos_usd": 84.42,
     "derivados": {
      "margem_liquida_calc_pct": 13.95,
      "margem_ebitda_pct": 25.54,
@@ -126,6 +129,7 @@
      "dividendos_estimados": 17263,
      "concentracao_recompras_pct": 26.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 88.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 2.65,
      "shareholder_yield_pct": 5.78,
@@ -272,6 +276,17 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "Upstream Production (koebd) do release do 3T26; coluna do trimestre identificada pelo lucro ajustado de US$ 17.505 M. Divulgado sob ExxonMobil Holdings Corporation (CIK 2115436) apos reorganizacao societaria -- a serie pelo ticker se manteve continua, conferida pelo lucro GAAP de 15.413"
+    },
+    "preco_realizado": {
+     "fonte": "3Q26 Supplement Data (8-K, Exhibit 99.2), Upstream Realization Data",
+     "url": "https://d1io3yog0oux5.cloudfront.net/_62978b0daa733c81ab0f8cb87a0b8f0b/exxonmobil/db/2288/22725/supplement/3Q26_Supplement_Data.pdf",
+     "definicao": "PETROLEO (crude), sem NGL: media de EUA (84,82) e fora dos EUA (84,03) ponderada pela producao de liquidos do trimestre (1.627 e 1.652 kbd). A ExxonMobil nao publica realizacao de liquidos consolidada; sem NGL, o numero tende a ficar ACIMA do de quem inclui NGL",
+     "trimestre_do_dado": "Q3 2026"
+    },
+    "nao_controladores": {
+     "fonte": "10-Q de 30/09/2026 (ExxonMobil Holdings Corp, CIK 2115436)",
+     "observacao": "6.731 em 30/09/2026, igual ao de 30/06/2026 -- conferido no 10-Q porque saldo identico em dois trimestres parecia repeticao da fonte. Nao e: o 10-Q traz o mesmo numero",
+     "url": "https://www.sec.gov/Archives/edgar/data/2115436/000211543626000020/xom-20260930.htm"
     }
    },
    "fontes": [
@@ -353,6 +368,7 @@
      "dividendos_estimados": 13864.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -379,6 +395,7 @@
     "roe_pct": 13.88,
     "roa_pct": 8.08,
     "producao_kboed": 3980,
+    "preco_realizado_liquidos_usd": 62.72,
     "derivados": {
      "margem_liquida_calc_pct": 15.21,
      "margem_ebitda_pct": 31.28,
@@ -408,6 +425,7 @@
      "dividendos_estimados": 13916,
      "concentracao_recompras_pct": 27.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 65.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 3.42,
      "shareholder_yield_pct": 6.15,
@@ -554,6 +572,12 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "Net Oil-Equivalent Production (MBOED) mundial do release do 3T26; US 2.043 + internacional 1.937 fecha em 3.980. Queda ante o 2T26 por menores entitlements e pelo conflito no Oriente Medio"
+    },
+    "preco_realizado": {
+     "fonte": "release do 3T26 (Liquids Realization, consolidado)",
+     "url": "https://www.financialcontent.com/article/bizwire-2026-10-30-chevron-reports-third-quarter-2026-results",
+     "definicao": "liquidos (petroleo + NGL), media consolidada, US$/bbl. O peso de NGL e de petroleo onshore dos EUA (Permian) puxa a media para baixo do Brent",
+     "trimestre_do_dado": "Q3 2026"
     }
    },
    "fontes": [
@@ -635,6 +659,7 @@
      "dividendos_estimados": 4332.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -661,6 +686,7 @@
     "roe_pct": 16.48,
     "roa_pct": 7.78,
     "producao_kboed": 2574,
+    "preco_realizado_liquidos_usd": 84.0,
     "derivados": {
      "margem_liquida_calc_pct": 12.99,
      "margem_ebitda_pct": 26.73,
@@ -690,6 +716,7 @@
      "dividendos_estimados": 8485,
      "concentracao_recompras_pct": 27.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 87.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 3.21,
      "shareholder_yield_pct": 8.05,
@@ -836,6 +863,12 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "soma Upstream (1.802) + Integrated Gas (772) do release do 3T26; a aquisicao da ARC Resources, concluida no trimestre, soma ~370 kboe/d -- o degrau no Integrated Gas (631 -> 772) nao e organico"
+    },
+    "preco_realizado": {
+     "fonte": "press release do 3T26, quadro de indicadores do segmento Upstream",
+     "url": "https://finviz.com/news/411102/shell-plc-publishes-third-quarter-2026-press-release",
+     "definicao": "liquidos do segmento UPSTREAM (84; o release arredonda a US$ inteiro). Integrated Gas tem preco proprio de liquidos (69) e fica de fora: a Shell nao publica media do grupo",
+     "trimestre_do_dado": "Q3 2026"
     }
    },
    "fontes": [
@@ -916,6 +949,7 @@
      "dividendos_estimados": 5186.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -942,6 +976,7 @@
     "roe_pct": 14.52,
     "roa_pct": 2.97,
     "producao_kboed": 2220,
+    "preco_realizado_liquidos_usd": 77.2,
     "derivados": {
      "margem_liquida_calc_pct": 6.87,
      "margem_ebitda_pct": 20.59,
@@ -971,6 +1006,7 @@
      "dividendos_estimados": 5201,
      "concentracao_recompras_pct": 60.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 80.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.72,
      "shareholder_yield_pct": 5.98,
@@ -1122,6 +1158,12 @@
      "fonte": "release do 3T26 da BP, DFC consolidada (Net issue (repurchase) of shares)",
      "url": "https://www.bp.com/press-and-publications/press-releases/third-quarter-2026-results",
      "observacao": "3T25 750; 1T26 562 (nove meses de 2026 = 562, com 2T26 e 3T26 zerados); 2T26 e 3T26 zero -- a BP passou a destinar o caixa excedente a reduzir a divida e nao recomprou. O Yahoo omite a linha quando ela e zero e nao trouxe o 3T25; o 4T25 (826) e do Yahoo"
+    },
+    "preco_realizado": {
+     "fonte": "release do 3T26, Realizations and marker prices",
+     "url": "https://www.bp.com/press-and-publications/press-releases/third-quarter-2026-results",
+     "definicao": "liquidos (petroleo, condensado, NGL), bp average; so subsidiarias consolidadas, sem as coligadas",
+     "trimestre_do_dado": "Q3 2026"
     }
    },
    "fontes": [
@@ -1177,7 +1219,7 @@
     "divida_patrimonio_pct": 77,
     "roe_pct": 12.2,
     "roa_pct": 3.8,
-    "producao_kboed": null,
+    "producao_kboed": 2137,
     "derivados": {
      "margem_liquida_calc_pct": 4.74,
      "margem_ebitda_pct": 35.53,
@@ -1187,21 +1229,22 @@
      "nd_ebitda_x": 0.31,
      "conversao_fcf_pct": 15.8,
      "capex_fco_pct": 70.07,
-     "receita_por_boe_usd": 134.66,
-     "ebitda_por_boe_usd": 47.85,
-     "producao_proxy": true,
+     "receita_por_boe_usd": 136.49,
+     "ebitda_por_boe_usd": 48.49,
+     "producao_proxy": false,
      "producao_periodo_do_dado": null,
      "producao_defasada": false,
-     "producao_usada_kboed": 2166,
+     "producao_usada_kboed": 2137,
      "dias_periodo": 365,
      "ev": 104944,
      "ev_inclui_nao_controladores": true,
      "ev_ebitda_x": 2.77,
-     "ev_por_boed_usd": 48451.0,
+     "ev_por_boed_usd": 49108.0,
      "fcf_yield_pct": 6.43,
      "dividendos_estimados": 3654.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1228,6 +1271,7 @@
     "roe_pct": 26.28,
     "roa_pct": 8.02,
     "producao_kboed": 2166,
+    "preco_realizado_liquidos_usd": 92.3,
     "derivados": {
      "margem_liquida_calc_pct": 7.7,
      "margem_ebitda_pct": 45.01,
@@ -1257,6 +1301,7 @@
      "dividendos_estimados": 3747,
      "concentracao_recompras_pct": 81.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 96.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.03,
      "shareholder_yield_pct": 8.2,
@@ -1403,6 +1448,17 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "total equity liquids and gas production do financial statements do 3T26; a media de 9M26 (2.214) confere com a serie 1T-3T deste arquivo"
+    },
+    "preco_realizado": {
+     "fonte": "release do 3T26",
+     "url": "https://www.equinor.com/news/equinor-third-quarter-2026-results",
+     "definicao": "liquidos, media do grupo, US$/bbl",
+     "trimestre_do_dado": "Q3 2026"
+    },
+    "producao_anual": {
+     "fonte": "release do 4T25 e ano de 2025 da Equinor",
+     "observacao": "Total equity liquids and gas production, ano de 2025: 2.137 mboe/d (2.067 em 2024). Antes o FY2025 usava a producao do trimestre como proxy",
+     "url": "https://equinor.com/news/equinor-fourth-quarter-and-full-year-2025-results"
     }
    },
    "fontes": [
@@ -1483,6 +1539,7 @@
      "dividendos_estimados": 8791.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1509,6 +1566,7 @@
     "roe_pct": 16.89,
     "roa_pct": 6.56,
     "producao_kboed": 2474,
+    "preco_realizado_liquidos_usd": 87.1,
     "derivados": {
      "margem_liquida_calc_pct": 13.36,
      "margem_ebitda_pct": 30.08,
@@ -1538,6 +1596,7 @@
      "dividendos_estimados": 8532,
      "concentracao_recompras_pct": 29.0,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": 90.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.57,
      "shareholder_yield_pct": 7.41,
@@ -1684,6 +1743,12 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "producao de hidrocarbonetos do 3T26 (E&P 1.963 + GNL integrado 511); conflito no Oriente Medio cortou ~5% do trimestre"
+    },
+    "preco_realizado": {
+     "fonte": "release do 3T26 (average liquids price)",
+     "url": "https://finviz.com/news/411109/totalenergies-se-third-quarter-2026-results",
+     "definicao": "liquidos, media do grupo, US$/bbl",
+     "trimestre_do_dado": "Q3 2026"
     }
    },
    "fontes": [
@@ -1764,6 +1829,7 @@
      "dividendos_estimados": 5509.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
+     "captura_brent_pct": null,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1790,6 +1856,7 @@
     "roe_pct": 27.89,
     "roa_pct": 10.63,
     "producao_kboed": 3512,
+    "preco_realizado_liquidos_usd": null,
     "derivados": {
      "margem_liquida_calc_pct": 23.47,
      "margem_ebitda_pct": 48.73,
@@ -1819,6 +1886,7 @@
      "dividendos_estimados": 6796,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 96.33,
+     "captura_brent_pct": null,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 6.59,
      "shareholder_yield_pct": 6.59,
@@ -1978,6 +2046,10 @@
     "recompras": {
      "fonte": "CVM, DFC consolidada (6.03, financiamento)",
      "observacao": "zero lido da propria DFC: a linha 6.03.10 'Recompra de acoes' existe nas demonstracoes de 2026 e esta zerada nos trimestres da serie (o ultimo programa, 2023-2024, foi encerrado). Conferido pelas linhas 6.03 que a coleta lista no resumo do workflow atualiza-fundamentos (execucao de 21/11/2026)"
+    },
+    "preco_realizado": {
+     "fonte": "release de resultados da Petrobras",
+     "definicao": "NAO DIVULGADO: o E&P da Petrobras vende ao refino por preco de transferencia em paridade com o Brent, e o release traz o Brent medio e precos de derivados, nao um preco realizado de petroleo. Fica nulo, nao estimado"
     }
    },
    "fontes": [

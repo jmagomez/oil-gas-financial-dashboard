@@ -39,13 +39,17 @@ CAMPOS = [
     ("preco_acao", "Preço<br><span style='font-weight:400;color:#888'>US$</span>", 2, "mercado"),
     ("market_cap", "Market cap<br><span style='font-weight:400;color:#888'>US$ mi</span>", 0, "mercado"),
     ("pe", "P/E", 2, "mercado"),
-    ("dividend_yield_pct", "Div. yield<br><span style='font-weight:400;color:#888'>%</span>", 2, "mercado"),
+    # Yield de CAIXA (dividendos pagos em 12 meses / market cap), nao o de
+    # mercado do Yahoo: aquele herda a razao de ADR e mandava a Shell com 1,64%
+    # para a caixa de entrada todo dia, quando o certo e ~3,2%.
+    ("dividend_yield_caixa_pct", "Div. yield<br><span style='font-weight:400;color:#888'>% · caixa 12m</span>", 2, "yield_caixa"),
+    ("shareholder_yield_pct", "Shareholder yield<br><span style='font-weight:400;color:#888'>% · 12m</span>", 2, "trimestre"),
     ("fcf_yield_pct", "FCF yield<br><span style='font-weight:400;color:#888'>% · último ano fiscal</span>", 2, "derivado"),
 ]
 
 # Colunas em que a mediana do grupo ajuda a julgar o valor individual.
 # Preco e market cap nao entram: mediana de escala nao diz nada.
-COM_MEDIANA = {"pe", "dividend_yield_pct", "fcf_yield_pct"}
+COM_MEDIANA = {"pe", "dividend_yield_caixa_pct", "shareholder_yield_pct", "fcf_yield_pct"}
 
 BORDA = "border-bottom:1px solid #eee"
 
@@ -61,6 +65,13 @@ def num(v, casas=2):
 def valor_do_campo(empresa, chave, origem):
     if origem == "mercado":
         return empresa["mercado"].get(chave)
+    if origem == "trimestre":
+        return empresa["q_recente"]["derivados"].get(chave)
+    if origem == "yield_caixa":
+        # Sem a janela de 12 meses de dividendos pagos, cai para o de mercado:
+        # numero com ressalva e melhor que buraco, e o cabecalho diz a regra.
+        caixa = empresa["q_recente"]["derivados"].get(chave)
+        return caixa if caixa is not None else empresa["mercado"].get("dividend_yield_pct")
     return empresa["anual"]["derivados"].get(chave)
 
 

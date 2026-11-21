@@ -183,3 +183,23 @@ def test_conteudo_do_relatorio_e_escapado(dados):
     h = be.montar(rel, dados)
     assert "<script>alert(1)</script>" not in h
     assert "&lt;script&gt;" in h
+
+
+def test_dividend_yield_do_email_e_o_de_caixa_e_nao_o_de_mercado(relatorio):
+    """O de mercado herda a razao de ADR: a Shell aparecia com 1,64% em vez de ~3,2%.
+
+    Contra o arquivo VIVO: o snapshot congelado e anterior as distribuicoes.
+    """
+    dados = bd.enriquecer(json.loads((SNAPSHOT.parent.parent.parent / "indicadores_oleo_gas.json").read_text(encoding="utf-8")))
+    shel = next(e for e in dados["empresas"] if e["ticker"] == "SHEL")
+    caixa = shel["q_recente"]["derivados"]["dividend_yield_caixa_pct"]
+    mercado = shel["mercado"]["dividend_yield_pct"]
+    assert caixa is not None and abs(caixa - mercado) > 0.5  # o caso real que motivou
+    assert be.valor_do_campo(shel, "dividend_yield_caixa_pct", "yield_caixa") == caixa
+    h = be.montar(relatorio, dados)
+    assert be.num(caixa, 2) in h
+
+
+def test_sem_caixa_de_12_meses_o_email_cai_para_o_yield_de_mercado():
+    e = {"q_recente": {"derivados": {"dividend_yield_caixa_pct": None}}, "mercado": {"dividend_yield_pct": 4.7}}
+    assert be.valor_do_campo(e, "dividend_yield_caixa_pct", "yield_caixa") == 4.7
