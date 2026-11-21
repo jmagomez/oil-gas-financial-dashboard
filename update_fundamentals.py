@@ -455,6 +455,17 @@ def _valor(df, chaves: list[str], coluna) -> float | None:
     return None
 
 
+def _coluna_da_data(df, coluna):
+    """A coluna de `df` com a mesma data de `coluna`, ou None."""
+    if df is None or getattr(df, "empty", True):
+        return None
+    alvo = coluna.date() if hasattr(coluna, "date") else coluna
+    for c in df.columns:
+        if (c.date() if hasattr(c, "date") else c) == alvo:
+            return c
+    return None
+
+
 def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
     """Extrai a coluna mais recente das tres demonstracoes, em US$ milhoes."""
     if income is None or getattr(income, "empty", True):
@@ -469,7 +480,12 @@ def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
             fonte = cashflow
         elif chave in LINHAS_BALANCO:
             fonte = balance
-        alvo = coluna if fonte is income else (fonte.columns[0] if fonte is not None and not getattr(fonte, "empty", True) else None)
+        # A coluna da MESMA data da DRE, nunca "a primeira" do balanco ou da DFC:
+        # se o Yahoo ainda nao publicou o balanco do trimestre, a primeira
+        # coluna e a do trimestre anterior -- e o saldo velho entraria com o
+        # rotulo do novo. Sem a data, o campo fica ausente e `preenche_lacunas`
+        # o completa quando a fonte alcancar.
+        alvo = coluna if fonte is income else _coluna_da_data(fonte, coluna)
         linhas[chave] = None if alvo is None else _valor(fonte, rotulos, alvo)
 
     # Lucro dos ultimos 12 meses, somando ate 4 colunas trimestrais. E o que

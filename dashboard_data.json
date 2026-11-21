@@ -1977,7 +1977,7 @@
     },
     "recompras": {
      "fonte": "CVM, DFC consolidada (6.03, financiamento)",
-     "observacao": "zero porque a DFC entregue a CVM nao tem linha de recompra de acoes nos trimestres da serie; o ultimo programa (2023-2024, R$ 5,6 bi em preferenciais) foi encerrado em 2024. As linhas 6.03 lidas em cada coleta saem no resumo do workflow atualiza-fundamentos, para conferencia"
+     "observacao": "zero lido da propria DFC: a linha 6.03.10 'Recompra de acoes' existe nas demonstracoes de 2026 e esta zerada nos trimestres da serie (o ultimo programa, 2023-2024, foi encerrado). Conferido pelas linhas 6.03 que a coleta lista no resumo do workflow atualiza-fundamentos (execucao de 21/11/2026)"
     }
    },
    "fontes": [
