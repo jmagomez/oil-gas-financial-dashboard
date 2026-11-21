@@ -223,3 +223,51 @@ def test_sem_ptax_do_trimestre_nao_ha_conversao(ls):
 
 def test_zip_sem_a_companhia_devolve_none():
     assert cvm.monta_bruto([]) is None
+
+
+# ---------------------------------------------------------------------------
+# Dividendos e recompras da DFC de financiamento
+# ---------------------------------------------------------------------------
+def _dfc_financiamento(linhas_por_trimestre):
+    """ITR de 2026 com DFC acumulada; cada item: (conta, descricao, {periodo: valor_isolado})."""
+    dfc = []
+    for conta, desc, por_tri in linhas_por_trimestre:
+        acumulado = 0.0
+        for p in ("2026-Q1", "2026-Q2"):
+            acumulado += por_tri[p]
+            dfc.append(_linha(conta, desc, acumulado, cvm._fim(p), "2026-01-01"))
+    return cvm.linhas(_zip("itr", 2026, {"DFC_MI": dfc}))
+
+
+def test_dividendos_da_petrobras_saem_da_dfc_sem_os_de_nao_controladores():
+    """O yield divide pelo market cap DA Petrobras: dividendo a minoritario de subsidiaria nao entra."""
+    ls = _dfc_financiamento([
+        ("6.03.03", "Dividendos pagos a acionistas da Petrobras", {"2026-Q1": -12_000, "2026-Q2": -18_000}),
+        ("6.03.04", "Dividendos pagos a acionistas não controladores", {"2026-Q1": -300, "2026-Q2": -400}),
+    ])
+    b = cvm.trimestre_brl(ls, "2026-Q2")
+    assert b["dividendos"] == pytest.approx(18_000)  # trimestre isolado, por diferenca de acumulados
+
+
+def test_sem_linha_de_recompra_na_dfc_a_recompra_e_zero():
+    """A DFC entregue a CVM e completa: sem a linha, nao houve recompra."""
+    ls = _dfc_financiamento([
+        ("6.03.03", "Dividendos pagos a acionistas da Petrobras", {"2026-Q1": -12_000, "2026-Q2": -18_000}),
+    ])
+    assert cvm.trimestre_brl(ls, "2026-Q2")["recompras"] == 0.0
+
+
+def test_recompra_quando_existe_e_lida_e_positiva():
+    ls = _dfc_financiamento([
+        ("6.03.03", "Dividendos pagos a acionistas da Petrobras", {"2026-Q1": -12_000, "2026-Q2": -18_000}),
+        ("6.03.06", "Recompra de ações", {"2026-Q1": -1_000, "2026-Q2": -2_500}),
+    ])
+    assert cvm.trimestre_brl(ls, "2026-Q2")["recompras"] == pytest.approx(2_500)
+
+
+def test_dividendos_e_recompras_sao_fluxos_convertidos_pela_media():
+    brl = {"dividendos": 18_000.0, "recompras": 0.0}
+    t = ptax.taxas("2026-Q2")
+    usd = cvm.converte(brl, t)
+    assert usd["dividendos"] == pytest.approx(18_000 / t["media"])
+    assert usd["recompras"] == 0.0
