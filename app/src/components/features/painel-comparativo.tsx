@@ -34,6 +34,12 @@ export function PainelComparativo() {
     [payload],
   );
 
+  /** Ano fiscal lido do DADO: "2025", ou "de cada empresa" na virada. */
+  const anoFiscal = useMemo(() => {
+    const anos = [...new Set((payload?.empresas ?? []).map((e) => e.anual.ano))].sort();
+    return anos.length === 1 ? String(anos[0]) : `de cada empresa (${anos.join(' e ')})`;
+  }, [payload]);
+
   /**
    * Trimestres e tamanhos de janela lidos do DADO, nao escritos na nota.
    *
@@ -78,7 +84,7 @@ export function PainelComparativo() {
   return (
     <div className="grid gap-4">
       <Card>
-        <CardTitle>Comparativo — ano fiscal 2025</CardTitle>
+        <CardTitle>Comparativo — ano fiscal {anoFiscal}</CardTitle>
         <CardNote className="mt-1">
           Dados v{payload.referencia.versao_dados}, atualizados em{' '}
           {data(payload.referencia.atualizado_em)}. Valores em US$ milhões.
@@ -87,9 +93,9 @@ export function PainelComparativo() {
         <div className="mt-3 overflow-x-auto rounded-lg border border-border">
           <table className="w-full min-w-[52rem] text-sm">
             <caption className="sr-only">
-              Receita, EBITDA, free cash flow, alavancagem e múltiplos por empresa no ano fiscal
-              2025, com a posição do EBITDA do último trimestre dentro da faixa histórica de cada
-              empresa
+              Receita, EBITDA, free cash flow, alavancagem e múltiplos por empresa no ano fiscal{' '}
+              {anoFiscal}, com a posição do EBITDA do último trimestre dentro da faixa histórica de
+              cada empresa
             </caption>
             <thead className="bg-bg text-xs text-muted">
               <tr>
