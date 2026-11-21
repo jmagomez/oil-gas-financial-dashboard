@@ -68,6 +68,17 @@ const derivadosPeriodoSchema = z.object({
   fcf_yield_pct: num,
   dividendos_estimados: num,
   cobertura_dividendo_x: num,
+  /**
+   * Remuneracao ao acionista em CAIXA (DFC), 12 meses. So no trimestre, so com
+   * janela TTM completa -- senao null. Totais da companhia sobre o market cap
+   * da companhia: imune a razao de ADR, que deixava o yield de mercado da
+   * Shell 2x menor.
+   */
+  base_dividendo: z.enum(['caixa_12m', 'estimado_yield_mercado']),
+  dividend_yield_caixa_pct: num,
+  shareholder_yield_pct: num,
+  distribuicao_fco_pct: num,
+  recompras_12m: num,
 });
 
 const derivadosHistoricoSchema = z.object({
