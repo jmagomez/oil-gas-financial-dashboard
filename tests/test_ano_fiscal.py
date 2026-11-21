@@ -124,3 +124,5 @@ def test_nenhum_consumidor_volta_a_escrever_o_ano():
         # Uso (chave, acesso), nao prosa: a docstring que conta a historia pode citar o nome.
         assert not re.search(r"""["']fy2025["']|\.fy2025\b|["']periodo_anual["']|\.periodo_anual\b""", texto), nome
         assert "'FY2025'" not in texto and '"FY2025"' not in texto, nome
+        # E o ano por extenso num titulo: o Comparativo do app dizia "ano fiscal 2025".
+        assert not re.search(r"ano fiscal\s+20\d\d", texto), nome
