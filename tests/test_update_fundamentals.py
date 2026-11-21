@@ -835,3 +835,15 @@ def test_balanco_atrasado_nao_entra_com_o_rotulo_do_trimestre_novo():
     assert bruto["linhas"]["fco"] == pytest.approx(25_000)
     # O 2T continua com o saldo certo, na coluna certa.
     assert bruto["anteriores"][0]["linhas"]["divida_total"] == pytest.approx(42_368)
+
+
+def test_preco_realizado_nao_e_carregado_para_o_trimestre_novo(dados):
+    """Producao velha e denominador aproximado; preco velho e outro numero."""
+    pbr = next(e for e in dados["empresas"] if e["ticker"] == "PBR")
+    pbr["q_recente"]["preco_realizado_liquidos_usd"] = 80.0
+    pbr.setdefault("proveniencia", {})["preco_realizado"] = {"fonte": "release"}
+    saida, rel = uf.aplica_fundamentos(dados, {"PBR": _bruto_cvm()}, hoje=date(2026, 11, 14))
+    assert [n["ticker"] for n in rel.novos] == ["PBR"]
+    nova = next(e for e in saida["empresas"] if e["ticker"] == "PBR")
+    assert nova["q_recente"]["preco_realizado_liquidos_usd"] is None
+    assert "preco_realizado" not in nova["proveniencia"]
