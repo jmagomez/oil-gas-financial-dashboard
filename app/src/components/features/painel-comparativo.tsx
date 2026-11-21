@@ -27,7 +27,7 @@ export function PainelComparativo() {
         const serieEbitda = serieDoHistorico(e.historico, 'ebitda');
         return {
           empresa: e,
-          alav: alavancagem(e.fy2025),
+          alav: alavancagem(e.anual),
           faixaEbitda: faixaHistorica(serieEbitda, e.q_recente.ebitda),
         };
       }),
@@ -128,17 +128,17 @@ export function PainelComparativo() {
                     {e.ticker}
                     <span className="ml-1.5 text-xs text-muted">{e.pais}</span>
                   </th>
-                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.fy2025.receita)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.fy2025.ebitda)}</td>
-                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.fy2025.fcf)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.anual.receita)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.anual.ebitda)}</td>
+                  <td className="px-3 py-2 text-right tabular-nums">{milhoes(e.anual.fcf)}</td>
                   <td className="px-3 py-2 text-right tabular-nums">
-                    {percentual(e.fy2025.margem_liquida_pct, 2)}
+                    {percentual(e.anual.margem_liquida_pct, 2)}
                   </td>
                   <td className="px-3 py-2 text-left">
                     <CelulaAlavancagem a={alav} />
                   </td>
                   <td className="px-3 py-2 text-right tabular-nums">
-                    {multiplo(e.fy2025.derivados.ev_ebitda_x)}
+                    {multiplo(e.anual.derivados.ev_ebitda_x)}
                   </td>
                   <td className="px-3 py-2 text-left">
                     {/* O rotulo do trimestre e DE CADA EMPRESA: no payload elas

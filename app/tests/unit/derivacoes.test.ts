@@ -15,7 +15,7 @@ const emp = (t: string) => p.empresas.find((e) => e.ticker === t)!;
 
 describe('patrimonioEstimado', () => {
   it('sai do ROE e nao do D/E, porque D/E usa divida total', () => {
-    const xom = emp('XOM').fy2025;
+    const xom = emp('XOM').anual;
     // lucro 29.760 / ROE 11,1% = 268.108, que e o patrimonio real.
     // Pelo D/E (32.860 / 16,3%) daria 201.595 -- errado.
     expect(patrimonioEstimado(xom)).toBeCloseTo(268108, -2);
@@ -27,13 +27,13 @@ describe('patrimonioEstimado', () => {
     // BP FY2025: lucro de US$ 55 mi por itens nao-recorrentes, ROE 0,1%.
     // Dividir quase-zero por quase-zero da um numero que PARECE preciso:
     // +-0,02 p.p. no ROE move o resultado em ~42%.
-    const bp = emp('BP').fy2025;
+    const bp = emp('BP').anual;
     expect(bp.roe_pct).toBeLessThan(LIMIAR_ROE_CONFIAVEL_PCT);
     expect(patrimonioEstimado(bp)).toBeNull();
   });
 
   it('e null quando falta lucro ou ROE', () => {
-    const base = emp('XOM').fy2025;
+    const base = emp('XOM').anual;
     expect(patrimonioEstimado({ ...base, roe_pct: null })).toBeNull();
     expect(patrimonioEstimado({ ...base, lucro_liquido: null })).toBeNull();
   });
@@ -41,7 +41,7 @@ describe('patrimonioEstimado', () => {
 
 describe('alavancagem', () => {
   it('devolve gearing para quem tem divida liquida positiva', () => {
-    const a = alavancagem(emp('XOM').fy2025);
+    const a = alavancagem(emp('XOM').anual);
     expect(a.tipo).toBe('gearing');
     if (a.tipo === 'gearing') expect(a.pct).toBeCloseTo(10.9, 1);
   });
@@ -49,19 +49,19 @@ describe('alavancagem', () => {
   it('caixa liquido NAO vira gearing negativo (caso Equinor)', () => {
     // ND de -11.888: um grafico que plota isso como -40% ao lado de +46% da
     // Petrobras afirma uma comparacao que nao existe.
-    const a = alavancagem(emp('EQNR').fy2025);
+    const a = alavancagem(emp('EQNR').anual);
     expect(a.tipo).toBe('caixa_liquido');
     if (a.tipo === 'caixa_liquido') expect(a.caixaLiquido).toBe(11888);
   });
 
   it('fica indisponivel, com motivo, quando o patrimonio nao e estimavel', () => {
-    const a = alavancagem(emp('BP').fy2025);
+    const a = alavancagem(emp('BP').anual);
     expect(a.tipo).toBe('indisponivel');
     if (a.tipo === 'indisponivel') expect(a.motivo).toMatch(/ROE/);
   });
 
   it('fica indisponivel quando a divida liquida esta ausente', () => {
-    const a = alavancagem({ ...emp('XOM').fy2025, divida_liquida: null });
+    const a = alavancagem({ ...emp('XOM').anual, divida_liquida: null });
     expect(a.tipo).toBe('indisponivel');
   });
 });

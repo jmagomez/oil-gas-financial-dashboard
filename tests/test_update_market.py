@@ -262,7 +262,7 @@ def test_reescrita_preserva_todos_os_dados_fundamentais(dados, bruto):
     finais, _ = umd.aplica_cotacoes(dados, cot)
     novo = json.loads(umd.reescreve_json(bruto, finais))
     for antes, depois in zip(dados["empresas"], novo["empresas"], strict=True):
-        assert antes["fy2025"] == depois["fy2025"]
+        assert antes["anual"] == depois["anual"]
         assert antes["q_recente"] == depois["q_recente"]
         assert antes["fontes"] == depois["fontes"]
         assert depois["mercado"]["preco_acao"] == round(antes["mercado"]["preco_acao"] * 1.1, 2)
@@ -327,8 +327,8 @@ def test_json_atualizado_continua_passando_no_build(dados, bruto, tmp_path):
     enriquecido = bd.enriquecer(novo)
     xom = enriquecido["empresas"][0]
     # FCF yield usa o market cap novo: tem de ter acompanhado.
-    esperado = xom["fy2025"]["fcf"] / 642_000 * 100
-    assert xom["fy2025"]["derivados"]["fcf_yield_pct"] == pytest.approx(esperado, abs=0.01)
+    esperado = xom["anual"]["fcf"] / 642_000 * 100
+    assert xom["anual"]["derivados"]["fcf_yield_pct"] == pytest.approx(esperado, abs=0.01)
 
 
 def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
@@ -365,7 +365,7 @@ def test_formato_do_arquivo_vivo_suporta_escrita_cirurgica():
 def test_rede_de_seguranca_pega_bloco_de_mercado_trocado(tmp_path, monkeypatch):
     """Troca de blocos entre empresas passa por todas as outras conferencias.
 
-    As checagens de campo nao-mercado comparam fy2025, q_recente, historico,
+    As checagens de campo nao-mercado comparam anual, q_recente, historico,
     nome, pais e ticker -- todas batem numa troca. O arquivo continua JSON
     valido e nenhum campo some. So a conferencia do proprio bloco "mercado"
     contra o calculado para AQUELA empresa pega o caso.

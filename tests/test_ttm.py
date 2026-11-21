@@ -35,7 +35,7 @@ def _empresa(historico, q_ebitda=40, q_fcf=10, nd=500, market_cap=1000):
     q["divida_liquida"] = nd
     return {
         "ticker": "TST", "nome": "Teste", "pais": "X",
-        "fy2025": dict(_tri("FY2025", receita=400, ebitda=160, fcf=40, capex=-80)),
+        "anual": dict(_tri("FY2025", receita=400, ebitda=160, fcf=40, capex=-80), ano=2025),
         "q_recente": q,
         "mercado": {"market_cap": market_cap, "pe": 10.0,
                     "dividend_yield_pct": 2.0, "preco_acao": 20.0},
@@ -136,8 +136,8 @@ def test_ano_fiscal_nao_e_tocado_pelo_ttm():
     """FY ja e um periodo de 12 meses -- nao leva ajuste nenhum."""
     hist = [_tri(p) for p in ("2025-Q2", "2025-Q3", "2025-Q4", "2026-Q1")]
     d = bd.enriquecer({"empresas": [_empresa(hist)]})["empresas"][0]
-    assert d["fy2025"]["derivados"]["base_12m_ebitda"] == "fy"
-    fy = d["fy2025"]
+    assert d["anual"]["derivados"]["base_12m_ebitda"] == "fy"
+    fy = d["anual"]
     assert fy["derivados"]["nd_ebitda_x"] == pytest.approx(
         fy["divida_liquida"] / fy["ebitda"], abs=0.01)
 

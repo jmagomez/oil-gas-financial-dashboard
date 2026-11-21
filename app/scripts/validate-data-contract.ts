@@ -60,14 +60,14 @@ if (trimestres.size > 1) {
   );
 }
 for (const e of empresas) {
-  if (e.fy2025.producao_kboed === null) {
+  if (e.anual.producao_kboed === null) {
     console.warn(
-      `aviso   ${e.ticker}: producao ausente em FY2025 -- indicadores por boe ficam ausentes`,
+      `aviso   ${e.ticker}: producao ausente em FY${e.anual.ano} -- indicadores por boe ficam ausentes`,
     );
   }
-  if (e.fy2025.roe_pct !== null && Math.abs(e.fy2025.roe_pct) < 1) {
+  if (e.anual.roe_pct !== null && Math.abs(e.anual.roe_pct) < 1) {
     console.warn(
-      `aviso   ${e.ticker}: ROE de ${e.fy2025.roe_pct}% em FY2025 -- patrimonio nao e estimavel, gearing fica indisponivel`,
+      `aviso   ${e.ticker}: ROE de ${e.anual.roe_pct}% em FY${e.anual.ano} -- patrimonio nao e estimavel, gearing fica indisponivel`,
     );
   }
 }

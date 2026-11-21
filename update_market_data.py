@@ -430,14 +430,14 @@ def main(argv: list[str] | None = None) -> int:
         raise AssertionError(
             f"reescrita mudou o numero de empresas: {len(dados['empresas'])} -> {len(conferido['empresas'])}"
         )
-    # "producao_kboed" nao existe no nivel da empresa (vive dentro de fy2025 /
+    # "producao_kboed" nao existe no nivel da empresa (vive dentro de anual /
     # q_recente), entao a checagem antiga comparava None com None e nao valia nada.
     for antes, depois in zip(dados["empresas"], conferido["empresas"]):
         if antes.get("ticker") != depois.get("ticker"):
             raise AssertionError(
                 f"reescrita trocou a ordem dos tickers: {antes.get('ticker')} -> {depois.get('ticker')}"
             )
-        for chave in ("fy2025", "q_recente", "historico", "fontes", "nome", "pais", "ticker"):
+        for chave in ("anual", "q_recente", "historico", "fontes", "nome", "pais", "ticker"):
             if antes.get(chave) != depois.get(chave):
                 raise AssertionError(f"reescrita alterou campo nao-mercado em {antes['ticker']}: {chave}")
         # A conferencia que faltava, e a unica que pega bloco TROCADO de empresa.

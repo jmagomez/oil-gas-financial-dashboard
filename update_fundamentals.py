@@ -66,6 +66,7 @@ CAMPOS_TRIMESTRE = [
     "dividendos_pagos",
     "recompras",
     "divida_liquida",
+    "nao_controladores",
     "divida_patrimonio_pct",
     "roe_pct",
     "roa_pct",
@@ -104,6 +105,7 @@ CAMPOS_DERIVAVEIS = [
     "dividendos_pagos",
     "recompras",
     "divida_liquida",
+    "nao_controladores",
     "divida_patrimonio_pct",
     "roe_pct",
     "roa_pct",
@@ -133,7 +135,17 @@ LINHAS = {
     "investimentos_curto": ["Other Short Term Investments"],
     "patrimonio": ["Stockholders Equity", "Total Equity Gross Minority Interest"],
     "ativos": ["Total Assets"],
+    # Participacao de nao controladores no PL consolidado. Entra no EV: o
+    # EBITDA e consolidado a 100%, entao o numerador tambem precisa ser -- na
+    # BP sao US$ 17,4 bi (30/09/2026), 16% do market cap.
+    "nao_controladores": ["Minority Interest"],
 }
+
+# De qual demonstracao sai cada linha (o resto sai da DRE).
+LINHAS_FLUXO_CAIXA = frozenset({"fco", "capex", "fcf", "dividendos", "recompras"})
+LINHAS_BALANCO = frozenset(
+    {"divida_total", "caixa", "investimentos_curto", "patrimonio", "ativos", "nao_controladores"}
+)
 
 # Faixas de plausibilidade por campo (US$ milhoes, ou % / x conforme o caso).
 FAIXAS: dict[str, tuple[float, float]] = {
@@ -145,6 +157,7 @@ FAIXAS: dict[str, tuple[float, float]] = {
     "fcf": (-40_000.0, 90_000.0),
     "capex": (-60_000.0, 0.0),
     "divida_liquida": (-150_000.0, 300_000.0),
+    "nao_controladores": (-20_000.0, 100_000.0),
     "divida_patrimonio_pct": (0.0, 400.0),
     "roe_pct": (-100.0, 100.0),
     "roa_pct": (-60.0, 60.0),
@@ -241,6 +254,7 @@ ORDEM_HISTORICO = [
     "dividendos_pagos",
     "recompras",
     "divida_liquida",
+    "nao_controladores",
     "producao_kboed",
 ]
 
@@ -292,6 +306,8 @@ class Relatorio:
     rejeicoes: list[dict[str, Any]] = field(default_factory=list)
     falhas: list[dict[str, Any]] = field(default_factory=list)
     preenchidos: list[dict[str, Any]] = field(default_factory=list)
+    # Linhas de financiamento da DFC por ticker de fonte primaria (CVM).
+    auditoria: dict[str, list[str]] = field(default_factory=dict)
 
     def resumo(self) -> str:
         linhas: list[str] = []
@@ -305,11 +321,14 @@ class Relatorio:
         else:
             linhas.append("Nenhum trimestre novo divulgado.")
         if self.preenchidos:
-            linhas.append(f"{len(self.preenchidos)} campo(s) de distribuicao preenchido(s) em trimestres ja curados:")
+            linhas.append(f"{len(self.preenchidos)} campo(s) preenchido(s) em trimestres ja curados:")
             for p in self.preenchidos:
                 linhas.append(
                     f"  {p['ticker']:<5} {p['periodo']:<8} {p['campo']:<17} {p['valor']:,.0f}".replace(",", ".")
                 )
+        for ticker, contas in self.auditoria.items():
+            linhas.append(f"{ticker}: linhas de financiamento na DFC (6.03, acumulado do ano):")
+            linhas.extend(f"  {c}" for c in contas)
         for rotulo, itens, titulo in (
             ("rejeicoes", self.rejeicoes, "campo(s) rejeitado(s)"),
             ("divergencias", self.divergencias, "divergencia(s) com o dado curado"),
@@ -331,6 +350,7 @@ class Relatorio:
             "rejeicoes": self.rejeicoes,
             "falhas": self.falhas,
             "preenchidos": self.preenchidos,
+            "auditoria": self.auditoria,
         }
 
 
@@ -445,9 +465,9 @@ def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
     linhas: dict[str, float | None] = {}
     for chave, rotulos in LINHAS.items():
         fonte = income
-        if chave in ("fco", "capex", "fcf", "dividendos", "recompras"):
+        if chave in LINHAS_FLUXO_CAIXA:
             fonte = cashflow
-        elif chave in ("divida_total", "caixa", "investimentos_curto", "patrimonio", "ativos"):
+        elif chave in LINHAS_BALANCO:
             fonte = balance
         alvo = coluna if fonte is income else (fonte.columns[0] if fonte is not None and not getattr(fonte, "empty", True) else None)
         linhas[chave] = None if alvo is None else _valor(fonte, rotulos, alvo)
@@ -472,9 +492,9 @@ def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
         linhas_ant = {}
         for chave, rotulos in LINHAS.items():
             fonte = income
-            if chave in ("fco", "capex", "fcf", "dividendos", "recompras"):
+            if chave in LINHAS_FLUXO_CAIXA:
                 fonte = cashflow
-            elif chave in ("divida_total", "caixa", "investimentos_curto", "patrimonio", "ativos"):
+            elif chave in LINHAS_BALANCO:
                 fonte = balance
             v = _valor(fonte, rotulos, col) if fonte is not None else None
             linhas_ant[chave] = v / 1e6 if v is not None else None
@@ -513,10 +533,7 @@ def monta_trimestre(bruto: dict[str, Any], ttm: dict[str, float] | None = None) 
     if fcf is None and fco is not None and capex is not None:
         fcf = fco + capex
 
-    caixa = (L.get("caixa") or 0.0) + (L.get("investimentos_curto") or 0.0)
-    divida_liquida = None
-    if L.get("divida_total") is not None:
-        divida_liquida = L["divida_total"] - caixa
+    divida_liquida = _divida_liquida(L)
 
     divida_patrimonio = None
     if L.get("divida_total") is not None and L.get("patrimonio"):
@@ -549,10 +566,26 @@ def monta_trimestre(bruto: dict[str, Any], ttm: dict[str, float] | None = None) 
         "dividendos_pagos": _distribuido(L.get("dividendos")),
         "recompras": _distribuido(L.get("recompras")),
         "divida_liquida": _arredonda(divida_liquida, 0),
+        "nao_controladores": _arredonda(L.get("nao_controladores"), 0),
         "divida_patrimonio_pct": _arredonda(divida_patrimonio, 1),
         "roe_pct": _arredonda(roe, 2),
         "roa_pct": _arredonda(roa, 2),
     }
+
+
+def _divida_liquida(L: dict[str, float | None]) -> float | None:
+    """Divida bruta (com arrendamentos) menos caixa e aplicacoes de curto prazo.
+
+    UMA definicao para as sete e para todos os periodos. O `Total Debt` do Yahoo
+    inclui arrendamentos; a Petrobras (coleta_cvm) soma financiamentos e
+    arrendamentos. Nao e o numero que cada empresa destaca -- a BP divulga
+    13.870 no 3T26, sem arrendamentos e sem hibridos; aqui sao 26.563 --, e e
+    por isso que serve para comparar: as definicoes das empresas divergem
+    entre si. Ver `build_dashboard.valida_divida_liquida`.
+    """
+    if L.get("divida_total") is None:
+        return None
+    return L["divida_total"] - ((L.get("caixa") or 0.0) + (L.get("investimentos_curto") or 0.0))
 
 
 def _distribuido(v: float | None) -> int | None:
@@ -733,7 +766,11 @@ def aplica_fundamentos(
         # consegue refazer.
         if bruto.get("conversao"):
             fundamentos["conversao"] = bruto["conversao"]
+        # Atualiza SO as duas chaves que este passo produz. As outras (a curadoria
+        # de recompras da BP, a promocao do ano fiscal) documentam numeros que
+        # continuam no arquivo -- apaga-las deixaria o numero sem a origem.
         empresa["proveniencia"] = {
+            **(empresa.get("proveniencia") or {}),
             "fundamentos": fundamentos,
             "producao_kboed": {
                 "fonte": "release da empresa",
@@ -750,9 +787,22 @@ def aplica_fundamentos(
     return saida, rel
 
 
-def _distribuicoes_por_periodo(bruto: dict[str, Any]) -> dict[str, dict[str, int | None]]:
-    """Dividendos e recompras de cada coluna que a fonte trouxe, por periodo "AAAA-QN"."""
-    saida: dict[str, dict[str, int | None]] = {}
+# Campos que `preenche_lacunas` completa em trimestres JA curados, e a faixa de
+# cada um. Distribuicoes nasceram depois da serie; nao controladores tambem; e a
+# divida liquida tinha buracos deixados de proposito (ver referencia.notas: o
+# 1T26 de seis empresas tinha sido curado a mao com outra definicao -- na TTE e
+# na EQNR, com o sinal trocado).
+CAMPOS_LACUNA: dict[str, tuple[float, float]] = {
+    "dividendos_pagos": FAIXA_DISTRIBUICAO,
+    "recompras": FAIXA_DISTRIBUICAO,
+    "divida_liquida": FAIXAS["divida_liquida"],
+    "nao_controladores": FAIXAS["nao_controladores"],
+}
+
+
+def _valores_por_periodo(bruto: dict[str, Any]) -> dict[str, dict[str, float | int | None]]:
+    """Os campos de CAMPOS_LACUNA em cada coluna que a fonte trouxe, por periodo "AAAA-QN"."""
+    saida: dict[str, dict[str, float | int | None]] = {}
     for bloco in [bruto, *(bruto.get("anteriores") or [])]:
         if bloco.get("fim") is None:
             continue
@@ -761,25 +811,27 @@ def _distribuicoes_por_periodo(bruto: dict[str, Any]) -> dict[str, dict[str, int
         saida[periodo] = {
             "dividendos_pagos": _distribuido(linhas.get("dividendos")),
             "recompras": _distribuido(linhas.get("recompras")),
+            "divida_liquida": _arredonda(_divida_liquida(linhas), 0),
+            "nao_controladores": _arredonda(linhas.get("nao_controladores"), 0),
         }
     return saida
 
 
-def preenche_distribuicoes(
+def preenche_lacunas(
     saida: dict[str, Any], coletado: dict[str, dict[str, Any]], rel: Relatorio
 ) -> set[str]:
-    """Completa dividendos e recompras em trimestres JA CURADOS. Devolve os tickers tocados.
+    """Completa campos ausentes em trimestres JA CURADOS. Devolve os tickers tocados.
 
     Por que um passo separado da promocao: `aplica_fundamentos` so age em
-    trimestre NOVO, e os campos de distribuicao nasceram depois que os
-    trimestres do arquivo ja estavam curados. Sem isto, o TTM de
-    dividendos + recompras so ficaria completo daqui a um ano.
+    trimestre NOVO, e campos que nasceram depois (distribuicoes, nao
+    controladores) ou que foram anulados por curadoria ficariam vazios por um
+    ano -- e o TTM com eles.
 
     Regras, todas conservadoras:
       * so PREENCHE campo ausente -- nunca sobrescreve um valor existente;
       * casa pelo periodo exato (fim do trimestre da coluna da fonte);
       * so fonte em USD (a Petrobras chega aqui ja convertida pela CVM/PTAX);
-      * valor fora de FAIXA_DISTRIBUICAO e rejeitado, nao gravado.
+      * valor fora da faixa do campo (CAMPOS_LACUNA) e rejeitado, nao gravado.
     """
     tocados: set[str] = set()
     for empresa in saida["empresas"]:
@@ -787,27 +839,106 @@ def preenche_distribuicoes(
         bruto = coletado.get(ticker)
         if not bruto or (bruto.get("moeda") or "USD").upper() != MOEDA_DEMONSTRACOES:
             continue
-        fonte = _distribuicoes_por_periodo(bruto)
+        fonte = _valores_por_periodo(bruto)
         alvos = [(rotulo_historico(empresa["q_recente"]["trimestre"]), empresa["q_recente"])]
         alvos += [(h.get("periodo"), h) for h in (empresa.get("historico") or [])]
         for periodo, bloco in alvos:
             valores = fonte.get(periodo)
             if not valores:
                 continue
-            for campo in CAMPOS_DISTRIBUICAO:
+            for campo, (piso, teto) in CAMPOS_LACUNA.items():
                 v = valores.get(campo)
                 if v is None or bloco.get(campo) is not None:
                     continue
-                if not FAIXA_DISTRIBUICAO[0] <= v <= FAIXA_DISTRIBUICAO[1]:
+                if not piso <= v <= teto:
                     rel.rejeicoes.append({
                         "ticker": ticker, "campo": campo,
-                        "motivo": f"{periodo}: {v} fora da faixa {FAIXA_DISTRIBUICAO}",
+                        "motivo": f"{periodo}: {v} fora da faixa {(piso, teto)}",
                     })
                     continue
                 bloco[campo] = v
                 rel.preenchidos.append({"ticker": ticker, "periodo": periodo, "campo": campo, "valor": v})
                 tocados.add(ticker)
     return tocados
+
+
+# Bloco anual, na ordem em que aparece no JSON.
+CAMPOS_ANUAL = [
+    "ano",
+    "receita",
+    "lucro_liquido",
+    "ebitda",
+    "margem_liquida_pct",
+    "fluxo_caixa_operacional",
+    "fcf",
+    "capex",
+    "dividendos_pagos",
+    "recompras",
+    "divida_liquida",
+    "nao_controladores",
+    "divida_patrimonio_pct",
+    "roe_pct",
+    "roa_pct",
+    "producao_kboed",
+]
+# Fluxos do ano = soma dos quatro trimestres. Saldos = os do 4T.
+FLUXOS_ANUAIS = (
+    "receita", "lucro_liquido", "ebitda", "fluxo_caixa_operacional",
+    "fcf", "capex", "dividendos_pagos", "recompras",
+)
+SALDOS_DO_4T = ("divida_liquida", "nao_controladores", "divida_patrimonio_pct", "roe_pct", "roa_pct")
+
+
+def promove_ano_fiscal(empresa: dict[str, Any]) -> int | None:
+    """Vira o bloco `anual` quando o 4T de um ano novo chega. Devolve o ano promovido.
+
+    POR QUE ISTO EXISTE. O ano fiscal era curado a mao uma vez e ficava: a chave
+    chamava `fy2025` e o rotulo FY2025 estava escrito em ~40 lugares. Em
+    fevereiro de 2027, com o 4T26 publicado, o dashboard compararia o trimestre
+    de 2026 com o ano de 2025 sem dizer nada -- ou alguem teria de editar o
+    ano em quarenta lugares no dia.
+
+    Regra: so com os QUATRO trimestres do ano no arquivo. Fluxo e a soma dos
+    quatro (um fluxo ausente em qualquer trimestre deixa o do ano ausente, nao
+    parcial); saldo e o do 4T, que e o saldo de fim de ano; ROE e ROA do 4T ja
+    estao em base de 12 meses, que no 4T e o proprio ano. A margem e recalculada
+    sobre as somas. Producao e a media dos quatro, ou nada.
+
+    Por que somar trimestres e nao ler o 20-F: o 20-F sai semanas depois do 4T
+    e o Yahoo nao traz o ano fechado na mesma tabela. A diferenca entre a soma e
+    o anual auditado existe (reapresentacoes) e e pequena; fica registrada em
+    `proveniencia.anual` para quem audita.
+    """
+    q = empresa["q_recente"]
+    ano, tri = ordem_trimestre(q.get("trimestre", ""))
+    if tri != 4 or ano <= (empresa.get("anual") or {}).get("ano", 0):
+        return None
+    por_periodo = {h.get("periodo"): h for h in (empresa.get("historico") or [])}
+    por_periodo[rotulo_historico(q["trimestre"])] = q
+    trimestres = [por_periodo.get(f"{ano}-Q{i}") for i in (1, 2, 3, 4)]
+    if any(t is None for t in trimestres):
+        return None
+
+    novo: dict[str, Any] = {"ano": ano}
+    for campo in FLUXOS_ANUAIS:
+        valores = [t.get(campo) for t in trimestres]
+        novo[campo] = None if any(v is None for v in valores) else sum(valores)
+    receita, lucro = novo.get("receita"), novo.get("lucro_liquido")
+    novo["margem_liquida_pct"] = _arredonda(lucro / receita * 100, 2) if receita and lucro is not None else None
+    for campo in SALDOS_DO_4T:
+        novo[campo] = q.get(campo)
+    producoes = [t.get("producao_kboed") for t in trimestres]
+    novo["producao_kboed"] = None if any(v is None for v in producoes) else round(sum(producoes) / 4)
+
+    empresa["anual"] = {c: novo.get(c) for c in CAMPOS_ANUAL}
+    prov = dict(empresa.get("proveniencia") or {})
+    prov["anual"] = {
+        "fonte": "soma dos quatro trimestres do arquivo (fluxos) e saldo do 4T (balanco)",
+        "trimestres": [f"{ano}-Q{i}" for i in (1, 2, 3, 4)],
+        "promovido_em": date.today().isoformat(),
+    }
+    empresa["proveniencia"] = prov
+    return ano
 
 
 def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
@@ -823,6 +954,7 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
         "dividendos_pagos": bloco.get("dividendos_pagos"),
         "recompras": bloco.get("recompras"),
         "divida_liquida": bloco.get("divida_liquida"),
+        "nao_controladores": bloco.get("nao_controladores"),
         "producao_kboed": bloco.get("producao_kboed"),
     }
 
@@ -830,7 +962,7 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Escrita cirurgica no JSON (preserva a formatacao curada a mao)
 #
-# O arquivo mantem cada bloco ("fy2025", "q_recente", "mercado") em UMA linha,
+# O arquivo mantem cada bloco ("anual", "q_recente", "mercado") em UMA linha,
 # e numeros com o zero a direita ("preco_acao": 196.60). Isso nao e estetica:
 # e o que faz o commit diario da rotina de mercado aparecer como uma linha por
 # empresa. Reserializar com json.dump(indent=2) expandiria tudo e trocaria ~500
@@ -853,6 +985,7 @@ def serializa_historico(itens: list[dict[str, Any]], recuo: str) -> str:
 
 
 _RE_Q_RECENTE = re.compile(r'("q_recente":\s*)\{[^{}]*\}')
+_RE_ANUAL = re.compile(r'("anual":\s*)\{[^{}]*\}')
 # O bloco opcional de proveniencia e escrito sempre em UMA linha, o que permite
 # reconhece-lo (e substitui-lo em execucoes seguintes) sem regex recursiva.
 _RE_HIST_PROV = re.compile(
@@ -885,8 +1018,16 @@ def atualiza_referencia(bruto: str, trimestre: str, hoje: date) -> str:
     return ec.atualiza_campo_data(bruto, hoje)
 
 
-def reescreve_json(bruto: str, saida: dict[str, Any], tickers_novos: set[str], hoje: date) -> str:
-    """Aplica so os blocos que mudaram, preservando o resto byte a byte."""
+def reescreve_json(
+    bruto: str, saida: dict[str, Any], tickers_novos: set[str], hoje: date,
+    anos_promovidos: set[str] = frozenset(),
+) -> str:
+    """Aplica so os blocos que mudaram, preservando o resto byte a byte.
+
+    O bloco `anual` so e reescrito para quem teve o ano fiscal promovido
+    (`anos_promovidos`): reserializar um anual intocado trocaria `11.30` por
+    `11.3` em linha que ninguem mudou.
+    """
     por_ticker = {e["ticker"]: e for e in saida["empresas"]}
     posicoes = ec.posicoes_dos_tickers(bruto)
 
@@ -916,6 +1057,13 @@ def reescreve_json(bruto: str, saida: dict[str, Any], tickers_novos: set[str], h
         bloco_q = serializa_bloco(empresa["q_recente"], CAMPOS_TRIMESTRE)
         texto = texto[: alvo.start()] + alvo.group(1) + bloco_q + texto[alvo.end():]
 
+        if ticker in anos_promovidos:
+            alvo = _RE_ANUAL.search(texto, fim_ticker)
+            if alvo is None:
+                raise ValueError(f'bloco "anual" nao encontrado para {ticker}')
+            bloco_a = serializa_bloco(empresa["anual"], CAMPOS_ANUAL)
+            texto = texto[: alvo.start()] + alvo.group(1) + bloco_a + texto[alvo.end():]
+
     if tickers_novos:
         texto = atualiza_referencia(texto, "", hoje)
     return texto
@@ -938,7 +1086,13 @@ def main(argv: list[str] | None = None) -> int:
     coletado = busca_fundamentos(tickers)
 
     saida, rel = aplica_fundamentos(dados, coletado)
-    tocados = {n["ticker"] for n in rel.novos} | preenche_distribuicoes(saida, coletado, rel)
+    tocados = {n["ticker"] for n in rel.novos} | preenche_lacunas(saida, coletado, rel)
+    rel.auditoria = {t: b["dfc_financiamento"] for t, b in coletado.items() if b and b.get("dfc_financiamento")}
+    anos_promovidos: set[str] = set()
+    for empresa in saida["empresas"]:
+        if empresa["ticker"] in tocados and promove_ano_fiscal(empresa) is not None:
+            anos_promovidos.add(empresa["ticker"])
+            print(f"{empresa['ticker']}: ano fiscal promovido para FY{empresa['anual']['ano']}")
     print(rel.resumo())
 
     if args.relatorio:
@@ -954,10 +1108,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     bruto = args.json.read_text(encoding="utf-8")
-    args.json.write_text(reescreve_json(bruto, saida, tocados, date.today()), encoding="utf-8")
+    args.json.write_text(
+        reescreve_json(bruto, saida, tocados, date.today(), anos_promovidos), encoding="utf-8"
+    )
     print(
         f"\n{args.json.name} atualizado: {len(rel.novos)} trimestre(s) novo(s), "
-        f"{len(rel.preenchidos)} campo(s) de distribuicao preenchido(s)."
+        f"{len(rel.preenchidos)} campo(s) preenchido(s) em trimestres ja curados."
     )
     return 0
 

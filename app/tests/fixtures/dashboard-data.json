@@ -2,7 +2,6 @@
   "referencia": {
     "data_consulta": "2026-07-20",
     "moeda": "USD (milhões, exceto onde indicado)",
-    "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
     "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
     "notas": [
       "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
@@ -17,7 +16,8 @@
       "ticker": "XOM",
       "nome": "ExxonMobil",
       "pais": "EUA",
-      "fy2025": {
+      "anual": {
+        "ano": 2025,
         "receita": 323910,
         "lucro_liquido": 29760,
         "ebitda": 59530,
@@ -45,6 +45,9 @@
           "producao_usada_kboed": 4740,
           "dias_periodo": 365,
           "ev": 709481,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 149680.0,
           "fcf_yield_pct": 3.49,
           "dividendos_estimados": 16780.0,
@@ -89,6 +92,9 @@
           "producao_usada_kboed": 4514,
           "dias_periodo": 91,
           "ev": 708401,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 156934.0,
           "fcf_yield_pct": 4.52,
           "dividendos_estimados": 16780.0,
@@ -245,7 +251,8 @@
       "ticker": "BP",
       "nome": "BP",
       "pais": "Reino Unido",
-      "fy2025": {
+      "anual": {
+        "ano": 2025,
         "receita": 189335,
         "lucro_liquido": 55,
         "ebitda": 28237,
@@ -273,6 +280,9 @@
           "producao_usada_kboed": 2310,
           "dias_periodo": 365,
           "ev": 136894,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_ebitda_x": 4.85,
           "ev_por_boed_usd": 59261.0,
           "fcf_yield_pct": 9.83,
@@ -317,6 +327,9 @@
           "producao_usada_kboed": 2201,
           "dias_periodo": 92,
           "ev": 141257,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_ebitda_x": 3.21,
           "ev_por_boed_usd": 64179.0,
           "fcf_yield_pct": 20.4,
@@ -491,7 +504,8 @@
       "ticker": "SHEL",
       "nome": "Shell",
       "pais": "Reino Unido",
-      "fy2025": {
+      "anual": {
+        "ano": 2025,
         "receita": 266886,
         "lucro_liquido": 17837,
         "ebitda": 52881,
@@ -519,6 +533,9 @@
           "producao_usada_kboed": 2800,
           "dias_periodo": 365,
           "ev": 326466,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 116595.0,
           "fcf_yield_pct": 8.52,
           "dividendos_estimados": 4380.0,
@@ -563,6 +580,9 @@
           "producao_usada_kboed": 2455,
           "dias_periodo": 92,
           "ev": 320429,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 130521.0,
           "fcf_yield_pct": 13.31,
           "dividendos_estimados": 4380.0,
@@ -737,7 +757,8 @@
       "ticker": "EQNR",
       "nome": "Equinor",
       "pais": "Noruega",
-      "fy2025": {
+      "anual": {
+        "ano": 2025,
         "receita": 106462,
         "lucro_liquido": 5043,
         "ebitda": 37826,
@@ -765,6 +786,9 @@
           "producao_usada_kboed": 2165,
           "dias_periodo": 365,
           "ev": 87498,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 40415.0,
           "fcf_yield_pct": 6.01,
           "dividendos_estimados": 3697.0,
@@ -809,6 +833,9 @@
           "producao_usada_kboed": 2165,
           "dias_periodo": 92,
           "ev": 105053,
+          "ev_inclui_nao_controladores": false,
+          "concentracao_recompras_pct": null,
+          "brent_medio_usd": null,
           "ev_por_boed_usd": 48523.0,
           "fcf_yield_pct": 11.4,
           "dividendos_estimados": 3697.0,
@@ -990,11 +1017,11 @@
       "Escala"
     ],
     "dias_periodo": {
-      "fy2025": 365,
+      "anual": 365,
       "q_recente": 90
     },
     "fator_anualizacao": {
-      "fy2025": 1,
+      "anual": 1,
       "q_recente": 4
     },
     "tem_historico": true,

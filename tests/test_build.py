@@ -27,7 +27,7 @@ def empresa_sintetica(receita, lucro, margem):
     }
     return {
         "ticker": "TST", "nome": "Teste", "pais": "X",
-        "fy2025": dict(periodo), "q_recente": dict(periodo),
+        "anual": dict(periodo, ano=2025), "q_recente": dict(periodo),
         "mercado": {"market_cap": 1000.0, "pe": 10.0,
                     "dividend_yield_pct": 2.0, "preco_acao": 50.0},
         "fontes": ["teste"],
@@ -61,7 +61,7 @@ def test_todas_empresas_ganham_derivados(dados):
     for e in dados["empresas"]:
         assert "derivados" in e
         assert "perfil" in e
-        for periodo in ("fy2025", "q_recente"):
+        for periodo in ("anual", "q_recente"):
             assert "derivados" in e[periodo], f"{e['ticker']} {periodo}"
 
 
@@ -74,7 +74,7 @@ def test_json_primario_nao_e_alterado_no_disco():
     """
     bruto = (ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8")
     raw = json.loads(bruto)
-    assert "derivados" not in raw["empresas"][0]["fy2025"]
+    assert "derivados" not in raw["empresas"][0]["anual"]
     assert "meta_build" not in raw
     bd.enriquecer(json.loads(bruto))
     assert (ROOT / "indicadores_oleo_gas.json").read_text(encoding="utf-8") == bruto
@@ -85,7 +85,7 @@ def test_json_primario_nao_e_alterado_no_disco():
 # --------------------------------------------------------------------------- #
 def test_margem_ebitda_bate_com_calculo_manual(dados):
     xom = next(e for e in dados["empresas"] if e["ticker"] == "XOM")
-    p = xom["fy2025"]
+    p = xom["anual"]
     esperado = round(p["ebitda"] / p["receita"] * 100, 2)
     assert p["derivados"]["margem_ebitda_pct"] == esperado
 
@@ -99,7 +99,7 @@ def test_nd_ebitda_usa_ebitda_anualizado_no_trimestre(dados):
 
 def test_enterprise_value_soma_divida_liquida(dados):
     for e in dados["empresas"]:
-        p = e["fy2025"]
+        p = e["anual"]
         assert p["derivados"]["ev"] == round(e["mercado"]["market_cap"] + p["divida_liquida"])
 
 
@@ -172,7 +172,7 @@ def test_producao_defasada_nao_se_confunde_com_producao_proxy(dados):
 def test_bloco_anual_nunca_e_marcado_como_defasado(dados):
     """No ano a producao e anual por definicao; o conceito nao se aplica."""
     for e in dados["empresas"]:
-        d = e["fy2025"]["derivados"]
+        d = e["anual"]["derivados"]
         assert d["producao_defasada"] is False, e["ticker"]
         assert d["producao_periodo_do_dado"] is None, e["ticker"]
 
@@ -184,7 +184,7 @@ def test_ev_ebitda_sai_do_ev_e_do_ebitda_do_proprio_payload(dados):
     ele vinha, e ele divergia do nosso `ev` sobre o nosso `ebitda`.
     """
     for e in dados["empresas"]:
-        p = e["fy2025"]
+        p = e["anual"]
         esperado = round(p["derivados"]["ev"] / p["ebitda"], 2)
         assert p["derivados"]["ev_ebitda_x"] == esperado, e["ticker"]
 
@@ -220,13 +220,13 @@ def test_caixa_liquido_gera_ev_menor_que_market_cap(dados):
     """Equinor e TotalEnergies têm dívida líquida negativa."""
     for tk in ("EQNR", "TTE"):
         e = next(x for x in dados["empresas"] if x["ticker"] == tk)
-        assert e["fy2025"]["derivados"]["ev"] < e["mercado"]["market_cap"]
+        assert e["anual"]["derivados"]["ev"] < e["mercado"]["market_cap"]
 
 
 def test_receita_por_boe_em_ordem_de_grandeza_plausivel(dados):
     """Receita por barril equivalente deve ficar numa faixa realista (US$ 10–500)."""
     for e in dados["empresas"]:
-        v = e["fy2025"]["derivados"]["receita_por_boe_usd"]
+        v = e["anual"]["derivados"]["receita_por_boe_usd"]
         assert v is not None, e["ticker"]
         assert 10 < v < 500, f"{e['ticker']}: {v} US$/boe fora da faixa esperada"
 
@@ -236,8 +236,8 @@ def test_producao_ausente_usa_proxy_do_trimestre(dados):
     US$/boe calculado com o proxy do trimestre — quem lesse nao tinha como saber.
     """
     eqnr = next(e for e in dados["empresas"] if e["ticker"] == "EQNR")
-    d = eqnr["fy2025"]["derivados"]
-    assert eqnr["fy2025"]["producao_kboed"] is None
+    d = eqnr["anual"]["derivados"]
+    assert eqnr["anual"]["producao_kboed"] is None
     assert d["producao_proxy"] is True
     assert d["producao_usada_kboed"] == eqnr["q_recente"]["producao_kboed"]
     assert d["receita_por_boe_usd"] is not None
@@ -245,9 +245,9 @@ def test_producao_ausente_usa_proxy_do_trimestre(dados):
 
 def test_sem_producao_em_lugar_nenhum_nao_inventa_por_boe():
     e = empresa_sintetica(1000.0, 100.0, 10.0)
-    e["fy2025"]["producao_kboed"] = None
+    e["anual"]["producao_kboed"] = None
     e["q_recente"]["producao_kboed"] = None
-    d = bd.enriquecer({"empresas": [e]})["empresas"][0]["fy2025"]["derivados"]
+    d = bd.enriquecer({"empresas": [e]})["empresas"][0]["anual"]["derivados"]
     assert d["producao_proxy"] is False
     assert d["producao_usada_kboed"] is None
     assert d["receita_por_boe_usd"] is None
@@ -265,7 +265,7 @@ def test_margem_exibida_e_a_recalculada():
     1.295/189.335 = 0,68% (o que a fonte trazia);  55/189.335 = 0,03%.
     """
     p = bd.enriquecer({"empresas": [empresa_sintetica(189335.0, 55.0, 0.68)]})
-    p = p["empresas"][0]["fy2025"]
+    p = p["empresas"][0]["anual"]
     assert p["margem_liquida_pct"] == pytest.approx(0.03, abs=0.005)
     assert p["margem_liquida_fonte_pct"] == 0.68
 
@@ -278,7 +278,7 @@ def test_divergencia_de_margem_e_reportada_sem_descartar_a_fonte():
 
 def test_margem_ja_coerente_fica_intacta_e_sem_aviso():
     data = bd.enriquecer({"empresas": [empresa_sintetica(1000.0, 100.0, 10.0)]})
-    assert data["empresas"][0]["fy2025"]["margem_liquida_pct"] == pytest.approx(10.0)
+    assert data["empresas"][0]["anual"]["margem_liquida_pct"] == pytest.approx(10.0)
     assert not any("margem da fonte" in x for x in bd.validate(data))
 
 
@@ -299,13 +299,13 @@ def test_payout_sobre_fcf_nao_volta_como_indicador_proprio(dados):
     por recalculo acidental da mesma razao.
     """
     for e in dados["empresas"]:
-        for per in ("fy2025", "q_recente"):
+        for per in ("anual", "q_recente"):
             assert "payout_fcf_pct" not in e[per]["derivados"], e["ticker"]
     assert "payout_fcf_pct" not in bd.CSV_HEADER
 
 
 def test_run_rate_zero_quando_trimestre_e_um_quarto_do_ano():
-    d = bd.derivar_empresa({"fy2025": {"ebitda": 100}, "q_recente": {"ebitda": 25}})
+    d = bd.derivar_empresa({"anual": {"ebitda": 100}, "q_recente": {"ebitda": 25}})
     assert d["run_rate_ebitda_pct"] == 0
 
 
@@ -315,15 +315,15 @@ def test_run_rate_e_o_unico_derivado_de_empresa():
     So o EBITDA chega a tela (cartao de KPI). Se outro run-rate voltar, deve
     voltar junto com o lugar onde e lido.
     """
-    d = bd.derivar_empresa({"fy2025": {"ebitda": 100}, "q_recente": {"ebitda": 40}})
+    d = bd.derivar_empresa({"anual": {"ebitda": 100}, "q_recente": {"ebitda": 40}})
     assert set(d) == {"run_rate_ebitda_pct"}
     assert d["run_rate_ebitda_pct"] == 60.0
 
 
 def test_run_rate_sem_ano_fiscal_fica_nulo_em_vez_de_estourar():
-    assert bd.derivar_empresa({"fy2025": {"ebitda": 0}, "q_recente": {"ebitda": 9}})[
+    assert bd.derivar_empresa({"anual": {"ebitda": 0}, "q_recente": {"ebitda": 9}})[
         "run_rate_ebitda_pct"] is None
-    assert bd.derivar_empresa({"fy2025": {}, "q_recente": {}})["run_rate_ebitda_pct"] is None
+    assert bd.derivar_empresa({"anual": {}, "q_recente": {}})["run_rate_ebitda_pct"] is None
 
 
 def test_scores_do_radar_ficam_entre_0_e_100_com_extremos(dados):
@@ -413,7 +413,7 @@ def test_build_dados_publica_os_derivados_que_o_json_fonte_nao_tem(dados, tmp_pa
     lido = json.loads(saida.read_text(encoding="utf-8"))
     empresa = lido["empresas"][0]
 
-    for bloco in ("fy2025", "q_recente"):
+    for bloco in ("anual", "q_recente"):
         assert "derivados" in empresa[bloco]
         assert "ebitda_por_boe_usd" in empresa[bloco]["derivados"]
     # E os eixos do radar, que o app nao recalcula.

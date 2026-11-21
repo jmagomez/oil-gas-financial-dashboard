@@ -8,7 +8,7 @@ const emp = (t: string) => d.empresas.find((e) => e.ticker === t)!;
 
 describe('montaPonte', () => {
   it('encadeia receita -> EBITDA -> FCO -> FCF com os valores do periodo', () => {
-    const b = emp('XOM').fy2025;
+    const b = emp('XOM').anual;
     const p = montaPonte(b)!;
     const acum = Object.fromEntries(p.passos.map((s) => [s.rotulo, s.acumulado]));
     expect(acum['Receita']).toBe(b.receita);
@@ -18,7 +18,7 @@ describe('montaPonte', () => {
   });
 
   it('os passos de consumo sao NEGATIVOS e somam a diferenca', () => {
-    const b = emp('XOM').fy2025;
+    const b = emp('XOM').anual;
     const p = montaPonte(b)!;
     const custos = p.passos.find((s) => s.rotulo === 'Custos operacionais')!;
     const giro = p.passos.find((s) => s.rotulo.startsWith('Capital de giro'))!;
@@ -30,7 +30,7 @@ describe('montaPonte', () => {
   });
 
   it('a ponte da XOM fecha exatamente: residuo zero', () => {
-    const p = montaPonte(emp('XOM').fy2025)!;
+    const p = montaPonte(emp('XOM').anual)!;
     expect(p.residuo).toBe(0);
     expect(p.residuoRelevante).toBe(false);
   });
@@ -39,7 +39,7 @@ describe('montaPonte', () => {
     // No payload real: FCO 42.863, capex -18.948 -> 23.915, mas o FCF
     // publicado e 23.916. Um dolar, por arredondamento na fonte. Forcar as
     // barras a fechar esconderia a diferenca.
-    const b = emp('SHEL').fy2025;
+    const b = emp('SHEL').anual;
     const p = montaPonte(b)!;
     expect(b.fluxo_caixa_operacional! + b.capex!).not.toBe(b.fcf);
     expect(p.residuo).toBe(1);
@@ -49,7 +49,7 @@ describe('montaPonte', () => {
   });
 
   it('marca residuo RELEVANTE quando passa de 1% do FCF', () => {
-    const b = { ...emp('XOM').fy2025, fcf: emp('XOM').fy2025.fcf! + 5000 };
+    const b = { ...emp('XOM').anual, fcf: emp('XOM').anual.fcf! + 5000 };
     const p = montaPonte(b)!;
     expect(p.residuo).toBe(5000);
     expect(p.residuoRelevante).toBe(true);
@@ -57,7 +57,7 @@ describe('montaPonte', () => {
 
   it('e null quando falta qualquer campo da cadeia, em vez de somar buraco', () => {
     for (const campo of ['receita', 'ebitda', 'fluxo_caixa_operacional', 'capex', 'fcf'] as const) {
-      expect(montaPonte({ ...emp('XOM').fy2025, [campo]: null })).toBeNull();
+      expect(montaPonte({ ...emp('XOM').anual, [campo]: null })).toBeNull();
     }
   });
 });

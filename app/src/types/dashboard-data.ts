@@ -19,21 +19,22 @@ export type Dados = z.infer<typeof dadosSchema>;
 export type EmpresaEnriquecida = z.infer<typeof empresaEnriquecidaSchema>;
 export type MetaBuild = z.infer<typeof metaBuildSchema>;
 
-export type BlocoEnriquecido = EmpresaEnriquecida['fy2025'] | EmpresaEnriquecida['q_recente'];
-export type DerivadosPeriodo = EmpresaEnriquecida['fy2025']['derivados'];
+export type BlocoEnriquecido = EmpresaEnriquecida['anual'] | EmpresaEnriquecida['q_recente'];
+export type DerivadosPeriodo = EmpresaEnriquecida['anual']['derivados'];
 export type HistoricoEnriquecido = EmpresaEnriquecida['historico'][number];
 
 /** Qual coluna de periodo a tela esta mostrando. */
-export type Periodo = 'fy2025' | 'q_recente';
+export type Periodo = 'anual' | 'q_recente';
 
 export function bloco(e: EmpresaEnriquecida, p: Periodo): BlocoEnriquecido {
-  return p === 'fy2025' ? e.fy2025 : e.q_recente;
+  return p === 'anual' ? e.anual : e.q_recente;
 }
 
 /**
- * Rotulo do periodo. Para o trimestre vem de CADA EMPRESA: no payload elas
- * estao em trimestres diferentes (Q2 e Q3 2026), e um rotulo global mentiria.
+ * Rotulo do periodo, sempre de CADA EMPRESA: no payload elas podem estar em
+ * trimestres (e, na virada, em anos fiscais) diferentes, e um rotulo global
+ * mentiria.
  */
 export function rotuloPeriodo(e: EmpresaEnriquecida, p: Periodo): string {
-  return p === 'fy2025' ? 'FY2025' : e.q_recente.trimestre;
+  return p === 'anual' ? `FY${e.anual.ano}` : e.q_recente.trimestre;
 }

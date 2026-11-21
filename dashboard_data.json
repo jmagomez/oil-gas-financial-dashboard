@@ -2,7 +2,6 @@
  "referencia": {
   "data_consulta": "2026-07-20",
   "moeda": "USD (milhões, exceto onde indicado)",
-  "periodo_anual": "FY2025 (ano fiscal encerrado em 31/12/2025)",
   "fonte_principal": "stockanalysis.com (financials, balance-sheet, cash-flow-statement, statistics, metrics), complementado por press releases oficiais (Shell, BP, Equinor, TotalEnergies) para dívida líquida/gearing e produção",
   "notas": [
    "Petrobras a partir do 3T26: coletada do ITR da CVM e convertida pela PTAX do Banco Central (fluxos pela média de 5,1366; saldos pelo fechamento de 5,1809 em 30/09/2026). Conferido contra o 6-K em dólar da própria companhia: lucro 7.739 vs 7.740, EBITDA 16.065 vs 16.061, FCO 12.028 vs 12.026, capex 5.402 vs 5.402, dívida líquida 57.880 vs 57.847. O EBITDA é o da Resolução CVM 156; o EBITDA AJUSTADO que a companhia destaca (16.703) soma de volta US$ 710 milhões de resultado com baixa de ativos e exclui equivalência patrimonial. As sete empresas estão no Q3 2026.",
@@ -12,16 +11,18 @@
    "Shell 3T26: a aquisição da ARC Resources foi concluída no trimestre e soma cerca de 370 kboe/d. O salto do Integrated Gas de 631 para 772 kboe/d não é crescimento orgânico.",
    "Chevron 3T26: queda de 4.070 para 3.980 MBOED por menores entitlements (preço mais alto) e pelo conflito no Oriente Médio; a Venezuela entrou com um mês após a mudança para equivalência patrimonial.",
    "Petrobras: demonstrações originais em BRL (S&P Global via stockanalysis.com); convertidas para USD usando taxa média implícita de ~R$5,58/US$ (FY2025) e ~R$5,25/US$ (Q1 2026). Métricas de mercado (Market Cap, P/E, EV/EBITDA, ROE, ROA, D/E, yield) já nativas em USD (ADR na NYSE).",
-   "BP e Shell: dívida líquida e gearing reportados na metodologia oficial (não-IFRS) das próprias empresas, que difere do cálculo padronizado caixa-menos-dívida-total.",
+   "Dívida líquida em UMA definição para as sete e para todos os períodos: dívida bruta com arrendamentos menos caixa e aplicações de curto prazo (Yahoo; Petrobras pela CVM). Não é o número que cada empresa destaca — a BP divulga 13.870 no 3T26, sem arrendamentos e sem híbridos; aqui são 26.563 — e é por isso que compara. O ano fiscal usa o saldo do 4T do mesmo ano. Até 11/2026 o FY2025 de BP e Shell vinha na metodologia própria de cada uma e o da BP era 22.200 contra 35.815 do 4T25 da série.",
    "BP FY2025: lucro líquido atribuível aos acionistas próximo de zero (US$ 55 milhões) por itens não-recorrentes; margem líquida quase nula no ano.",
-   "Equinor e TotalEnergies apresentam caixa líquido positivo (dívida líquida negativa) em ambos os períodos.",
+   "Correção de curadoria (11/2026): Equinor e TotalEnergies apareciam em caixa líquido no FY2025 (−11.888 e −31.499) e no 1T26 (−4.209 e −34.142). Era sinal trocado — convenção 'Net Cash (Debt)' de agregador; a TotalEnergies reporta gearing de 15% no fim de 2025, e a série do Yahoo tem +32.907 no 4T25 e +30.991 no 2T26. O FY passou ao saldo do 4T25 e o 1T26 de seis empresas (curado à mão, com definições misturadas: o da BP era o número dela, 25.300) foi anulado para a coleta repreencher na definição única. O build agora acusa troca de sinal grande entre trimestres.",
    "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
    "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
    "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 21/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
    "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
    "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
    "Produção da Equinor em FY2025 não estava disponível de forma consistente na fonte padronizada; os indicadores por boe do ano fiscal usam a produção do trimestre mais recente como proxy nesse caso.",
-   "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%."
+   "Shell: a empresa publica duas bases de produção. O total do grupo ('oil and gas production available for sale') dá FY2025 = 2800, base da coluna anual deste arquivo; a soma dos segmentos Upstream + Integrated Gas dá FY2025 = 2759. A série TRIMESTRAL (histórico e q_recente) usa a soma dos segmentos. As duas colunas estão em bases diferentes — divergem em ~1,5%.",
+   "EV inclui a participação de não controladores (saldo do fim do período; no ano fiscal, o do 4T): o EBITDA é consolidado a 100%, então o numerador também precisa ser. Na BP são US$ 17,4 bi em 30/09/2026 (release do 3T26), ~16% do market cap. Enquanto a coleta não traz o saldo de uma empresa, o payload marca derivados.ev_inclui_nao_controladores = false e a seção de valuation lista quem está sem.",
+   "BP — recompras da DFC do release do 3T26 (Net issue (repurchase) of shares): 750 no 3T25, 562 no 1T26 e zero no 2T26 e no 3T26; a BP passou a destinar o caixa excedente a reduzir a dívida. O Yahoo omite a linha quando ela é zero e não trazia o 3T25, o que deixava a BP sem shareholder yield e rebaixava o radar inteiro para a base de dividendos."
   ],
   "versao_dados": "1.2",
   "atualizado_em": "2026-11-21",
@@ -32,7 +33,8 @@
    "ticker": "XOM",
    "nome": "ExxonMobil",
    "pais": "EUA",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 323910,
     "lucro_liquido": 29760,
     "ebitda": 59530,
@@ -40,7 +42,7 @@
     "fluxo_caixa_operacional": 51970,
     "fcf": 23610,
     "capex": -28360,
-    "divida_liquida": 32860,
+    "divida_liquida": 32856,
     "divida_patrimonio_pct": 16.3,
     "roe_pct": 11.1,
     "roa_pct": 6.6,
@@ -61,11 +63,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 4740,
      "dias_periodo": 365,
-     "ev": 685495,
+     "ev": 685491,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 11.52,
-     "ev_por_boed_usd": 144619.0,
+     "ev_por_boed_usd": 144618.0,
      "fcf_yield_pct": 3.62,
      "dividendos_estimados": 16903.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -113,10 +118,13 @@
      "producao_usada_kboed": 4496,
      "dias_periodo": 92,
      "ev": 674732,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 7.98,
      "ev_por_boed_usd": 150074.0,
      "fcf_yield_pct": 6.58,
      "dividendos_estimados": 17263,
+     "concentracao_recompras_pct": 26.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 2.65,
      "shareholder_yield_pct": 5.78,
@@ -204,7 +212,7 @@
      "capex": -6470,
      "dividendos_pagos": 4334,
      "recompras": 4868,
-     "divida_liquida": 39230,
+     "divida_liquida": null,
      "producao_kboed": 4590,
      "derivados": {
       "margem_ebitda_pct": 14.5,
@@ -283,7 +291,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 5379
    },
    "derivados": {
     "run_rate_ebitda_pct": 89.63
@@ -291,7 +300,7 @@
    "perfil": {
     "Rentabilidade": 17.6,
     "Geração de caixa": 80.4,
-    "Solidez": 42.0,
+    "Solidez": 81.7,
     "Valuation": 0.0,
     "Retorno ao acionista": 0.0,
     "Escala": 100.0
@@ -301,7 +310,8 @@
    "ticker": "CVX",
    "nome": "Chevron",
    "pais": "EUA",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 184430,
     "lucro_liquido": 12490,
     "ebitda": 36490,
@@ -309,7 +319,7 @@
     "fluxo_caixa_operacional": 33940,
     "fcf": 16590,
     "capex": -17350,
-    "divida_liquida": 34460,
+    "divida_liquida": 34461,
     "divida_patrimonio_pct": 21.2,
     "roe_pct": 7.1,
     "roa_pct": 4.2,
@@ -330,11 +340,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 3720,
      "dias_periodo": 365,
-     "ev": 441043,
+     "ev": 441044,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 12.09,
      "ev_por_boed_usd": 118560.0,
      "fcf_yield_pct": 4.08,
      "dividendos_estimados": 13864.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -382,10 +395,13 @@
      "producao_usada_kboed": 3980,
      "dias_periodo": 92,
      "ev": 427313,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 6.74,
      "ev_por_boed_usd": 107365.0,
      "fcf_yield_pct": 8.38,
      "dividendos_estimados": 13916,
+     "concentracao_recompras_pct": 27.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 3.42,
      "shareholder_yield_pct": 6.15,
@@ -473,7 +489,7 @@
      "capex": -4060,
      "dividendos_pagos": 3526,
      "recompras": 2572,
-     "divida_liquida": 40100,
+     "divida_liquida": null,
      "producao_kboed": 3860,
      "derivados": {
       "margem_ebitda_pct": 19.03,
@@ -552,7 +568,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 3003
    },
    "derivados": {
     "run_rate_ebitda_pct": 123.67
@@ -560,9 +577,9 @@
    "perfil": {
     "Rentabilidade": 38.0,
     "Geração de caixa": 100.0,
-    "Solidez": 26.4,
+    "Solidez": 51.9,
     "Valuation": 20.5,
-    "Retorno ao acionista": 19.5,
+    "Retorno ao acionista": 15.3,
     "Escala": 77.9
    }
   },
@@ -570,7 +587,8 @@
    "ticker": "SHEL",
    "nome": "Shell",
    "pais": "Reino Unido",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 266886,
     "lucro_liquido": 17837,
     "ebitda": 52881,
@@ -578,7 +596,7 @@
     "fluxo_caixa_operacional": 42863,
     "fcf": 23916,
     "capex": -18948,
-    "divida_liquida": 45687,
+    "divida_liquida": 46013,
     "divida_patrimonio_pct": 20.7,
     "roe_pct": 10.1,
     "roa_pct": 4.7,
@@ -589,7 +607,7 @@
      "base_12m_ebitda": "fy",
      "base_12m_fcf": "fy",
      "janela_ttm": null,
-     "nd_ebitda_x": 0.86,
+     "nd_ebitda_x": 0.87,
      "conversao_fcf_pct": 45.23,
      "capex_fco_pct": 44.21,
      "receita_por_boe_usd": 261.14,
@@ -599,11 +617,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2800,
      "dias_periodo": 365,
-     "ev": 309824,
-     "ev_ebitda_x": 5.86,
-     "ev_por_boed_usd": 110651.0,
+     "ev": 310150,
+     "ev_inclui_nao_controladores": false,
+     "ev_ebitda_x": 5.87,
+     "ev_por_boed_usd": 110768.0,
      "fcf_yield_pct": 9.05,
      "dividendos_estimados": 4332.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -651,10 +672,13 @@
      "producao_usada_kboed": 2574,
      "dias_periodo": 92,
      "ev": 303787,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 3.93,
      "ev_por_boed_usd": 118021.0,
      "fcf_yield_pct": 14.14,
      "dividendos_estimados": 8485,
+     "concentracao_recompras_pct": 27.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 3.21,
      "shareholder_yield_pct": 8.05,
@@ -742,7 +766,7 @@
      "capex": -3757,
      "dividendos_pagos": 2100,
      "recompras": 3182,
-     "divida_liquida": 52606,
+     "divida_liquida": null,
      "producao_kboed": 2752,
      "derivados": {
       "margem_ebitda_pct": 23.11,
@@ -820,7 +844,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 3425
    },
    "derivados": {
     "run_rate_ebitda_pct": 87.76
@@ -828,9 +853,9 @@
    "perfil": {
     "Rentabilidade": 21.8,
     "Geração de caixa": 99.2,
-    "Solidez": 29.6,
+    "Solidez": 57.3,
     "Valuation": 66.8,
-    "Retorno ao acionista": 14.2,
+    "Retorno ao acionista": 93.8,
     "Escala": 17.5
    }
   },
@@ -838,7 +863,8 @@
    "ticker": "BP",
    "nome": "BP",
    "pais": "Reino Unido",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 189335,
     "lucro_liquido": 55,
     "ebitda": 28237,
@@ -846,7 +872,7 @@
     "fluxo_caixa_operacional": 24493,
     "fcf": 11272,
     "capex": -13221,
-    "divida_liquida": 22200,
+    "divida_liquida": 35815,
     "divida_patrimonio_pct": 98,
     "roe_pct": 0.1,
     "roa_pct": 0.02,
@@ -857,7 +883,7 @@
      "base_12m_ebitda": "fy",
      "base_12m_fcf": "fy",
      "janela_ttm": null,
-     "nd_ebitda_x": 0.79,
+     "nd_ebitda_x": 1.27,
      "conversao_fcf_pct": 39.92,
      "capex_fco_pct": 53.98,
      "receita_por_boe_usd": 224.56,
@@ -867,11 +893,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2310,
      "dias_periodo": 365,
-     "ev": 132309,
-     "ev_ebitda_x": 4.69,
-     "ev_por_boed_usd": 57277.0,
+     "ev": 145924,
+     "ev_inclui_nao_controladores": false,
+     "ev_ebitda_x": 5.17,
+     "ev_por_boed_usd": 63171.0,
      "fcf_yield_pct": 10.24,
      "dividendos_estimados": 5186.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -891,6 +920,7 @@
     "fcf": 11865,
     "capex": -2964,
     "dividendos_pagos": 1345,
+    "recompras": 0,
     "divida_liquida": 26563,
     "divida_patrimonio_pct": 112.0,
     "roe_pct": 14.52,
@@ -918,15 +948,18 @@
      "producao_usada_kboed": 2220,
      "dias_periodo": 92,
      "ev": 136672,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 3.11,
      "ev_por_boed_usd": 61564.0,
      "fcf_yield_pct": 21.25,
      "dividendos_estimados": 5201,
+     "concentracao_recompras_pct": 60.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.72,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
+     "shareholder_yield_pct": 5.98,
+     "distribuicao_fco_pct": 18.23,
+     "recompras_12m": 1388,
      "cobertura_dividendo_x": 4.5
     },
     "margem_liquida_fonte_pct": 6.87
@@ -966,6 +999,7 @@
      "fcf": 4615,
      "capex": -3171,
      "dividendos_pagos": 1288,
+     "recompras": 750,
      "divida_liquida": 39769,
      "producao_kboed": 2362,
      "derivados": {
@@ -1007,7 +1041,8 @@
      "fcf": -382,
      "capex": -3242,
      "dividendos_pagos": 1278,
-     "divida_liquida": 25300,
+     "recompras": 562,
+     "divida_liquida": null,
      "producao_kboed": 2344,
      "derivados": {
       "margem_ebitda_pct": 22.74,
@@ -1027,6 +1062,7 @@
      "fcf": 7771,
      "capex": -3087,
      "dividendos_pagos": 1302,
+     "recompras": 0,
      "divida_liquida": 35468,
      "producao_kboed": 2201,
      "derivados": {
@@ -1061,6 +1097,11 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "producao reportada do upstream no release do 3T26 (2.220 mboe/d), dentro do guidance de 2.190-2.240 do trading statement de outubro"
+    },
+    "recompras": {
+     "fonte": "release do 3T26 da BP, DFC consolidada (Net issue (repurchase) of shares)",
+     "url": "https://www.bp.com/press-and-publications/press-releases/third-quarter-2026-results",
+     "observacao": "3T25 750; 1T26 562 (nove meses de 2026 = 562, com 2T26 e 3T26 zerados); 2T26 e 3T26 zero -- a BP passou a destinar o caixa excedente a reduzir a divida e nao recomprou. O Yahoo omite a linha quando ela e zero e nao trouxe o 3T25; o 4T25 (826) e do Yahoo"
     }
    },
    "fontes": [
@@ -1077,14 +1118,15 @@
     "fcf": 23393,
     "capex": -12756,
     "dividendos_pagos": 5201,
-    "recompras": null,
+    "recompras": 1388,
     "producao_kboed": 2277.25,
     "janela": [
      "2025-Q4",
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 826
    },
    "derivados": {
     "run_rate_ebitda_pct": 99.54
@@ -1092,9 +1134,9 @@
    "perfil": {
     "Rentabilidade": 0.0,
     "Geração de caixa": 81.3,
-    "Solidez": 32.4,
+    "Solidez": 26.7,
     "Valuation": 80.4,
-    "Retorno ao acionista": 52.5,
+    "Retorno ao acionista": 8.3,
     "Escala": 2.3
    }
   },
@@ -1102,7 +1144,8 @@
    "ticker": "EQNR",
    "nome": "Equinor",
    "pais": "Noruega",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 106462,
     "lucro_liquido": 5043,
     "ebitda": 37826,
@@ -1110,7 +1153,7 @@
     "fluxo_caixa_operacional": 19971,
     "fcf": 5977,
     "capex": -13994,
-    "divida_liquida": -11888,
+    "divida_liquida": 11887,
     "divida_patrimonio_pct": 77,
     "roe_pct": 12.2,
     "roa_pct": 3.8,
@@ -1121,7 +1164,7 @@
      "base_12m_ebitda": "fy",
      "base_12m_fcf": "fy",
      "janela_ttm": null,
-     "nd_ebitda_x": -0.31,
+     "nd_ebitda_x": 0.31,
      "conversao_fcf_pct": 15.8,
      "capex_fco_pct": 70.07,
      "receita_por_boe_usd": 134.66,
@@ -1131,11 +1174,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2166,
      "dias_periodo": 365,
-     "ev": 81095,
-     "ev_ebitda_x": 2.14,
-     "ev_por_boed_usd": 37440.0,
+     "ev": 104870,
+     "ev_inclui_nao_controladores": false,
+     "ev_ebitda_x": 2.77,
+     "ev_por_boed_usd": 48416.0,
      "fcf_yield_pct": 6.43,
      "dividendos_estimados": 3654.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1183,10 +1229,13 @@
      "producao_usada_kboed": 2166,
      "dias_periodo": 92,
      "ev": 98650,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 1.92,
      "ev_por_boed_usd": 45545.0,
      "fcf_yield_pct": 12.19,
      "dividendos_estimados": 3747,
+     "concentracao_recompras_pct": 81.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.03,
      "shareholder_yield_pct": 8.2,
@@ -1274,7 +1323,7 @@
      "capex": -3116,
      "dividendos_pagos": 920,
      "recompras": 271,
-     "divida_liquida": -4209,
+     "divida_liquida": null,
      "producao_kboed": 2313,
      "derivados": {
       "margem_ebitda_pct": 40.63,
@@ -1352,7 +1401,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 3137
    },
    "derivados": {
     "run_rate_ebitda_pct": 56.78
@@ -1360,9 +1410,9 @@
    "perfil": {
     "Rentabilidade": 86.8,
     "Geração de caixa": 0.0,
-    "Solidez": 76.4,
+    "Solidez": 100.0,
     "Valuation": 100.0,
-    "Retorno ao acionista": 35.0,
+    "Retorno ao acionista": 100.0,
     "Escala": 0.0
    }
   },
@@ -1370,7 +1420,8 @@
    "ticker": "TTE",
    "nome": "TotalEnergies",
    "pais": "França",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 182344,
     "lucro_liquido": 13127,
     "ebitda": 34806,
@@ -1378,7 +1429,7 @@
     "fluxo_caixa_operacional": 27343,
     "fcf": 10390,
     "capex": -16953,
-    "divida_liquida": -31499,
+    "divida_liquida": 32907,
     "divida_patrimonio_pct": 52,
     "roe_pct": 11.3,
     "roa_pct": 4.55,
@@ -1389,7 +1440,7 @@
      "base_12m_ebitda": "fy",
      "base_12m_fcf": "fy",
      "janela_ttm": null,
-     "nd_ebitda_x": -0.9,
+     "nd_ebitda_x": 0.95,
      "conversao_fcf_pct": 29.85,
      "capex_fco_pct": 62.0,
      "receita_por_boe_usd": 197.46,
@@ -1399,11 +1450,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2530,
      "dias_periodo": 365,
-     "ev": 155138,
-     "ev_ebitda_x": 4.46,
-     "ev_por_boed_usd": 61319.0,
+     "ev": 219544,
+     "ev_inclui_nao_controladores": false,
+     "ev_ebitda_x": 6.31,
+     "ev_por_boed_usd": 86776.0,
      "fcf_yield_pct": 5.57,
      "dividendos_estimados": 8791.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1451,10 +1505,13 @@
      "producao_usada_kboed": 2474,
      "dias_periodo": 92,
      "ev": 211825,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 3.89,
      "ev_por_boed_usd": 85620.0,
      "fcf_yield_pct": 12.06,
      "dividendos_estimados": 8532,
+     "concentracao_recompras_pct": 29.0,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.57,
      "shareholder_yield_pct": 7.41,
@@ -1542,7 +1599,7 @@
      "capex": -4621,
      "dividendos_pagos": 2123,
      "recompras": 775,
-     "divida_liquida": -34142,
+     "divida_liquida": null,
      "producao_kboed": 2553,
      "derivados": {
       "margem_ebitda_pct": 28.89,
@@ -1620,7 +1677,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 1511
    },
    "derivados": {
     "run_rate_ebitda_pct": 113.83
@@ -1628,9 +1686,9 @@
    "perfil": {
     "Rentabilidade": 33.7,
     "Geração de caixa": 47.4,
-    "Solidez": 100.0,
+    "Solidez": 51.1,
     "Valuation": 67.5,
-    "Retorno ao acionista": 48.7,
+    "Retorno ao acionista": 67.4,
     "Escala": 13.2
    }
   },
@@ -1638,7 +1696,8 @@
    "ticker": "PBR",
    "nome": "Petrobras",
    "pais": "Brasil",
-   "fy2025": {
+   "anual": {
+    "ano": 2025,
     "receita": 89200,
     "lucro_liquido": 19740,
     "ebitda": 37310,
@@ -1646,7 +1705,7 @@
     "fluxo_caixa_operacional": 35910,
     "fcf": 16420,
     "capex": -19490,
-    "divida_liquida": 59760,
+    "divida_liquida": 60596,
     "divida_patrimonio_pct": 91.96,
     "roe_pct": 28.1,
     "roa_pct": 9.4,
@@ -1657,7 +1716,7 @@
      "base_12m_ebitda": "fy",
      "base_12m_fcf": "fy",
      "janela_ttm": null,
-     "nd_ebitda_x": 1.6,
+     "nd_ebitda_x": 1.62,
      "conversao_fcf_pct": 44.01,
      "capex_fco_pct": 54.27,
      "receita_por_boe_usd": 81.73,
@@ -1667,11 +1726,14 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2990,
      "dias_periodo": 365,
-     "ev": 162934,
-     "ev_ebitda_x": 4.37,
-     "ev_por_boed_usd": 54493.0,
+     "ev": 163770,
+     "ev_inclui_nao_controladores": false,
+     "ev_ebitda_x": 4.39,
+     "ev_por_boed_usd": 54773.0,
      "fcf_yield_pct": 15.91,
      "dividendos_estimados": 5509.0,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 69.1,
      "base_dividendo": "estimado_yield_mercado",
      "dividend_yield_caixa_pct": null,
      "shareholder_yield_pct": null,
@@ -1719,10 +1781,13 @@
      "producao_usada_kboed": 3512,
      "dias_periodo": 92,
      "ev": 161054,
+     "ev_inclui_nao_controladores": false,
      "ev_ebitda_x": 2.88,
      "ev_por_boed_usd": 45858.0,
      "fcf_yield_pct": 21.11,
      "dividendos_estimados": 6796,
+     "concentracao_recompras_pct": null,
+     "brent_medio_usd": 96.33,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 6.59,
      "shareholder_yield_pct": 6.59,
@@ -1874,6 +1939,10 @@
      "fonte": "release da empresa",
      "trimestre_do_dado": "Q3 2026",
      "observacao": "producao propria ('Total production') do Relatorio de Producao e Vendas do 3T26: 3,512 MMboed, recorde, +5,3% sobre o 2T26 -- nao a operada (5,08 MMboed). Ramp-up de P-78 e P-79 em Buzios"
+    },
+    "recompras": {
+     "fonte": "CVM, DFC consolidada (6.03, financiamento)",
+     "observacao": "zero porque a DFC entregue a CVM nao tem linha de recompra de acoes nos trimestres da serie; o ultimo programa (2023-2024, R$ 5,6 bi em preferenciais) foi encerrado em 2024. As linhas 6.03 lidas em cada coleta saem no resumo do workflow atualiza-fundamentos, para conferencia"
     }
    },
    "fontes": [
@@ -1897,7 +1966,8 @@
      "2026-Q1",
      "2026-Q2",
      "Q3 2026"
-    ]
+    ],
+    "recompras_maior_trimestre": 0
    },
    "derivados": {
     "run_rate_ebitda_pct": 72.23
@@ -1907,7 +1977,7 @@
     "Geração de caixa": 95.1,
     "Solidez": 0.0,
     "Valuation": 84.2,
-    "Retorno ao acionista": 100.0,
+    "Retorno ao acionista": 33.5,
     "Escala": 57.8
    }
   }
@@ -1941,9 +2011,47 @@
    "mais_recente": "Q3 2026",
    "mais_antigo": "Q3 2026"
   },
+  "ano_fiscal": {
+   "por_empresa": {
+    "XOM": 2025,
+    "CVX": 2025,
+    "SHEL": 2025,
+    "BP": 2025,
+    "EQNR": 2025,
+    "TTE": 2025,
+    "PBR": 2025
+   },
+   "distintos": [
+    2025
+   ],
+   "empresas_por_ano": {
+    "2025": [
+     "BP",
+     "CVX",
+     "EQNR",
+     "PBR",
+     "SHEL",
+     "TTE",
+     "XOM"
+    ]
+   },
+   "uniforme": true,
+   "mais_recente": 2025
+  },
+  "brent": {
+   "fonte": "EIA, Europe Brent Spot Price FOB (RBRTE), media mensal",
+   "por_trimestre": {
+    "Q2 2025": 68.01,
+    "Q3 2025": 68.97,
+    "Q4 2025": 63.63,
+    "Q1 2026": 80.21,
+    "Q2 2026": 103.28,
+    "Q3 2026": 96.33
+   }
+  },
   "base_retorno_acionista": {
-   "chave": "dividend_yield_caixa",
-   "descricao": "dividendos pagos em 12 meses / market cap"
+   "chave": "shareholder_yield",
+   "descricao": "dividendos + recompras pagos em 12 meses / market cap"
   },
   "eixos_perfil": [
    "Rentabilidade",
@@ -1954,11 +2062,11 @@
    "Escala"
   ],
   "dias_periodo": {
-   "fy2025": 365,
+   "anual": 365,
    "q_recente": 90
   },
   "fator_anualizacao": {
-   "fy2025": 1,
+   "anual": 1,
    "q_recente": 4
   },
   "tem_historico": true,
