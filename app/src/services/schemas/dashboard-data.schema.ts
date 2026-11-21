@@ -68,6 +68,8 @@ const derivadosPeriodoSchema = z.object({
   concentracao_recompras_pct: num,
   /** Brent medio do periodo (EIA, US$/bbl): contexto de preco. */
   brent_medio_usd: num,
+  /** Preco realizado de liquidos / Brent do trimestre (%). So no trimestre. */
+  captura_brent_pct: num,
   /** Derivado de ev / ebitda_anual, na base de `base_12m_ebitda`. */
   ev_ebitda_x: num,
   ev_por_boed_usd: num,
