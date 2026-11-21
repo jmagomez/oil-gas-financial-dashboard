@@ -11,9 +11,11 @@ interface Props {
    * porque as empresas estao em trimestres diferentes.
    */
   rotuloTrimestre: string;
+  /** Idem para o ano fiscal: FY2025, ou "ano fiscal" quando ha mais de um. */
+  rotuloAno: string;
 }
 
-export function SeletorPeriodo({ valor, onChange, rotuloTrimestre }: Props) {
+export function SeletorPeriodo({ valor, onChange, rotuloTrimestre, rotuloAno }: Props) {
   return (
     <ToggleGroup.Root
       type="single"
@@ -21,14 +23,14 @@ export function SeletorPeriodo({ valor, onChange, rotuloTrimestre }: Props) {
       onValueChange={(v) => {
         // O Radix emite "" quando o item ativo e clicado de novo. Ignorar
         // mantem sempre um periodo escolhido: nao existe "nenhum periodo".
-        if (v === 'fy2025' || v === 'q_recente') onChange(v);
+        if (v === 'anual' || v === 'q_recente') onChange(v);
       }}
       aria-label="Período"
       className="inline-flex rounded-lg border border-border p-0.5"
     >
       {(
         [
-          ['fy2025', 'FY2025'],
+          ['anual', rotuloAno],
           ['q_recente', rotuloTrimestre],
         ] as const
       ).map(([v, rot]) => (
