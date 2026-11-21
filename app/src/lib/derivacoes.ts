@@ -54,10 +54,16 @@ export function patrimonioEstimado(b: BlocoFinanceiro): number | null {
 /**
  * Uniao discriminada de proposito: caixa liquido NAO e alavancagem negativa.
  *
- * Equinor e TotalEnergies estao em caixa liquido (divida liquida de -11.888 e
- * -31.499 em FY2025). Um grafico que coloca -40% ao lado dos +46% da Petrobras
- * na mesma escala afirma uma comparacao que nao existe. Com esta uniao, a tela
- * nao CONSEGUE plotar caixa liquido como barra negativa sem tratar o caso.
+ * Caixa liquido existe no setor (a Equinor chegou perto em 2026) e um grafico
+ * que coloca -40% ao lado dos +46% da Petrobras na mesma escala afirma uma
+ * comparacao que nao existe. Com esta uniao, a tela nao CONSEGUE plotar caixa
+ * liquido como barra negativa sem tratar o caso.
+ *
+ * Nota de curadoria (11/2026): o payload trazia Equinor e TotalEnergies em
+ * caixa liquido no FY2025 (-11.888 e -31.499). Era SINAL TROCADO -- convencao
+ * "Net Cash (Debt)" de agregador; a TotalEnergies reporta gearing de 15%. O
+ * pipeline agora acusa troca de sinal grande entre trimestres
+ * (`build_dashboard.valida_divida_liquida`).
  */
 export type Alavancagem =
   | { tipo: 'gearing'; pct: number }
