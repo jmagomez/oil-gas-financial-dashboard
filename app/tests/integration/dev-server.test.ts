@@ -87,11 +87,11 @@ describe('dev server: os JSON da raiz em /data/', () => {
     // arquivo primario no lugar do enriquecido passaria nas checagens acima.
     const r = await fetch(`${base}/data/dashboard_data.json`);
     const d = (await r.json()) as {
-      empresas: { fy2025: { derivados?: unknown }; perfil?: unknown }[];
+      empresas: { anual: { derivados?: unknown }; perfil?: unknown }[];
       meta_build?: { eixos_perfil?: unknown };
     };
     expect(d.empresas.length).toBeGreaterThan(0);
-    expect(d.empresas[0]?.fy2025.derivados).toBeDefined();
+    expect(d.empresas[0]?.anual.derivados).toBeDefined();
     expect(d.empresas[0]?.perfil).toBeDefined();
     expect(d.meta_build?.eixos_perfil).toBeDefined();
   }, 30_000);
