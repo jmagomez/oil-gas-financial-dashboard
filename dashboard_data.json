@@ -66,6 +66,11 @@
      "ev_por_boed_usd": 144619.0,
      "fcf_yield_pct": 3.62,
      "dividendos_estimados": 16903.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 1.4
     },
     "margem_liquida_fonte_pct": 9.19
@@ -110,6 +115,11 @@
      "ev_por_boed_usd": 150074.0,
      "fcf_yield_pct": 6.58,
      "dividendos_estimados": 16903.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 2.54
     },
     "margem_liquida_fonte_pct": 13.95
@@ -255,6 +265,8 @@
     "fluxo_caixa_operacional": 70594,
     "fcf": 42969,
     "capex": -27625,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 4647.0,
     "janela": [
      "2025-Q4",
@@ -313,6 +325,11 @@
      "ev_por_boed_usd": 118560.0,
      "fcf_yield_pct": 4.08,
      "dividendos_estimados": 13864.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 1.2
     },
     "margem_liquida_fonte_pct": 6.77
@@ -357,6 +374,11 @@
      "ev_por_boed_usd": 107365.0,
      "fcf_yield_pct": 8.38,
      "dividendos_estimados": 13864.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 2.46
     },
     "margem_liquida_fonte_pct": 15.21
@@ -502,6 +524,8 @@
     "fluxo_caixa_operacional": 51946,
     "fcf": 34073,
     "capex": -17873,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 3988.75,
     "janela": [
      "2025-Q4",
@@ -560,6 +584,11 @@
      "ev_por_boed_usd": 110651.0,
      "fcf_yield_pct": 9.05,
      "dividendos_estimados": 4332.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 5.52
     },
     "margem_liquida_fonte_pct": 6.79
@@ -604,6 +633,11 @@
      "ev_por_boed_usd": 118021.0,
      "fcf_yield_pct": 14.14,
      "dividendos_estimados": 4332.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 8.62
     },
     "margem_liquida_fonte_pct": 12.99
@@ -748,6 +782,8 @@
     "fluxo_caixa_operacional": 57975,
     "fcf": 37360,
     "capex": -20615,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 2655.25,
     "janela": [
      "2025-Q4",
@@ -806,6 +842,11 @@
      "ev_por_boed_usd": 57277.0,
      "fcf_yield_pct": 10.24,
      "dividendos_estimados": 5186.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 2.17
     },
     "margem_liquida_fonte_pct": 0.68
@@ -850,6 +891,11 @@
      "ev_por_boed_usd": 61564.0,
      "fcf_yield_pct": 21.25,
      "dividendos_estimados": 5186.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 4.51
     },
     "margem_liquida_fonte_pct": 6.87
@@ -994,6 +1040,8 @@
     "fluxo_caixa_operacional": 36149,
     "fcf": 23393,
     "capex": -12756,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 2277.25,
     "janela": [
      "2025-Q4",
@@ -1052,6 +1100,11 @@
      "ev_por_boed_usd": 37440.0,
      "fcf_yield_pct": 6.43,
      "dividendos_estimados": 3654.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 1.64
     },
     "margem_liquida_fonte_pct": 4.75
@@ -1096,6 +1149,11 @@
      "ev_por_boed_usd": 45545.0,
      "fcf_yield_pct": 12.19,
      "dividendos_estimados": 3654.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 3.1
     },
     "margem_liquida_fonte_pct": 7.7
@@ -1240,6 +1298,8 @@
     "fluxo_caixa_operacional": 24336,
     "fcf": 11330,
     "capex": -13006,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 2210.5,
     "janela": [
      "2025-Q4",
@@ -1298,6 +1358,11 @@
      "ev_por_boed_usd": 61319.0,
      "fcf_yield_pct": 5.57,
      "dividendos_estimados": 8791.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 1.18
     },
     "margem_liquida_fonte_pct": 7.33
@@ -1342,6 +1407,11 @@
      "ev_por_boed_usd": 85620.0,
      "fcf_yield_pct": 12.06,
      "dividendos_estimados": 8791.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 2.56
     },
     "margem_liquida_fonte_pct": 13.36
@@ -1486,6 +1556,8 @@
     "fluxo_caixa_operacional": 40080,
     "fcf": 22511,
     "capex": -17569,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 2491.75,
     "janela": [
      "2025-Q4",
@@ -1544,6 +1616,11 @@
      "ev_por_boed_usd": 54493.0,
      "fcf_yield_pct": 15.91,
      "dividendos_estimados": 5509.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 2.98
     },
     "margem_liquida_fonte_pct": 22.13
@@ -1588,6 +1665,11 @@
      "ev_por_boed_usd": 45858.0,
      "fcf_yield_pct": 21.11,
      "dividendos_estimados": 5509.0,
+     "base_dividendo": "estimado_yield_mercado",
+     "dividend_yield_caixa_pct": null,
+     "shareholder_yield_pct": null,
+     "distribuicao_fco_pct": null,
+     "recompras_12m": null,
      "cobertura_dividendo_x": 3.95
     },
     "margem_liquida_fonte_pct": 23.47
@@ -1741,6 +1823,8 @@
     "fluxo_caixa_operacional": 42860,
     "fcf": 21784,
     "capex": -21076,
+    "dividendos_pagos": null,
+    "recompras": null,
     "producao_kboed": 3290.75,
     "janela": [
      "2025-Q4",
@@ -1790,6 +1874,10 @@
    "uniforme": true,
    "mais_recente": "Q3 2026",
    "mais_antigo": "Q3 2026"
+  },
+  "base_retorno_acionista": {
+   "chave": "dividend_yield_mercado",
+   "descricao": "dividend yield de mercado (Yahoo) -- sujeito a razao de ADR"
   },
   "eixos_perfil": [
    "Rentabilidade",

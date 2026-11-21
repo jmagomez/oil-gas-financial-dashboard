@@ -486,7 +486,7 @@ footer a:hover{text-decoration:underline;}
     </div>
   </div>
   <div class="charts-grid">
-    <div class="card"><div class="card-head"><div><h3>Radar de perfil</h3><p class="note">Escala relativa ao grupo, não absoluta</p></div><div class="card-tools"><button class="btn icon" data-png="chRadar">PNG</button></div></div><div class="canvas-box xtall"><canvas id="chRadar"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><h3>Radar de perfil</h3><p class="note">Escala relativa ao grupo, não absoluta · <span id="radarBaseRetorno"></span></p></div><div class="card-tools"><button class="btn icon" data-png="chRadar">PNG</button></div></div><div class="canvas-box xtall"><canvas id="chRadar"></canvas></div></div>
     <div class="card">
       <div class="card-head"><div><h3>Matriz de ranking</h3><p class="note">Posição relativa em cada indicador do período selecionado</p></div></div>
       <div class="table-wrap" style="max-height:420px;"><table class="heat" id="tblHeat"><thead><tr id="heatHead"></tr></thead><tbody id="heatBody"></tbody></table></div>
@@ -645,9 +645,17 @@ const METRICAS = {
   pe:                 {label:'P/E',                           grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, get:(e)=>e.mercado.pe, melhor:'baixo'},
   ev_ebitda_x:        {label:'EV / EBITDA',                   grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.ev_ebitda_x, melhor:'baixo'},
   ev_por_boed_usd:    {label:'EV por boe/d',                  grupo:'Mercado',     tipo:'usd',   fluxo:false, dec:0, derivado:true, get:(e,p)=>p.derivados.ev_por_boed_usd, melhor:'baixo'},
-  dividend_yield_pct: {label:'Dividend yield',                grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, get:(e)=>e.mercado.dividend_yield_pct, melhor:'alto'},
+  dividend_yield_pct: {label:'Dividend yield (mercado)',      grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, get:(e)=>e.mercado.dividend_yield_pct, melhor:'alto'},
   fcf_yield_pct:      {label:'FCF yield',                     grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.fcf_yield_pct, melhor:'alto'},
   cobertura_dividendo_x:{label:'Cobertura do dividendo (FCF)',grupo:'Mercado',     tipo:'x',     fluxo:false, dec:2, derivado:true, get:(e,p)=>p.derivados.cobertura_dividendo_x, melhor:'alto'},
+  /* Remuneracao ao acionista EM CAIXA, 12 meses ate o trimestre mais recente.
+     Lida sempre de q_recente: como os campos de mercado, nao muda com o seletor
+     de periodo -- e um retorno corrente sobre o market cap de hoje. Totais da
+     companhia sobre o market cap da companhia: imune a razao de ADR, que
+     deixava o dividend yield de mercado da Shell 2x menor. */
+  dividend_yield_caixa_pct:{label:'Dividend yield (caixa, 12m)',grupo:'Mercado',  tipo:'pct',   fluxo:false, dec:2, derivado:true, get:(e)=>e.q_recente.derivados.dividend_yield_caixa_pct, melhor:'alto'},
+  shareholder_yield_pct:{label:'Shareholder yield (div. + recompras, 12m)',grupo:'Mercado', tipo:'pct', fluxo:false, dec:2, derivado:true, get:(e)=>e.q_recente.derivados.shareholder_yield_pct, melhor:'alto'},
+  distribuicao_fco_pct:{label:'Distribuição / FCO (12m)',      grupo:'Mercado',     tipo:'pct',   fluxo:false, dec:1, derivado:true, get:(e)=>e.q_recente.derivados.distribuicao_fco_pct, melhor:'alto'},
   preco_acao:         {label:'Preço da ação',                 grupo:'Mercado',     tipo:'usd',   fluxo:false, dec:2, get:(e)=>e.mercado.preco_acao, melhor:'alto'},
 };
 
@@ -914,7 +922,12 @@ function renderKpis(){
         <div class="kpi-row"><span>Margem EBITDA</span><b class="num">${fmt(d.margem_ebitda_pct, 1)}%</b></div>
         <div class="kpi-row"><span>ND / EBITDA</span><b class="num">${fmt(d.nd_ebitda_x, 2)}x</b></div>
         <div class="kpi-row"><span>FCF yield</span><b class="num">${fmt(d.fcf_yield_pct, 1)}%</b></div>
-        <div class="kpi-row"><span>Div. yield</span><b class="num">${fmt(e.mercado.dividend_yield_pct, 2)}%</b></div>
+        ${(() => {
+          const dq = e.q_recente.derivados, cx = dq.dividend_yield_caixa_pct;
+          const dy = cx ?? e.mercado.dividend_yield_pct;
+          return `<div class="kpi-row" title="${cx === null ? 'Yield de mercado (Yahoo): sujeito à razão de ADR' : 'Dividendos pagos em 12 meses ÷ market cap'}"><span>Div. yield ${cx === null ? '(mercado)' : '(caixa)'}</span><b class="num">${fmt(dy, 2)}%</b></div>`
+            + `<div class="kpi-row" title="(Dividendos + recompras pagos em 12 meses) ÷ market cap"><span>Shareholder yield</span><b class="num">${dq.shareholder_yield_pct === null ? '—' : fmt(dq.shareholder_yield_pct, 2) + '%'}</b></div>`;
+        })()}
         <div class="kpi-row"><span>EV / EBITDA</span><b class="num">${fmt(valor('ev_ebitda_x', e), 2)}x</b></div>
       </div>`;
     grid.appendChild(c);
@@ -1233,7 +1246,8 @@ function renderValuation(){
 
   // Dispersão dividend yield x FCF yield com diagonal de cobertura
   const pontos = vis.map(e => ({
-    x: e.mercado.dividend_yield_pct,
+    // Dividendo PAGO em 12 meses quando existe; o de mercado so como recurso.
+    x: e.q_recente.derivados.dividend_yield_caixa_pct ?? e.mercado.dividend_yield_pct,
     y: e[STATE.period].derivados.fcf_yield_pct,
     tk: e.ticker, nome: e.nome,
   })).filter(p => p.x !== null && p.y !== null);
@@ -1267,7 +1281,7 @@ function renderValuation(){
         }}},
       },
       scales:{
-        x: eixo({min:0, max:lim, title:{display:true, text:'Dividend yield (%)', color:TICK, font:{size:11}}}),
+        x: eixo({min:0, max:lim, title:{display:true, text:'Dividend yield (%) — dividendos pagos em 12m quando disponível', color:TICK, font:{size:11}}}),
         y: eixo({min:0, max:lim, title:{display:true, text:'FCF yield (%) — ' + rotuloPeriodo(), color:TICK, font:{size:11}}}),
       },
     },
@@ -1278,6 +1292,10 @@ function renderValuation(){
    Radar de perfil
    ========================================================================== */
 function renderRadar(){
+  const base = DATA.meta_build.base_retorno_acionista;
+  const alvo = document.getElementById('radarBaseRetorno');
+  if(alvo && base) alvo.textContent = 'Retorno ao acionista = ' + base.descricao.replace(/ -- .*/, '')
+    + (base.chave === 'shareholder_yield' ? '' : ' (base reduzida: falta dado de caixa para alguma empresa)');
   if(!chartsOk) return;
   const eixos = DATA.meta_build.eixos_perfil;
   const vis = empresasVisiveis();
@@ -1312,7 +1330,7 @@ function renderRadar(){
 /* ==========================================================================
    Matriz de ranking (heatmap)
    ========================================================================== */
-const HEAT_METRICAS = ['margem_ebitda_pct','conversao_fcf_pct','capex_fco_pct','nd_ebitda_x','roe_pct','ebitda_por_boe_usd','ev_ebitda_x','fcf_yield_pct','dividend_yield_pct'];
+const HEAT_METRICAS = ['margem_ebitda_pct','conversao_fcf_pct','capex_fco_pct','nd_ebitda_x','roe_pct','ebitda_por_boe_usd','ev_ebitda_x','fcf_yield_pct','shareholder_yield_pct'];
 
 function renderHeat(){
   const vis = empresasVisiveis();
@@ -1515,8 +1533,11 @@ const FORMULAS = [
   ['Enterprise value', 'market cap + dívida líquida'],
   ['EV por boe/d', 'EV ÷ produção diária'],
   ['FCF yield', 'FCF dos últimos 12 meses (TTM) ÷ market cap'],
+  ['Dividend yield (caixa)', 'dividendos PAGOS nos últimos 12 meses (DFC) ÷ market cap. Totais da companhia: sem razão de ADR — o yield de mercado da Shell vinha 2× menor por dividir o dividendo por ação ordinária pelo preço do ADS, que vale duas'],
+  ['Shareholder yield', '(dividendos + recompras pagos em 12 meses) ÷ market cap — o retorno em caixa que as majors efetivamente entregam'],
+  ['Distribuição / FCO', '(dividendos + recompras em 12 meses) ÷ FCO de 12 meses — a métrica que as próprias companhias guiam'],
   ['Dividendos estimados', 'market cap × dividend yield'],
-  ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos estimados. O payout sobre FCF é <b>100 ÷ cobertura</b> e não aparece como indicador próprio — seria a mesma informação em duas colunas'],
+  ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos PAGOS em 12 meses (estimativa market cap × yield de mercado só quando falta o dado de caixa; o payload diz qual em <code>base_dividendo</code>). O payout sobre FCF é <b>100 ÷ cobertura</b> e não aparece como indicador próprio — seria a mesma informação em duas colunas'],
   ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1 — aqui o ×4 é proposital: mede o ritmo do trimestre isolado'],
   ['ROE e ROA', 'no trimestre: lucro dos últimos 12 meses ÷ patrimônio (ou ativos) do fim do período. No ano fiscal vêm da fonte padronizada, em base própria — <b>as duas colunas não são comparáveis entre si</b>'],
   ['Scores do radar', 'normalização min-max 0–100 sobre as sete empresas, fixa no build. Mostra posição relativa, não magnitude: o melhor é sempre 100 e o pior sempre 0, com dispersão de 2x ou de 5x'],

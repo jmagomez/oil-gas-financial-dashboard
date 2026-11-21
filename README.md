@@ -1,6 +1,6 @@
 # Dashboard Financeiro — Óleo & Gás
 
-Dashboard comparativo de **27 indicadores** financeiros, operacionais e de valuation — 16 primários e 11 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
+Dashboard comparativo de **30 indicadores** financeiros, operacionais e de valuation — 16 primários e 14 derivados — de 7 grandes petroleiras: **ExxonMobil, Chevron, Shell, BP, Equinor, TotalEnergies e Petrobras**.
 
 Períodos cobertos: ano fiscal **FY2025** (encerrado em 31/12/2025) e o **trimestre mais recente de cada empresa**, com os trimestres anteriores na série histórica. As empresas divulgam em datas diferentes — e a Petrobras entra dias depois das outras, quando o portal da CVM é regenerado —, então durante a temporada de balanços a coluna do trimestre mistura períodos; o dashboard avisa quando isso acontece e mostra o trimestre de cada empresa sob o ticker. Este README não cita um trimestre de propósito: ele não é regenerado a cada balanço e envelheceria. Os fundamentos foram coletados em 20/07/2026 e revisados a cada balanço; a data do último snapshot de mercado está no rodapé do dashboard.
 
@@ -82,7 +82,7 @@ Para editar à mão:
 
 | Seção | Conteúdo |
 |---|---|
-| Explorador de indicadores | Qualquer um dos 27 indicadores em colunas, barras horizontais ou participação, com leitura automática do melhor/pior/média |
+| Explorador de indicadores | Qualquer um dos 30 indicadores em colunas, barras horizontais ou participação, com leitura automática do melhor/pior/média |
 | Resultado e geração de caixa | Receita, lucro líquido, EBITDA e FCF — ano fiscal vs. trimestre |
 | Ponte de caixa | Waterfall da receita ao caixa livre por empresa, com o percentual da receita retido em cada etapa |
 | Balanço e rentabilidade | Dívida líquida, ND/EBITDA, ROE vs. ROA, margem líquida vs. margem EBITDA |
@@ -112,6 +112,9 @@ Para editar à mão:
 | EV / EBITDA | EV ÷ EBITDA dos últimos 12 meses (TTM) | Múltiplo de valuation neutro à estrutura de capital. **Calculado aqui, não lido do Yahoo**: o `enterpriseToEbitda` da fonte usa outro numerador e outro denominador, e as duas definições divergiam de +6% a +100% sob o mesmo rótulo. Mesma base de 12 meses do ND / EBITDA |
 | EV por boe/d | EV ÷ produção diária | Quanto o mercado paga pela capacidade instalada |
 | FCF yield | FCF dos últimos 12 meses (TTM) ÷ market cap | Retorno de caixa implícito no preço |
+| Dividend yield (caixa) | dividendos **pagos** em 12 meses (DFC) ÷ market cap | Yield sem razão de ADR: totais da companhia sobre o market cap da companhia. O yield de mercado da Shell vinha 2× menor (dividendo por ação ordinária sobre o preço do ADS, que vale duas) |
+| Shareholder yield | (dividendos + recompras pagos em 12 meses) ÷ market cap | O retorno em caixa que as majors entregam de fato — Shell, XOM e CVX devolvem a maior parte por recompra |
+| Distribuição / FCO | (dividendos + recompras em 12 meses) ÷ FCO de 12 meses | A métrica que as próprias companhias guiam (Shell: 40–50% do FCO; BP: 30–40%) |
 | Cobertura do dividendo | FCF dos últimos 12 meses (TTM) ÷ (market cap × dividend yield) | Se o dividendo cabe no caixa gerado. O payout sobre FCF é `100 ÷ cobertura` e não existe como indicador próprio — seria a mesma informação em duas colunas |
 | Run-rate do trimestre | (trimestre × 4 ÷ ano fiscal) − 1 | Aceleração ou desaceleração vs. o ano fiscal |
 
@@ -167,6 +170,7 @@ Os testes de lógica leem `tests/fixtures/indicadores_snapshot.json`, um snapsho
 - **BP FY2025**: lucro líquido atribuível próximo de zero (US$ 55 milhões) por itens não recorrentes.
 - **Equinor e TotalEnergies**: caixa líquido positivo (dívida líquida negativa) nos dois períodos.
 - **Equinor FY2025**: produção anual indisponível na fonte padronizada; os indicadores por boe do ano usam a produção do trimestre como proxy (sinalizado na validação).
+- **Remuneração ao acionista em caixa**: dividendos e recompras saem da DFC de cada trimestre (Yahoo para seis empresas; CVM para a Petrobras, convertida pela PTAX média) e somam em 12 meses. O eixo "Retorno ao acionista" do radar usa **shareholder yield** quando as sete o têm; se faltar para alguma, cai para o dividend yield de caixa e, em último caso, para o de mercado — sempre a mesma base para o grupo inteiro, e o radar diz qual. O yield de mercado continua no painel como referência, e o build acusa quando ele diverge do caixa pago por mais de 35% (a assinatura da razão de ADR).
 - **Dividend yield da Petrobras**: ~5,34% (stockanalysis.com), mas varia de 5,3% a 9,3% entre fontes — tratar como faixa.
 - **Shell**: a empresa publica duas bases de produção. A coluna anual usa o total do grupo (FY2025 = 2.800 mil boe/d); a série trimestral usa a soma de Upstream + Integrated Gas (2.759 no mesmo ano). As duas divergem ~1,5% e estão em bases diferentes — divergência preexistente, registrada nas notas do JSON.
 - **ROE e ROA**: no trimestre são lucro dos últimos 12 meses ÷ patrimônio (ou ativos) do **fim** do período; no ano fiscal vêm da fonte padronizada, em base própria. **As duas colunas não são comparáveis entre si** — a diferença entre períodos não é variação real.
