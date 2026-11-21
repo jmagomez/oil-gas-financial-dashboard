@@ -271,3 +271,36 @@ def test_dividendos_e_recompras_sao_fluxos_convertidos_pela_media():
     usd = cvm.converte(brl, t)
     assert usd["dividendos"] == pytest.approx(18_000 / t["media"])
     assert usd["recompras"] == 0.0
+
+
+def test_linhas_de_financiamento_ficam_no_relatorio_para_auditar_o_zero():
+    """O zero de recompra e uma inferencia; o relatorio mostra de que DFC ela saiu."""
+    ls = _dfc_financiamento([
+        ("6.03.03", "Dividendos pagos a acionistas da Petrobras", {"2026-Q1": -12_000, "2026-Q2": -18_000}),
+        ("6.03.01", "Amortizações de principal", {"2026-Q1": -5_000, "2026-Q2": -6_000}),
+    ])
+    contas = cvm.linhas_financiamento(ls, "2026-Q2")
+    assert contas == ["6.03.01 amortizacoes de principal", "6.03.03 dividendos pagos a acionistas da petrobras"]
+
+
+# ---------------------------------------------------------------------------
+# Nao controladores (entram no EV)
+# ---------------------------------------------------------------------------
+def _bpp(linhas):
+    fim = cvm._fim("2026-Q2")
+    return cvm.linhas(_zip("itr", 2026, {"BPP": [_linha(c, d, v, fim) for c, d, v in linhas]}))
+
+
+def test_nao_controladores_saem_do_pl_consolidado():
+    ls = _bpp([
+        ("2.03", "Patrimônio Líquido Consolidado", 420_000),
+        ("2.03.01", "Capital Social Realizado", 205_000),
+        ("2.03.09", "Participação dos Acionistas Não Controladores", 1_800),
+    ])
+    assert cvm.trimestre_brl(ls, "2026-Q2")["nao_controladores"] == pytest.approx(1_800)
+
+
+def test_nao_controladores_sao_saldo_convertido_pelo_fechamento():
+    t = ptax.taxas("2026-Q2")
+    usd = cvm.converte({"nao_controladores": 1_800.0}, t)
+    assert usd["nao_controladores"] == pytest.approx(1_800 / t["fechamento"])

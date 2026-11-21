@@ -140,7 +140,7 @@ def test_fcf_yield_derivado_chega_ao_email(dados, relatorio):
     h = be.montar(relatorio, dados)
     assert "FCF yield" in h
     xom = next(e for e in dados["empresas"] if e["ticker"] == "XOM")
-    assert be.num(xom["fy2025"]["derivados"]["fcf_yield_pct"], 2) in h
+    assert be.num(xom["anual"]["derivados"]["fcf_yield_pct"], 2) in h
 
 
 def test_tabela_tem_estrutura_semantica(dados, relatorio):

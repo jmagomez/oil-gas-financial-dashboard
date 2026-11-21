@@ -26,7 +26,7 @@ def _tri(periodo, receita=100.0, ebitda=40.0, lucro=10.0, fcf=12.0, fco=30.0,
 
 def _empresa(historico):
     return {"ticker": "TST", "nome": "Teste", "pais": "X",
-            "fy2025": _tri("FY2025"),
+            "anual": dict(_tri("FY2025"), ano=2025),
             "q_recente": dict(_tri("x"), trimestre="Q2 2026"),
             "mercado": {"market_cap": 1000, "pe": 10.0,
                         "dividend_yield_pct": 2.0, "preco_acao": 20.0},
