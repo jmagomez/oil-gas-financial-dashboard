@@ -71,7 +71,16 @@ CAMPOS_TRIMESTRE = [
     "roe_pct",
     "roa_pct",
     "producao_kboed",
+    "preco_realizado_liquidos_usd",
 ]
+
+# Preco realizado de liquidos (US$/bbl), do release de cada empresa. Curado a
+# mao, como a producao -- mas, ao contrario dela, NAO e carregado para o
+# trimestre seguinte: producao do trimestre anterior e um denominador
+# aproximado; preco do trimestre anterior, num ano em que o Brent oscilou de 80
+# para 104 e 97, e outro numero. Ao promover um trimestre, o campo zera (None)
+# e a procedencia dele sai junto.
+CAMPOS_CURADOS_NAO_CARREGADOS = ("preco_realizado_liquidos_usd",)
 
 # Remuneracao ao acionista em CAIXA, da DFC, em US$ milhoes e sempre POSITIVA
 # (e o valor distribuido, nao o sinal contabil da saida).
@@ -772,6 +781,8 @@ def aplica_fundamentos(
         empresa["historico"] = historico
 
         empresa["q_recente"] = {c: novo.get(c, atual.get(c)) for c in CAMPOS_TRIMESTRE}
+        for c in CAMPOS_CURADOS_NAO_CARREGADOS:
+            empresa["q_recente"][c] = None
         fundamentos = {
             "fonte": bruto.get("fonte") or "Yahoo Finance (demonstracoes trimestrais)",
             "coletado_em": hoje.isoformat(),
@@ -785,8 +796,10 @@ def aplica_fundamentos(
         # Atualiza SO as duas chaves que este passo produz. As outras (a curadoria
         # de recompras da BP, a promocao do ano fiscal) documentam numeros que
         # continuam no arquivo -- apaga-las deixaria o numero sem a origem.
+        prov_anterior = dict(empresa.get("proveniencia") or {})
+        prov_anterior.pop("preco_realizado", None)
         empresa["proveniencia"] = {
-            **(empresa.get("proveniencia") or {}),
+            **prov_anterior,
             "fundamentos": fundamentos,
             "producao_kboed": {
                 "fonte": "release da empresa",

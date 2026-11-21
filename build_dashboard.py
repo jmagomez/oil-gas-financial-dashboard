@@ -172,7 +172,7 @@ CSV_HEADER = [
     "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_ebitda_x", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x",
     "dividend_yield_caixa_pct", "shareholder_yield_pct", "distribuicao_fco_pct",
-    "concentracao_recompras_pct", "brent_medio_usd",
+    "concentracao_recompras_pct", "brent_medio_usd", "preco_realizado_liquidos_usd", "captura_brent_pct",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
     # Produção de OUTRO trimestre: existe, mas não é a do período da linha.
@@ -426,6 +426,15 @@ def derivar_periodo(empresa, period_key, ttm=None):
         # Brent medio do periodo (EIA). Contexto de preco: sem ele, margem de
         # 2026 contra 2025 parece desempenho e e, em boa parte, petroleo.
         "brent_medio_usd": preco_brent,
+        # Preco realizado de liquidos / Brent do mesmo trimestre. So no
+        # trimestre (o realizado e curado por trimestre) e so com o realizado do
+        # PROPRIO trimestre -- ver update_fundamentals.CAMPOS_CURADOS_NAO_CARREGADOS.
+        # As definicoes diferem entre empresas (proveniencia.preco_realizado):
+        # e uma leitura ao longo do tempo, nao um ranking.
+        "captura_brent_pct": (
+            arred(pct(p.get("preco_realizado_liquidos_usd"), preco_brent), 0)
+            if period_key == "q_recente" else None
+        ),
         "base_dividendo": base_dividendo,
         # Dividendos PAGOS em 12 meses / market cap. Imune a razao de ADR.
         "dividend_yield_caixa_pct": arred(pct(div_12m, market_cap)),
@@ -817,6 +826,7 @@ def build_csv(data):
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"],
                 d["dividend_yield_caixa_pct"], d["shareholder_yield_pct"], d["distribuicao_fco_pct"],
                 d["concentracao_recompras_pct"], d["brent_medio_usd"],
+                p.get("preco_realizado_liquidos_usd"), d["captura_brent_pct"],
                 "sim" if d["producao_proxy"] else "nao",
                 "sim" if d["producao_defasada"] else "nao",
             ])

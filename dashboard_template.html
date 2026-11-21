@@ -935,8 +935,11 @@ function renderKpis(){
       <div class="kpi-delta">EBITDA do trimestre × 4 ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY${e.anual.ano}</div>
       ${(() => {
         const bq = e.q_recente.derivados.brent_medio_usd, ba = e.anual.derivados.brent_medio_usd;
-        return (bq === null || ba === null) ? '' :
-          `<div class="kpi-delta" title="Brent médio (EIA) do trimestre da empresa contra o do ano fiscal: quanto do salto é preço, não desempenho">Brent ${trimCurto(e.q_recente.trimestre)} US$ ${fmt(bq, 0)} vs. US$ ${fmt(ba, 0)} no FY${e.anual.ano}</div>`;
+        if(bq === null || ba === null) return '';
+        const pr = e.q_recente.preco_realizado_liquidos_usd, cap = e.q_recente.derivados.captura_brent_pct;
+        const def = ((e.proveniencia || {}).preco_realizado || {}).definicao || '';
+        return `<div class="kpi-delta" title="Brent médio (EIA) do trimestre da empresa contra o do ano fiscal: quanto do salto é preço, não desempenho">Brent ${trimCurto(e.q_recente.trimestre)} US$ ${fmt(bq, 0)} vs. US$ ${fmt(ba, 0)} no FY${e.anual.ano}</div>`
+          + `<div class="kpi-delta" title="${def.replace(/"/g, '&quot;')}">Realizado (líquidos) ${pr === null ? '— não divulgado' : `US$ ${fmt(pr, 0)} · ${fmt(cap, 0)}% do Brent`}</div>`;
       })()}
       <div class="kpi-rows">
         <div class="kpi-row"><span>Margem EBITDA</span><b class="num">${fmt(d.margem_ebitda_pct, 1)}%</b></div>
@@ -1574,6 +1577,7 @@ const FORMULAS = [
   ['Shareholder yield', '(dividendos + recompras pagos em 12 meses) ÷ market cap — o retorno em caixa que as majors efetivamente entregam'],
   ['Distribuição / FCO', '(dividendos + recompras PAGOS em 12 meses) ÷ FCO de 12 meses. Não é a conta do guidance: a Shell guia 40–50% do CFFO <b>no ciclo</b> e conta a recompra <b>anunciada</b>; com recompra em valor fixo por trimestre, um ano de petróleo caro derruba o percentual pago sem que a política tenha mudado'],
   ['Concentração de recompras', 'maior trimestre de recompra ÷ recompras de 12 meses. Acima de 50%, o shareholder yield ganha um * no cartão: é pico, não ritmo (Equinor: a fatia do Estado norueguês é recomprada de uma vez, após a assembleia de maio)'],
+  ['Preço realizado e captura', 'preço realizado de líquidos do release de cada empresa ÷ Brent médio do mesmo trimestre. As definições diferem (Shell só Upstream; ExxonMobil só petróleo, sem NGL; Petrobras não divulga) e estão no título de cada cartão: compare a captura de uma empresa ao longo do tempo, não entre empresas'],
   ['Brent médio', 'EIA, Europe Brent Spot FOB (RBRTE): média dos três meses do trimestre da empresa, ou dos doze do ano fiscal. Preço realizado de cada empresa não entra — as sete o definem de jeitos diferentes'],
   ['Dividendos estimados', 'market cap × dividend yield'],
   ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos PAGOS em 12 meses (estimativa market cap × yield de mercado só quando falta o dado de caixa; o payload diz qual em <code>base_dividendo</code>). O payout sobre FCF é <b>100 ÷ cobertura</b> e não aparece como indicador próprio — seria a mesma informação em duas colunas'],
