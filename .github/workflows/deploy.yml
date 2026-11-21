@@ -16,6 +16,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Commit feito com o GITHUB_TOKEN NAO dispara outro workflow (regra do
+  # GitHub contra recursao). As coletas comitam como github-actions[bot], entao
+  # sem este gatilho os dados novos ficavam no repositorio e fora do ar ate o
+  # proximo push humano -- o site servia precos de dias atras sem aviso.
+  # Sob workflow_run, o checkout pega a ponta da main: o commit da coleta.
+  workflow_run:
+    workflows: ["Atualiza dados de mercado", "Atualiza fundamentos"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
@@ -46,6 +55,8 @@ permissions:
 
 jobs:
   build:
+    # Coleta que falhou nao comitou nada: nao ha o que publicar.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     concurrency:
       group: pages-build
