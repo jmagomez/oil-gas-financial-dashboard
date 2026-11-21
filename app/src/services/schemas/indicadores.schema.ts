@@ -38,7 +38,15 @@ const blocoBase = {
   producao_kboed: num,
 };
 
-export const anualSchema = z.object(blocoBase);
+/**
+ * O ano vai DENTRO do bloco (11/2026). A chave era `fy2025` e o rotulo
+ * FY2025 estava escrito no app inteiro; o pipeline agora vira o ano sozinho
+ * quando o 4T chega, e cada empresa pode estar num ano.
+ */
+export const anualSchema = z.object({
+  ano: z.number().int().min(2000).max(2100),
+  ...blocoBase,
+});
 
 export const trimestreSchema = z.object({
   ...blocoBase,
@@ -69,7 +77,7 @@ export const empresaSchema = z
     ticker: z.string().min(1),
     nome: z.string().min(1),
     pais: z.string().min(1),
-    fy2025: anualSchema,
+    anual: anualSchema,
     q_recente: trimestreSchema,
     mercado: mercadoSchema,
     historico: z.array(historicoItemSchema).default([]),
@@ -81,7 +89,7 @@ export const empresaSchema = z
     // significa sinal invertido na coleta, e inverteria a intensidade de
     // reinvestimento sem nenhum sinal visivel na tela.
     for (const [bloco, v] of [
-      ['fy2025', e.fy2025.capex],
+      ['anual', e.anual.capex],
       ['q_recente', e.q_recente.capex],
     ] as const) {
       if (v !== null && v > 0) {
@@ -122,7 +130,8 @@ export const empresaSchema = z
 export const referenciaSchema = z.object({
   data_consulta: z.string().regex(ISO_DATE),
   moeda: z.string().min(1),
-  periodo_anual: z.string().min(1),
+  // `periodo_anual` tambem saiu (11/2026), pelo mesmo motivo: o ano fiscal e
+  // de cada empresa (`anual.ano`) e o resumo e `meta_build.ano_fiscal`.
   // `periodo_trimestral` foi REMOVIDO do arquivo (11/2026): era um rotulo de
   // trimestre para o conjunto, e o pipeline o sobrescrevia com o trimestre de
   // quem acabara de ser promovido. O trimestre e de cada empresa

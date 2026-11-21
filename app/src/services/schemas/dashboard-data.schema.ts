@@ -62,6 +62,12 @@ const derivadosPeriodoSchema = z.object({
   receita_por_boe_usd: num,
   ebitda_por_boe_usd: num,
   ev: num,
+  /** Se o EV inclui nao controladores. Falso = saldo ausente, EV subestimado. */
+  ev_inclui_nao_controladores: z.boolean(),
+  /** % das recompras de 12 meses no maior trimestre da janela (pico x ritmo). */
+  concentracao_recompras_pct: num,
+  /** Brent medio do periodo (EIA, US$/bbl): contexto de preco. */
+  brent_medio_usd: num,
   /** Derivado de ev / ebitda_anual, na base de `base_12m_ebitda`. */
   ev_ebitda_x: num,
   ev_por_boed_usd: num,
@@ -106,7 +112,7 @@ export const empresaEnriquecidaSchema = z
     ticker: z.string().min(1),
     nome: z.string().min(1),
     pais: z.string().min(1),
-    fy2025: anualSchema.extend({
+    anual: anualSchema.extend({
       derivados: derivadosPeriodoSchema,
       margem_liquida_fonte_pct: num.optional(),
     }),
