@@ -63,12 +63,33 @@ CAMPOS_TRIMESTRE = [
     "fluxo_caixa_operacional",
     "fcf",
     "capex",
+    "dividendos_pagos",
+    "recompras",
     "divida_liquida",
     "divida_patrimonio_pct",
     "roe_pct",
     "roa_pct",
     "producao_kboed",
 ]
+
+# Remuneracao ao acionista em CAIXA, da DFC, em US$ milhoes e sempre POSITIVA
+# (e o valor distribuido, nao o sinal contabil da saida).
+#
+# POR QUE ISTO EXISTE. O dashboard media o retorno ao acionista so pelo
+# dividend yield de mercado -- e isso falhava de dois jeitos:
+#
+# 1. O yield do Yahoo herda a armadilha de ADR. Em 21/11/2026 a Shell aparecia
+#    com 1,64%: o dividendo por acao ORDINARIA (US$ 0,3906/trimestre) sobre o
+#    preco do ADS, que vale DUAS ordinarias. O certo era ~3,3%. Erro de 2x,
+#    igual ao da BP (6x), e o fail-safe nao pega: o valor errado e estavel.
+# 2. Mesmo certo, dividend yield nao e retorno ao acionista nas majors: Shell,
+#    XOM e CVX devolvem a maior parte via RECOMPRAS. A Shell, que distribui
+#    40-50% do FCO, ficava com nota zero no eixo de retorno do radar.
+#
+# Total pago / market cap usa dois TOTAIS da companhia: nao existe razao de
+# ADR na conta. E entra recompra, que e metade (ou mais) da historia.
+CAMPOS_DISTRIBUICAO = ("dividendos_pagos", "recompras")
+FAIXA_DISTRIBUICAO = (0.0, 40_000.0)  # US$ mi por TRIMESTRE
 
 # Campos que o script sabe derivar das demonstracoes. Os de fora desta lista
 # (hoje so producao_kboed) sao preservados do trimestre anterior e marcados.
@@ -80,6 +101,8 @@ CAMPOS_DERIVAVEIS = [
     "fluxo_caixa_operacional",
     "fcf",
     "capex",
+    "dividendos_pagos",
+    "recompras",
     "divida_liquida",
     "divida_patrimonio_pct",
     "roe_pct",
@@ -100,6 +123,10 @@ LINHAS = {
     "depreciacao": ["Reconciled Depreciation", "Depreciation And Amortization"],
     "fco": ["Operating Cash Flow", "Total Cash From Operating Activities"],
     "capex": ["Capital Expenditure", "Capital Expenditures"],
+    # Atividades de financiamento. Saem negativas da fonte; o JSON guarda o
+    # valor distribuido (positivo). Ver CAMPOS_DISTRIBUICAO.
+    "dividendos": ["Cash Dividends Paid", "Common Stock Dividend Paid"],
+    "recompras": ["Repurchase Of Capital Stock", "Common Stock Payments"],
     "fcf": ["Free Cash Flow"],
     "divida_total": ["Total Debt"],
     "caixa": ["Cash And Cash Equivalents", "Cash Cash Equivalents And Short Term Investments"],
@@ -211,6 +238,8 @@ ORDEM_HISTORICO = [
     "fluxo_caixa_operacional",
     "fcf",
     "capex",
+    "dividendos_pagos",
+    "recompras",
     "divida_liquida",
     "producao_kboed",
 ]
@@ -262,6 +291,7 @@ class Relatorio:
     divergencias: list[dict[str, Any]] = field(default_factory=list)
     rejeicoes: list[dict[str, Any]] = field(default_factory=list)
     falhas: list[dict[str, Any]] = field(default_factory=list)
+    preenchidos: list[dict[str, Any]] = field(default_factory=list)
 
     def resumo(self) -> str:
         linhas: list[str] = []
@@ -274,6 +304,12 @@ class Relatorio:
                 )
         else:
             linhas.append("Nenhum trimestre novo divulgado.")
+        if self.preenchidos:
+            linhas.append(f"{len(self.preenchidos)} campo(s) de distribuicao preenchido(s) em trimestres ja curados:")
+            for p in self.preenchidos:
+                linhas.append(
+                    f"  {p['ticker']:<5} {p['periodo']:<8} {p['campo']:<17} {p['valor']:,.0f}".replace(",", ".")
+                )
         for rotulo, itens, titulo in (
             ("rejeicoes", self.rejeicoes, "campo(s) rejeitado(s)"),
             ("divergencias", self.divergencias, "divergencia(s) com o dado curado"),
@@ -294,6 +330,7 @@ class Relatorio:
             "divergencias": self.divergencias,
             "rejeicoes": self.rejeicoes,
             "falhas": self.falhas,
+            "preenchidos": self.preenchidos,
         }
 
 
@@ -408,7 +445,7 @@ def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
     linhas: dict[str, float | None] = {}
     for chave, rotulos in LINHAS.items():
         fonte = income
-        if chave in ("fco", "capex", "fcf"):
+        if chave in ("fco", "capex", "fcf", "dividendos", "recompras"):
             fonte = cashflow
         elif chave in ("divida_total", "caixa", "investimentos_curto", "patrimonio", "ativos"):
             fonte = balance
@@ -435,7 +472,7 @@ def coleta_bruto(income, cashflow, balance) -> dict[str, Any] | None:
         linhas_ant = {}
         for chave, rotulos in LINHAS.items():
             fonte = income
-            if chave in ("fco", "capex", "fcf"):
+            if chave in ("fco", "capex", "fcf", "dividendos", "recompras"):
                 fonte = cashflow
             elif chave in ("divida_total", "caixa", "investimentos_curto", "patrimonio", "ativos"):
                 fonte = balance
@@ -509,11 +546,22 @@ def monta_trimestre(bruto: dict[str, Any], ttm: dict[str, float] | None = None) 
         "fluxo_caixa_operacional": _arredonda(fco, 0),
         "fcf": _arredonda(fcf, 0),
         "capex": _arredonda(capex, 0),
+        "dividendos_pagos": _distribuido(L.get("dividendos")),
+        "recompras": _distribuido(L.get("recompras")),
         "divida_liquida": _arredonda(divida_liquida, 0),
         "divida_patrimonio_pct": _arredonda(divida_patrimonio, 1),
         "roe_pct": _arredonda(roe, 2),
         "roa_pct": _arredonda(roa, 2),
     }
+
+
+def _distribuido(v: float | None) -> int | None:
+    """Saida de financiamento -> valor distribuido, positivo. Ausente fica ausente.
+
+    Ausente NAO vira zero: uma linha que a fonte renomeou zeraria a recompra
+    em silencio, e "nao houve recompra" e "nao sei" sao afirmacoes diferentes.
+    """
+    return None if v is None else _arredonda(abs(v), 0)
 
 
 def _arredonda(v: float | None, casas: int) -> float | int | None:
@@ -702,6 +750,66 @@ def aplica_fundamentos(
     return saida, rel
 
 
+def _distribuicoes_por_periodo(bruto: dict[str, Any]) -> dict[str, dict[str, int | None]]:
+    """Dividendos e recompras de cada coluna que a fonte trouxe, por periodo "AAAA-QN"."""
+    saida: dict[str, dict[str, int | None]] = {}
+    for bloco in [bruto, *(bruto.get("anteriores") or [])]:
+        if bloco.get("fim") is None:
+            continue
+        linhas = bloco.get("linhas") or {}
+        periodo = rotulo_historico(rotulo_trimestre(bloco["fim"]))
+        saida[periodo] = {
+            "dividendos_pagos": _distribuido(linhas.get("dividendos")),
+            "recompras": _distribuido(linhas.get("recompras")),
+        }
+    return saida
+
+
+def preenche_distribuicoes(
+    saida: dict[str, Any], coletado: dict[str, dict[str, Any]], rel: Relatorio
+) -> set[str]:
+    """Completa dividendos e recompras em trimestres JA CURADOS. Devolve os tickers tocados.
+
+    Por que um passo separado da promocao: `aplica_fundamentos` so age em
+    trimestre NOVO, e os campos de distribuicao nasceram depois que os
+    trimestres do arquivo ja estavam curados. Sem isto, o TTM de
+    dividendos + recompras so ficaria completo daqui a um ano.
+
+    Regras, todas conservadoras:
+      * so PREENCHE campo ausente -- nunca sobrescreve um valor existente;
+      * casa pelo periodo exato (fim do trimestre da coluna da fonte);
+      * so fonte em USD (a Petrobras chega aqui ja convertida pela CVM/PTAX);
+      * valor fora de FAIXA_DISTRIBUICAO e rejeitado, nao gravado.
+    """
+    tocados: set[str] = set()
+    for empresa in saida["empresas"]:
+        ticker = empresa["ticker"]
+        bruto = coletado.get(ticker)
+        if not bruto or (bruto.get("moeda") or "USD").upper() != MOEDA_DEMONSTRACOES:
+            continue
+        fonte = _distribuicoes_por_periodo(bruto)
+        alvos = [(rotulo_historico(empresa["q_recente"]["trimestre"]), empresa["q_recente"])]
+        alvos += [(h.get("periodo"), h) for h in (empresa.get("historico") or [])]
+        for periodo, bloco in alvos:
+            valores = fonte.get(periodo)
+            if not valores:
+                continue
+            for campo in CAMPOS_DISTRIBUICAO:
+                v = valores.get(campo)
+                if v is None or bloco.get(campo) is not None:
+                    continue
+                if not FAIXA_DISTRIBUICAO[0] <= v <= FAIXA_DISTRIBUICAO[1]:
+                    rel.rejeicoes.append({
+                        "ticker": ticker, "campo": campo,
+                        "motivo": f"{periodo}: {v} fora da faixa {FAIXA_DISTRIBUICAO}",
+                    })
+                    continue
+                bloco[campo] = v
+                rel.preenchidos.append({"ticker": ticker, "periodo": periodo, "campo": campo, "valor": v})
+                tocados.add(ticker)
+    return tocados
+
+
 def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
     """Converte um q_recente no formato de item de `historico`."""
     return {
@@ -712,6 +820,8 @@ def _para_historico(bloco: dict[str, Any]) -> dict[str, Any]:
         "fluxo_caixa_operacional": bloco.get("fluxo_caixa_operacional"),
         "fcf": bloco.get("fcf"),
         "capex": bloco.get("capex"),
+        "dividendos_pagos": bloco.get("dividendos_pagos"),
+        "recompras": bloco.get("recompras"),
         "divida_liquida": bloco.get("divida_liquida"),
         "producao_kboed": bloco.get("producao_kboed"),
     }
@@ -828,6 +938,7 @@ def main(argv: list[str] | None = None) -> int:
     coletado = busca_fundamentos(tickers)
 
     saida, rel = aplica_fundamentos(dados, coletado)
+    tocados = {n["ticker"] for n in rel.novos} | preenche_distribuicoes(saida, coletado, rel)
     print(rel.resumo())
 
     if args.relatorio:
@@ -835,7 +946,7 @@ def main(argv: list[str] | None = None) -> int:
             json.dumps(rel.para_json(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
 
-    if not rel.novos:
+    if not tocados:
         return 0
 
     if args.dry_run:
@@ -843,9 +954,11 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     bruto = args.json.read_text(encoding="utf-8")
-    novos = {n["ticker"] for n in rel.novos}
-    args.json.write_text(reescreve_json(bruto, saida, novos, date.today()), encoding="utf-8")
-    print(f"\n{args.json.name} atualizado com {len(rel.novos)} trimestre(s) novo(s).")
+    args.json.write_text(reescreve_json(bruto, saida, tocados, date.today()), encoding="utf-8")
+    print(
+        f"\n{args.json.name} atualizado: {len(rel.novos)} trimestre(s) novo(s), "
+        f"{len(rel.preenchidos)} campo(s) de distribuicao preenchido(s)."
+    )
     return 0
 
 

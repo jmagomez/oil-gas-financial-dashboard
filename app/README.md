@@ -4,7 +4,7 @@ App que lê o `indicadores_oleo_gas.json` publicado pelo pipeline Python deste
 repositório e o apresenta de forma interativa, acessível e comparável.
 
 > **Divisão por público.** O [`README.md` da raiz](../README.md) é para quem _lê_
-> o dashboard: o que cada um dos 27 indicadores significa, metodologia e fontes
+> o dashboard: o que cada um dos 30 indicadores significa, metodologia e fontes
 > por empresa. O [`CLAUDE.md`](../CLAUDE.md) é para quem _edita_ o pipeline.
 > Este arquivo é para quem _edita o frontend_: arquitetura, stack e as decisões
 > de interface. Nenhum dos três repete o outro — divergir é como eles apodrecem.
@@ -22,7 +22,7 @@ concretos**, e é honesto dizer que _performance não é um deles_:
    tela não encontra ali nem rótulo, nem série, nem valor. Não há como
    remendar isso sem trocar a camada de desenho. Aqui os gráficos são SVG
    (Recharts) e cada um vem com **tabela equivalente** do mesmo dado.
-2. **Interatividade de verdade.** Comparar 7 empresas × 27 indicadores × N
+2. **Interatividade de verdade.** Comparar 7 empresas × 30 indicadores × N
    trimestres exige selecionar, filtrar e cruzar. Isso é estado compartilhado
    entre componentes — exatamente o que fica insustentável em script solto
    dentro de um template de 79 KB.
@@ -254,7 +254,7 @@ diferente. Com sete empresas, basta uma no extremo para comprimir as outras seis
 
 ## Indicadores: o que entra, e o que eu recomendo **não** entrar
 
-O pipeline já calcula **19 indicadores derivados** — entre eles `fcf_yield_pct`,
+O pipeline já calcula **22 indicadores derivados** — entre eles `fcf_yield_pct`,
 `conversao_fcf_pct`, `nd_ebitda_x`, `ebitda_por_boe_usd` e `ev_por_boed_usd`.
 O `CLAUDE.md` tem duas regras que valem aqui: _um derivado precisa de um
 consumidor_ e _nenhum indicador é função algébrica de outro_. Então a resposta

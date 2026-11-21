@@ -51,7 +51,12 @@
           "cobertura_dividendo_x": 1.41,
           "ev_ebitda_x": 11.92,
           "producao_periodo_do_dado": null,
-          "producao_defasada": false
+          "producao_defasada": false,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 9.19
       },
@@ -90,7 +95,12 @@
           "cobertura_dividendo_x": 1.82,
           "ev_ebitda_x": 9.6,
           "producao_periodo_do_dado": "Q2 2026",
-          "producao_defasada": false
+          "producao_defasada": false,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 12.68
       },
@@ -269,7 +279,12 @@
           "dividendos_estimados": 5402.0,
           "cobertura_dividendo_x": 2.09,
           "producao_periodo_do_dado": null,
-          "producao_defasada": false
+          "producao_defasada": false,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 0.68
       },
@@ -308,7 +323,12 @@
           "dividendos_estimados": 5402.0,
           "cobertura_dividendo_x": 4.33,
           "producao_periodo_do_dado": "Q2 2026",
-          "producao_defasada": true
+          "producao_defasada": true,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 6.87
       },
@@ -505,7 +525,12 @@
           "cobertura_dividendo_x": 5.46,
           "ev_ebitda_x": 6.17,
           "producao_periodo_do_dado": null,
-          "producao_defasada": false
+          "producao_defasada": false,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 6.79
       },
@@ -544,7 +569,12 @@
           "cobertura_dividendo_x": 8.53,
           "ev_ebitda_x": 4.15,
           "producao_periodo_do_dado": "Q2 2026",
-          "producao_defasada": true
+          "producao_defasada": true,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 12.99
       },
@@ -741,7 +771,12 @@
           "cobertura_dividendo_x": 1.62,
           "ev_ebitda_x": 2.31,
           "producao_periodo_do_dado": null,
-          "producao_defasada": false
+          "producao_defasada": false,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 4.75
       },
@@ -780,7 +815,12 @@
           "cobertura_dividendo_x": 3.06,
           "ev_ebitda_x": 2.05,
           "producao_periodo_do_dado": "Q2 2026",
-          "producao_defasada": true
+          "producao_defasada": true,
+          "base_dividendo": "estimado_yield_mercado",
+          "dividend_yield_caixa_pct": null,
+          "shareholder_yield_pct": null,
+          "distribuicao_fco_pct": null,
+          "recompras_12m": null
         },
         "margem_liquida_fonte_pct": 7.7
       },

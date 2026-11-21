@@ -27,6 +27,14 @@ DEFINICOES (R$ milhoes, antes da conversao)
                      longo prazo ("disponibilidades ajustadas", como a Petrobras
                      define). Sem os de longo prazo a divida liquida do 1T25
                      saia 1,4% acima da divulgada.
+    dividendos       DFC de financiamento (6.03.xx): dividendos e JCP pagos aos
+                     acionistas DA PETROBRAS -- nao os pagos a nao controladores,
+                     porque o denominador do yield e o market cap da Petrobras.
+    recompras        DFC de financiamento: recompra / aquisicao de acoes proprias.
+                     Sem a linha na DFC, ZERO: a DFC entregue a CVM e completa,
+                     e a Petrobras teria a linha se tivesse recomprado. (No
+                     Yahoo a ausencia continua sendo "nao sei" -- la uma linha
+                     renomeada some sem aviso.)
     patrimonio       2.03     Patrimonio liquido consolidado
     ativos           1        Ativo total
 
@@ -195,11 +203,25 @@ def trimestre_brl(ls, p: str) -> dict[str, float | None]:
         "depreciacao": fluxo(ls, "DFC_MI", p, desc=r"^deprecia.*(deplec|amortiz)", nivel=3),
         "fco": fluxo(ls, "DFC_MI", p, conta="6.01"),
         "capex": fluxo(ls, "DFC_MI", p, desc=r"aquisi.*(imobilizado|intang)", nivel=2),
+        "dividendos": fluxo(
+            ls, "DFC_MI", p, nivel=2, prefixo="6.03",
+            desc=r"^(?!.*nao controlador)(dividendos|juros sobre (o )?capital proprio).*pag",
+        ),
+        "recompras": fluxo(
+            ls, "DFC_MI", p, nivel=2, prefixo="6.03",
+            desc=r"recompra de acoes|aquisicao de acoes (proprias|em tesouraria)",
+        ),
         "patrimonio": _busca(ls, "BPP", _fim(p), conta="2.03"),
         "ativos": _busca(ls, "BPA", _fim(p), conta="1"),
     }
     if r["capex"] is not None:
         r["capex"] = abs(r["capex"])
+    for campo in ("dividendos", "recompras"):
+        if r[campo] is not None:
+            r[campo] = abs(r[campo])
+    # DFC lida (ha dividendos) e nenhuma linha de recompra: nao houve recompra.
+    if r["recompras"] is None and r["dividendos"] is not None:
+        r["recompras"] = 0.0
     r["ebitda"] = None
     if None not in (r["lair"], r["resultado_financeiro"], r["depreciacao"]):
         r["ebitda"] = r["lair"] - r["resultado_financeiro"] + r["depreciacao"]
@@ -220,7 +242,7 @@ def trimestre_brl(ls, p: str) -> dict[str, float | None]:
 # ---------------------------------------------------------------------------
 # Conversao para US$ e formato do pipeline
 # ---------------------------------------------------------------------------
-FLUXOS = ("receita", "lucro_liquido", "ebitda", "fco", "capex")
+FLUXOS = ("receita", "lucro_liquido", "ebitda", "fco", "capex", "dividendos", "recompras")
 ESTOQUES = ("divida_total", "caixa", "patrimonio", "ativos")
 
 

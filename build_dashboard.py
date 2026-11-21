@@ -129,6 +129,7 @@ CSV_HEADER = [
     "margem_ebitda_pct", "nd_ebitda_x", "conversao_fcf_pct", "capex_fco_pct",
     "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_ebitda_x", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x",
+    "dividend_yield_caixa_pct", "shareholder_yield_pct", "distribuicao_fco_pct",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
     # Produção de OUTRO trimestre: existe, mas não é a do período da linha.
@@ -163,6 +164,8 @@ def arred(v, casas=2):
 CAMPOS_FLUXO_TTM = [
     "receita", "lucro_liquido", "ebitda",
     "fluxo_caixa_operacional", "fcf", "capex",
+    # Remuneracao ao acionista em caixa (DFC). Ver update_fundamentals.CAMPOS_DISTRIBUICAO.
+    "dividendos_pagos", "recompras",
 ]
 
 
@@ -269,10 +272,29 @@ def derivar_periodo(empresa, period_key, ttm=None):
     boed = None if prod is None else prod * 1000.0
 
     ev = None if (market_cap is None or nd is None) else market_cap + nd
-    dividendos = div(
-        None if market_cap is None else market_cap * (m.get("dividend_yield_pct") or 0.0),
-        100.0,
-    )
+    # Remuneracao ao acionista EM CAIXA, nos 12 meses (so no trimestre, e so
+    # com a janela TTM completa). Totais da companhia sobre o market cap da
+    # companhia: nao ha razao de ADR na conta -- ao contrario do dividend yield
+    # de mercado, que na Shell vinha 2x menor (dividendo por ordinaria sobre o
+    # preco do ADS, que vale duas). Ver update_fundamentals.CAMPOS_DISTRIBUICAO.
+    div_12m = rec_12m = dist_12m = None
+    if usa_ttm:
+        div_12m = ttm.get("dividendos_pagos")
+        rec_12m = ttm.get("recompras")
+        if div_12m is not None and rec_12m is not None:
+            dist_12m = div_12m + rec_12m
+    fco_12m = ttm.get("fluxo_caixa_operacional") if usa_ttm else None
+
+    # Base do dividendo para a cobertura: o PAGO quando existe; senao a
+    # estimativa market cap x yield de mercado -- e o payload diz qual foi.
+    if div_12m is not None:
+        dividendos, base_dividendo = div_12m, "caixa_12m"
+    else:
+        dividendos = div(
+            None if market_cap is None else market_cap * (m.get("dividend_yield_pct") or 0.0),
+            100.0,
+        )
+        base_dividendo = "estimado_yield_mercado"
 
     return {
         # Margem líquida recalculada a partir dos campos primários. Ver
@@ -317,6 +339,17 @@ def derivar_periodo(empresa, period_key, ttm=None):
         # Retorno de caixa implícito sobre o valor de mercado.
         "fcf_yield_pct": arred(pct(fcf_anual, market_cap)),
         "dividendos_estimados": arred(dividendos, 0),
+        "base_dividendo": base_dividendo,
+        # Dividendos PAGOS em 12 meses / market cap. Imune a razao de ADR.
+        "dividend_yield_caixa_pct": arred(pct(div_12m, market_cap)),
+        # (Dividendos + recompras) em 12 meses / market cap: o retorno em caixa
+        # que as majors efetivamente entregam. Shell, XOM e CVX devolvem a maior
+        # parte por recompra; medir so dividendo as subestima.
+        "shareholder_yield_pct": arred(pct(dist_12m, market_cap)),
+        # Fracao do FCO devolvida ao acionista -- a metrica que as proprias
+        # companhias guiam (Shell: 40-50% do FCO; BP: 30-40%).
+        "distribuicao_fco_pct": arred(pct(dist_12m, fco_12m)),
+        "recompras_12m": arred(rec_12m, 0),
         # Quantas vezes o FCF cobre o dividendo estimado (>1 = dividendo pago com
         # caixa próprio). Não existe um "payout sobre FCF" ao lado porque ele seria
         # 100 ÷ cobertura: a mesma informação ocupando uma segunda coluna da tabela,
@@ -416,9 +449,37 @@ EIXOS_PERFIL = [
 ]
 
 
+BASES_RETORNO_ACIONISTA = [
+    ("shareholder_yield", "dividendos + recompras pagos em 12 meses / market cap",
+     lambda e: e["q_recente"]["derivados"].get("shareholder_yield_pct")),
+    ("dividend_yield_caixa", "dividendos pagos em 12 meses / market cap",
+     lambda e: e["q_recente"]["derivados"].get("dividend_yield_caixa_pct")),
+    ("dividend_yield_mercado", "dividend yield de mercado (Yahoo) -- sujeito a razao de ADR",
+     lambda e: e["mercado"].get("dividend_yield_pct")),
+]
+
+
+def base_retorno_acionista(empresas):
+    """A melhor base que TODAS as empresas tem.
+
+    Min-max entre bases diferentes nao compara nada: uma empresa medida por
+    dividendos + recompras e outra so por dividendo nao estao na mesma regua.
+    Entao a base e escolhida para o conjunto inteiro, a mais completa possivel.
+    """
+    for chave, descricao, getter in BASES_RETORNO_ACIONISTA:
+        if all(getter(e) is not None for e in empresas):
+            return chave, descricao, getter
+    return BASES_RETORNO_ACIONISTA[-1]
+
+
 def calcular_perfil(empresas):
     """Normaliza cada eixo em 0–100 (min-max) para o radar comparativo."""
-    for nome, getter, maior_melhor in EIXOS_PERFIL:
+    _, _, getter_retorno = base_retorno_acionista(empresas)
+    eixos = [
+        (nome, getter_retorno if nome == "Retorno ao acionista" else getter, maior)
+        for nome, getter, maior in EIXOS_PERFIL
+    ]
+    for nome, getter, maior_melhor in eixos:
         valores = [(e, getter(e)) for e in empresas]
         validos = [v for _, v in valores if v is not None]
         if not validos:
@@ -453,6 +514,9 @@ def enriquecer(data):
     calcular_perfil(data["empresas"])
     data["meta_build"] = {
         "trimestre_recente": trimestres_recentes(data["empresas"]),
+        "base_retorno_acionista": dict(
+            zip(("chave", "descricao"), base_retorno_acionista(data["empresas"])[:2], strict=True)
+        ),
         "eixos_perfil": [nome for nome, _, _ in EIXOS_PERFIL],
         "dias_periodo": DIAS_PERIODO,
         "fator_anualizacao": FATOR_ANUAL,
@@ -474,6 +538,19 @@ def validate(data):
     problems = []
     # Informativo: no dashboard isso vira aviso visivel e rotulo por barra, mas
     # quem roda o build deve saber que a coluna do trimestre mistura periodos.
+    # Detector da armadilha de ADR: yield de mercado contra o yield do caixa
+    # pago. Os dois medem a mesma coisa por caminhos independentes; uma razao
+    # perto de 2 ou de 6 e a razao do ADS (Shell = 2, BP = 6), nao mercado.
+    for e in data["empresas"]:
+        caixa = e["q_recente"].get("derivados", {}).get("dividend_yield_caixa_pct")
+        mercado = e["mercado"].get("dividend_yield_pct")
+        if caixa and mercado:
+            razao = caixa / mercado
+            if razao > 1.35 or razao < 1 / 1.35:
+                problems.append(
+                    f"{e['ticker']}: dividend yield de mercado {mercado:.2f}% vs {caixa:.2f}% do caixa pago "
+                    f"em 12 meses (razão {razao:.2f}x) — suspeita de razão de ADR na fonte de mercado"
+                )
     tr = trimestres_recentes(data["empresas"])
     if not tr["uniforme"]:
         problems.append(
@@ -584,6 +661,7 @@ def build_csv(data):
                 d["receita_por_boe_usd"], d["ebitda_por_boe_usd"], d["ev"], d["ev_ebitda_x"],
                 d["ev_por_boed_usd"],
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"],
+                d["dividend_yield_caixa_pct"], d["shareholder_yield_pct"], d["distribuicao_fco_pct"],
                 "sim" if d["producao_proxy"] else "nao",
                 "sim" if d["producao_defasada"] else "nao",
             ])

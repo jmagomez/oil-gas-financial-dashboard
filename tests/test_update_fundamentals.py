@@ -669,3 +669,105 @@ def test_ptax_incompleta_vira_ausencia_e_nao_excecao(monkeypatch, capsys):
     monkeypatch.setitem(uf.FONTES_PRIMARIAS, "PBR", _sem_ptax)
     assert uf.busca_primaria("PBR") is None
     assert "12 dias uteis" in capsys.readouterr().out
+
+
+# ---------------------------------------------------------------------------
+# Remuneracao ao acionista em caixa: dividendos pagos e recompras
+# ---------------------------------------------------------------------------
+def test_le_dividendos_e_recompras_da_dfc_como_valores_distribuidos_positivos():
+    """A fonte traz saidas de financiamento NEGATIVAS; o JSON guarda o distribuido."""
+    colunas = [pd.Timestamp("2026-09-30"), pd.Timestamp("2026-06-30")]
+    income = _df({"Total Revenue": [110_503e6, 114_529e6], "Net Income": [15_413e6, 14_525e6]}, colunas)
+    cash = _df({
+        "Operating Cash Flow": [25_700e6, 23_555e6], "Capital Expenditure": [-6_600e6, -6_527e6],
+        "Cash Dividends Paid": [-4_300e6, -4_290e6], "Repurchase Of Capital Stock": [-5_000e6, -5_100e6],
+    }, colunas)
+    balance = _df({"Total Debt": [42_000e6, 42_368e6], "Cash And Cash Equivalents": [10_000e6, 10_588e6]}, colunas)
+    bruto = uf.coleta_bruto(income, cash, balance)
+    bloco = uf.monta_trimestre(bruto)
+    assert bloco["dividendos_pagos"] == 4_300
+    assert bloco["recompras"] == 5_000
+    assert bruto["anteriores"][0]["linhas"]["recompras"] == pytest.approx(-5_100)
+
+
+def test_recompra_ausente_fica_ausente_e_nao_vira_zero():
+    """"Nao houve recompra" e "nao sei" sao afirmacoes diferentes."""
+    bloco = uf.monta_trimestre(_bruto({"dividendos": -4_300}))
+    assert bloco["dividendos_pagos"] == 4_300
+    assert bloco["recompras"] is None
+
+
+def _bruto_com_anteriores(moeda="USD"):
+    """XOM: coluna atual 2026-Q2 e duas anteriores, com dividendos e recompras."""
+    base = _bruto({"dividendos": -4_290, "recompras": -5_100})
+    base["moeda"] = moeda
+    base["anteriores"] = [
+        {"fim": date(2026, 3, 31), "linhas": {"dividendos": -4_270, "recompras": -4_800}, "ttm": {}},
+        {"fim": date(2025, 12, 31), "linhas": {"dividendos": -4_250, "recompras": None}, "ttm": {}},
+    ]
+    return {"XOM": base}
+
+
+def _com_historico(dados):
+    xom = next(e for e in dados["empresas"] if e["ticker"] == "XOM")
+    xom["q_recente"]["trimestre"] = "Q2 2026"
+    xom["historico"] = [
+        {"periodo": "2025-Q4", "receita": 80_039},
+        {"periodo": "2026-Q1", "receita": 83_160, "dividendos_pagos": 9_999},
+    ]
+    return xom
+
+
+def test_preenche_distribuicoes_em_trimestres_ja_curados(dados):
+    xom = _com_historico(dados)
+    rel = uf.Relatorio()
+    tocados = uf.preenche_distribuicoes(dados, _bruto_com_anteriores(), rel)
+    assert tocados == {"XOM"}
+    assert xom["q_recente"]["dividendos_pagos"] == 4_290
+    assert xom["q_recente"]["recompras"] == 5_100
+    assert xom["historico"][0]["dividendos_pagos"] == 4_250
+    assert "recompras" not in xom["historico"][0]  # a fonte nao trouxe: nao inventa zero
+    assert xom["historico"][1]["recompras"] == 4_800
+    assert {(p["periodo"], p["campo"]) for p in rel.preenchidos} >= {("2026-Q2", "dividendos_pagos")}
+
+
+def test_preenchimento_nunca_sobrescreve_valor_existente(dados):
+    """O 9.999 do 1T26 e curado: a fonte dizer 4.270 nao o troca -- vira so silencio."""
+    xom = _com_historico(dados)
+    uf.preenche_distribuicoes(dados, _bruto_com_anteriores(), uf.Relatorio())
+    assert xom["historico"][1]["dividendos_pagos"] == 9_999
+
+
+def test_preenchimento_ignora_fonte_fora_de_usd(dados):
+    xom = _com_historico(dados)
+    rel = uf.Relatorio()
+    assert uf.preenche_distribuicoes(dados, _bruto_com_anteriores(moeda="BRL"), rel) == set()
+    assert "dividendos_pagos" not in xom["q_recente"] or xom["q_recente"]["dividendos_pagos"] is None
+
+
+def test_preenchimento_rejeita_valor_fora_de_faixa(dados):
+    _com_historico(dados)
+    coletado = _bruto_com_anteriores()
+    coletado["XOM"]["linhas"]["dividendos"] = -400_000  # unidade errada
+    rel = uf.Relatorio()
+    uf.preenche_distribuicoes(dados, coletado, rel)
+    assert any(r["campo"] == "dividendos_pagos" and "fora da faixa" in r["motivo"] for r in rel.rejeicoes)
+
+
+def test_preenchimento_reescreve_so_as_linhas_da_empresa_tocada(dados):
+    """Escrita cirurgica: o resto do arquivo fica byte a byte igual."""
+    import difflib
+
+    bruto = SNAPSHOT.read_text(encoding="utf-8")
+    rel = uf.Relatorio()
+    trimestre = next(e for e in dados["empresas"] if e["ticker"] == "XOM")["q_recente"]["trimestre"]
+    fim = uf.fim_do_trimestre(trimestre)
+    coletado = {"XOM": {"fim": fim, "linhas": {"dividendos": -4_000, "recompras": -3_000}, "moeda": "USD"}}
+    tocados = uf.preenche_distribuicoes(dados, coletado, rel)
+    assert tocados == {"XOM"}
+    novo = uf.reescreve_json(bruto, dados, tocados, date(2026, 11, 21))
+    xom = next(e for e in json.loads(novo)["empresas"] if e["ticker"] == "XOM")
+    assert (xom["q_recente"]["dividendos_pagos"], xom["q_recente"]["recompras"]) == (4_000, 3_000)
+    difs = [ln for ln in difflib.unified_diff(bruto.splitlines(), novo.splitlines(), lineterm="", n=0)
+            if ln.startswith(("-", "+")) and not ln.startswith(("---", "+++"))]
+    assert all("CVX" not in ln and "PBR" not in ln for ln in difs)
