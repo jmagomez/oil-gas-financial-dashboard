@@ -18,7 +18,10 @@ export interface BlocoFinanceiro {
   fcf: Valor;
   /** NEGATIVO no payload: e saida de caixa. */
   capex: Valor;
-  /** Negativo = CAIXA LIQUIDO. Ver `alavancagem()` em lib/derivacoes. */
+  /**
+   * Divida bruta COM arrendamentos menos caixa e aplicacoes de curto prazo --
+   * uma definicao so para as sete. Negativo = CAIXA LIQUIDO. Ver `alavancagem()`.
+   */
   divida_liquida: Valor;
   /** Usa divida TOTAL, nao liquida -- conferido contra os dados. */
   divida_patrimonio_pct: Valor;
@@ -28,8 +31,10 @@ export interface BlocoFinanceiro {
   producao_kboed: Valor;
 }
 
-/** O bloco anual nao tem campo proprio: e um alias, nao uma extensao vazia. */
-export type BlocoAnual = BlocoFinanceiro;
+/** O ano fiscal e da empresa: rotule por ele, nunca por um "FY" fixo. */
+export interface BlocoAnual extends BlocoFinanceiro {
+  ano: number;
+}
 
 export interface BlocoTrimestral extends BlocoFinanceiro {
   /** "Q2 2026". Varia POR EMPRESA -- nao existe trimestre global no payload. */
@@ -67,7 +72,7 @@ export interface Empresa {
   ticker: string;
   nome: string;
   pais: string;
-  fy2025: BlocoAnual;
+  anual: BlocoAnual;
   q_recente: BlocoTrimestral;
   mercado: Mercado;
   historico: HistoricoItem[];
@@ -78,7 +83,6 @@ export interface Empresa {
 export interface Referencia {
   data_consulta: string;
   moeda: string;
-  periodo_anual: string;
   fonte_principal: string;
   notas: string[];
   versao_dados: string;

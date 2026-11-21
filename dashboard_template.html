@@ -345,7 +345,7 @@ footer a:hover{text-decoration:underline;}
   <div class="toolbar-row">
     <span class="toolbar-label">Período</span>
     <div class="seg" id="periodToggle">
-      <button data-p="fy2025" class="active">FY2025</button>
+      <button data-p="anual" class="active" id="btnAnual">FY</button>
       <button data-p="q_recente" id="btnQ">Trimestre</button>
     </div>
     <label class="switch" title="Coloca o trimestre em base de 12 meses somando os quatro últimos trimestres (TTM). Sem a janela completa, cai para trimestre × 4.">
@@ -470,7 +470,7 @@ footer a:hover{text-decoration:underline;}
     </div>
   </div>
   <div class="charts-grid" id="gridValuation">
-    <div class="card"><div class="card-head"><div><h3>Múltiplo vs. retorno</h3><p class="note">EV/EBITDA (x) × ROE (%) · área da bolha = market cap</p></div><div class="card-tools"><button class="btn icon" data-png="chBubble">PNG</button></div></div><div class="canvas-box tall"><canvas id="chBubble"></canvas></div></div>
+    <div class="card"><div class="card-head"><div><h3>Múltiplo vs. retorno</h3><p class="note">EV/EBITDA (x) × ROE (%) · área da bolha = market cap · <span id="evNota"></span></p></div><div class="card-tools"><button class="btn icon" data-png="chBubble">PNG</button></div></div><div class="canvas-box tall"><canvas id="chBubble"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Dividend yield vs. FCF yield</h3><p class="note">Derivado · acima da diagonal, o caixa livre cobre o dividendo</p></div><div class="card-tools"><button class="btn icon" data-png="chYieldScatter">PNG</button></div></div><div class="canvas-box tall"><canvas id="chYieldScatter"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Múltiplos de valuation</h3><p class="note">P/E (x) · snapshot de mercado &nbsp;|&nbsp; EV/EBITDA (x) · derivado, muda com o período</p></div><div class="card-tools"><button class="btn icon" data-png="chMultiples">PNG</button></div></div><div class="canvas-box"><canvas id="chMultiples"></canvas></div></div>
     <div class="card"><div class="card-head"><div><h3>Valor da capacidade instalada</h3><p class="note">Derivado · enterprise value por barril/dia de produção (US$)</p></div><div class="card-tools"><button class="btn icon" data-png="chEvBoed">PNG</button></div></div><div class="canvas-box"><canvas id="chEvBoed"></canvas></div></div>
@@ -547,11 +547,16 @@ const TICK = '#6d7f9f';
    dos graficos e a coluna `periodo` de cada linha do CSV. Acertava enquanto as
    sete estavam no mesmo trimestre -- exatamente quando o rotulo importa menos. */
 const TRI = DATA.meta_build.trimestre_recente;
+/* Ano fiscal -- tambem de CADA empresa (build_dashboard.anos_fiscais). O ano
+   estava escrito no template (FY2025) e na chave do JSON (`fy2025`); a
+   primeira empresa a fechar o FY2026 quebraria os dois. */
+const ANO = DATA.meta_build.ano_fiscal;
+function rotuloAno(){ return ANO.uniforme ? 'FY' + ANO.distintos[0] : 'último ano fiscal de cada empresa'; }
 function trimCurto(t){ const m = /Q([1-4]) (\d{4})/.exec(t || ''); return m ? `${m[1]}T${m[2].slice(2)}` : (t || ''); }
 function rotuloTrimestre(){ return TRI.uniforme ? TRI.distintos[0] : 'último trimestre de cada empresa'; }
 /* Periodo de UMA empresa: o que vai na linha do CSV e na tabela. */
 function periodoDaLinha(e){
-  if(isFY()) return 'FY2025';
+  if(isFY()) return 'FY' + e.anual.ano;
   const t = e.q_recente.trimestre;
   return STATE.anualizar ? t + ' · 12m' : t;
 }
@@ -559,7 +564,8 @@ function periodoDaLinha(e){
    propria barra. `comTrimestre` forca isso nos graficos que mostram FY e
    trimestre lado a lado, independentemente do periodo selecionado. */
 function rotuloEmpresa(e, comTrimestre){
-  if(TRI.uniforme || (isFY() && !comTrimestre)) return e.ticker;
+  if(isFY() && !comTrimestre) return ANO.uniforme ? e.ticker : [e.ticker, 'FY' + String(e.anual.ano).slice(2)];
+  if(TRI.uniforme) return e.ticker;
   return [e.ticker, trimCurto(e.q_recente.trimestre)];
 }
 function descreveTrimestres(){
@@ -570,6 +576,13 @@ function descreveTrimestres(){
 function renderAvisoTrimestre(){
   const el = document.getElementById('avisoTrimestre');
   if(!el) return;
+  if(isFY() && !ANO.uniforme){
+    el.hidden = false;
+    el.innerHTML = `<b>Anos fiscais diferentes na mesma coluna.</b> `
+      + ANO.distintos.slice().reverse().map(a => `<b>FY${a}</b> (${ANO.empresas_por_ano[a].join(', ')})`).join('; ')
+      + `. O ano de cada uma está sob o ticker em cada gráfico.`;
+    return;
+  }
   const mostrar = !TRI.uniforme && !isFY();
   el.hidden = !mostrar;
   if(!mostrar) return;
@@ -581,7 +594,7 @@ function renderAvisoTrimestre(){
 
 const STATE = {
   active: new Set(DATA.empresas.map(e => e.ticker)),
-  period: 'fy2025',
+  period: 'anual',
   anualizar: false,
   log: false,
   ordem: 'valor',
@@ -608,8 +621,8 @@ function hex2rgba(hex, a){
   const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
   return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
 }
-function isFY(){ return STATE.period === 'fy2025'; }
-function rotuloPeriodo(){ return isFY() ? 'FY2025' : (STATE.anualizar ? rotuloTrimestre() + ' · 12m' : rotuloTrimestre()); }
+function isFY(){ return STATE.period === 'anual'; }
+function rotuloPeriodo(){ return isFY() ? rotuloAno() : (STATE.anualizar ? rotuloTrimestre() + ' · 12m' : rotuloTrimestre()); }
 
 /* ==========================================================================
    Registro de indicadores
@@ -846,7 +859,7 @@ function renderMeta(){
   document.getElementById('badgeCobertura').textContent =
     `${DATA.empresas.length} empresas · ${Object.keys(METRICAS).length} indicadores (${nDeriv} derivados)`;
   document.getElementById('subtitleText').textContent =
-    `Comparativo de ${DATA.empresas.map(e => e.nome).join(', ')} no ano fiscal ${ref.periodo_anual.split(' (')[0]} e ${TRI.uniforme ? `no trimestre mais recente divulgado (${TRI.distintos[0]})` : `no trimestre mais recente de cada empresa (${TRI.distintos.join(' e ')} — as empresas divulgam em datas diferentes)`}. ` +
+    `Comparativo de ${DATA.empresas.map(e => e.nome).join(', ')} no ano fiscal ${rotuloAno()} e ${TRI.uniforme ? `no trimestre mais recente divulgado (${TRI.distintos[0]})` : `no trimestre mais recente de cada empresa (${TRI.distintos.join(' e ')} — as empresas divulgam em datas diferentes)`}. ` +
     `Valores em US$ milhões, exceto onde indicado. Petrobras convertida de BRL para USD; metodologia completa no rodapé.`;
 
   const nav = document.getElementById('sectionNav');
@@ -857,6 +870,8 @@ function renderMeta(){
     a.href = '#' + id; a.textContent = label; a.dataset.sec = id;
     nav.appendChild(a);
   });
+  const btnA = document.getElementById('btnAnual');
+  btnA.textContent = ANO.uniforme ? 'FY' + ANO.distintos[0] : 'Último ano fiscal';
   const btnQ = document.getElementById('btnQ');
   btnQ.textContent = TRI.uniforme ? TRI.distintos[0] : 'Último trimestre';
   btnQ.title = TRI.uniforme ? '' : 'Trimestre mais recente de cada empresa: '
@@ -917,7 +932,12 @@ function renderKpis(){
       <div class="kpi-head"><span class="kpi-tk">${e.ticker}</span><span class="kpi-flag">${e.pais}${(!TRI.uniforme && !isFY()) ? ` · ${trimCurto(e.q_recente.trimestre)}` : ''}</span></div>
       <div class="kpi-nm">${e.nome}</div>
       <div class="kpi-hero num">US$ ${fmt(e.mercado.market_cap / 1000, 1)}<small>bi de market cap</small></div>
-      <div class="kpi-delta">EBITDA do trimestre × 4 ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY2025</div>
+      <div class="kpi-delta">EBITDA do trimestre × 4 ${rr === null ? '—' : `<span class="${cls}">${seta} ${fmt(Math.abs(rr), 1)}%</span>`} vs. FY${e.anual.ano}</div>
+      ${(() => {
+        const bq = e.q_recente.derivados.brent_medio_usd, ba = e.anual.derivados.brent_medio_usd;
+        return (bq === null || ba === null) ? '' :
+          `<div class="kpi-delta" title="Brent médio (EIA) do trimestre da empresa contra o do ano fiscal: quanto do salto é preço, não desempenho">Brent ${trimCurto(e.q_recente.trimestre)} US$ ${fmt(bq, 0)} vs. US$ ${fmt(ba, 0)} no FY${e.anual.ano}</div>`;
+      })()}
       <div class="kpi-rows">
         <div class="kpi-row"><span>Margem EBITDA</span><b class="num">${fmt(d.margem_ebitda_pct, 1)}%</b></div>
         <div class="kpi-row"><span>ND / EBITDA</span><b class="num">${fmt(d.nd_ebitda_x, 2)}x</b></div>
@@ -926,7 +946,15 @@ function renderKpis(){
           const dq = e.q_recente.derivados, cx = dq.dividend_yield_caixa_pct;
           const dy = cx ?? e.mercado.dividend_yield_pct;
           return `<div class="kpi-row" title="${cx === null ? 'Yield de mercado (Yahoo): sujeito à razão de ADR' : 'Dividendos pagos em 12 meses ÷ market cap'}"><span>Div. yield ${cx === null ? '(mercado)' : '(caixa)'}</span><b class="num">${fmt(dy, 2)}%</b></div>`
-            + `<div class="kpi-row" title="(Dividendos + recompras pagos em 12 meses) ÷ market cap"><span>Shareholder yield</span><b class="num">${dq.shareholder_yield_pct === null ? '—' : fmt(dq.shareholder_yield_pct, 2) + '%'}</b></div>`;
+            + (() => {
+              // Recompra concentrada num trimestre (Equinor: fatia do Estado) faz o
+              // yield de 12 meses parecer recorrente quando e um pico.
+              const conc = dq.concentracao_recompras_pct;
+              const pico = conc !== null && conc > 50;
+              const dica = '(Dividendos + recompras pagos em 12 meses) ÷ market cap'
+                + (pico ? ` — ${fmt(conc, 0)}% das recompras de 12 meses saíram num só trimestre: o yield não se repete trimestre a trimestre` : '');
+              return `<div class="kpi-row" title="${dica}"><span>Shareholder yield${pico ? ' <span aria-label="recompras concentradas">*</span>' : ''}</span><b class="num">${dq.shareholder_yield_pct === null ? '—' : fmt(dq.shareholder_yield_pct, 2) + '%'}</b></div>`;
+            })();
         })()}
         <div class="kpi-row"><span>EV / EBITDA</span><b class="num">${fmt(valor('ev_ebitda_x', e), 2)}x</b></div>
       </div>`;
@@ -1027,7 +1055,7 @@ function duplaPeriodo(vis, chave){
   // Dataset FY vs. trimestre. O trimestre vai para base de 12 meses via TTM;
   // ×4 só quando a empresa não tem a janela completa.
   const m = METRICAS[chave];
-  const fy = vis.map(e => m.get(e, e.fy2025));
+  const fy = vis.map(e => m.get(e, e.anual));
   const q  = vis.map(e => {
     const v = m.get(e, e.q_recente);
     if(v === null || v === undefined) return null;
@@ -1045,7 +1073,7 @@ function grafDuplo(id, chave, opts = {}){
   const [fy, q] = duplaPeriodo(vis, chave);
   const rotuloQ = rotuloTrimestre() + (STATE.anualizar && METRICAS[chave].fluxo ? ` (12m · ${baseRotulo(chave)})` : '');
   make(id, barConfig(labels, [
-    {label:'FY2025', data:fy, backgroundColor:cores.map(c => hex2rgba(c, .35)), borderColor:cores.map(c => hex2rgba(c, .6)), borderWidth:1},
+    {label:rotuloAno(), data:fy, backgroundColor:cores.map(c => hex2rgba(c, .35)), borderColor:cores.map(c => hex2rgba(c, .6)), borderWidth:1},
     {label:rotuloQ,  data:q,  backgroundColor:cores.map(c => hex2rgba(c, .9)),  borderColor:cores, borderWidth:1},
   ], Object.assign({
     log: opts.log,
@@ -1214,6 +1242,14 @@ function renderPonte(){
 /* ==========================================================================
    Valuation — dispersões
    ========================================================================== */
+/* Fora de renderValuation de proposito: e texto, nao grafico, e tem de
+   aparecer mesmo quando o Chart.js nao carrega. */
+function renderNotaEv(){
+  const semNci = DATA.empresas.filter(e => !e.q_recente.derivados.ev_inclui_nao_controladores).map(e => e.ticker);
+  document.getElementById('evNota').textContent = semNci.length === 0
+    ? 'EV inclui não controladores'
+    : `EV sem não controladores (saldo ausente na fonte): ${semNci.join(', ')}`;
+}
 function renderValuation(){
   if(!chartsOk) return;
   const vis = empresasVisiveis();
@@ -1530,12 +1566,15 @@ const FORMULAS = [
   ['Conversão de FCF', 'FCF ÷ EBITDA'],
   ['Capex / FCO', '|capex| ÷ fluxo de caixa operacional'],
   ['Receita e EBITDA por boe', 'valor ÷ (produção × dias do período)'],
-  ['Enterprise value', 'market cap + dívida líquida'],
+  ['Dívida líquida', 'dívida bruta COM arrendamentos − caixa e aplicações de curto prazo, numa definição só para as sete e para todos os períodos; no ano fiscal, o saldo do 4T. Não é o número que cada empresa destaca (a BP divulga sem arrendamentos e sem híbridos) — e é por isso que compara: as definições das empresas divergem entre si'],
+  ['Enterprise value', 'market cap + dívida líquida + participação de não controladores (saldo do fim do período). O EBITDA é consolidado a 100%: sem os minoritários no numerador, o múltiplo subestima quem tem subsidiária com sócio — na BP, ~16% do market cap'],
   ['EV por boe/d', 'EV ÷ produção diária'],
   ['FCF yield', 'FCF dos últimos 12 meses (TTM) ÷ market cap'],
   ['Dividend yield (caixa)', 'dividendos PAGOS nos últimos 12 meses (DFC) ÷ market cap. Totais da companhia: sem razão de ADR — o yield de mercado da Shell vinha 2× menor por dividir o dividendo por ação ordinária pelo preço do ADS, que vale duas'],
   ['Shareholder yield', '(dividendos + recompras pagos em 12 meses) ÷ market cap — o retorno em caixa que as majors efetivamente entregam'],
-  ['Distribuição / FCO', '(dividendos + recompras em 12 meses) ÷ FCO de 12 meses — a métrica que as próprias companhias guiam'],
+  ['Distribuição / FCO', '(dividendos + recompras PAGOS em 12 meses) ÷ FCO de 12 meses. Não é a conta do guidance: a Shell guia 40–50% do CFFO <b>no ciclo</b> e conta a recompra <b>anunciada</b>; com recompra em valor fixo por trimestre, um ano de petróleo caro derruba o percentual pago sem que a política tenha mudado'],
+  ['Concentração de recompras', 'maior trimestre de recompra ÷ recompras de 12 meses. Acima de 50%, o shareholder yield ganha um * no cartão: é pico, não ritmo (Equinor: a fatia do Estado norueguês é recomprada de uma vez, após a assembleia de maio)'],
+  ['Brent médio', 'EIA, Europe Brent Spot FOB (RBRTE): média dos três meses do trimestre da empresa, ou dos doze do ano fiscal. Preço realizado de cada empresa não entra — as sete o definem de jeitos diferentes'],
   ['Dividendos estimados', 'market cap × dividend yield'],
   ['Cobertura do dividendo', 'FCF dos últimos 12 meses (TTM) ÷ dividendos PAGOS em 12 meses (estimativa market cap × yield de mercado só quando falta o dado de caixa; o payload diz qual em <code>base_dividendo</code>). O payout sobre FCF é <b>100 ÷ cobertura</b> e não aparece como indicador próprio — seria a mesma informação em duas colunas'],
   ['Run-rate do trimestre', '(trimestre × 4 ÷ ano fiscal) − 1 — aqui o ×4 é proposital: mede o ritmo do trimestre isolado'],
@@ -1545,7 +1584,7 @@ const FORMULAS = [
 
 function renderFooter(){
   const ref = DATA.referencia;
-  let html = `<h4>Metodologia</h4>Ano fiscal = ${ref.periodo_anual}. Trimestre recente = ${descreveTrimestres()} (derivado do trimestre de cada empresa). Fonte principal: ${ref.fonte_principal}.`;
+  let html = `<h4>Metodologia</h4>Ano fiscal = ${rotuloAno()} (derivado do ano de cada empresa; ano fiscal = ano civil nas sete). Trimestre recente = ${descreveTrimestres()} (derivado do trimestre de cada empresa). Fonte principal: ${ref.fonte_principal}.`;
   html += ` Fundamentos coletados em ${ref.data_consulta} e revisados a cada balanço; dados de mercado atualizados em ${ref.atualizado_em} (versão ${ref.versao_dados}).`;
 
   html += '<h4>Indicadores derivados</h4><div class="formula-grid">';
@@ -1582,6 +1621,7 @@ function mostrarErroGraficos(msg){
 function renderAll(){
   renderAvisoTrimestre();
   renderKpis();
+  renderNotaEv();
   try{
     if(!chartsOk) throw new Error('Chart.js indisponível');
     renderExplorador();

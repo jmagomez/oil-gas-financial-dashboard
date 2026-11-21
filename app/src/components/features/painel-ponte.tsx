@@ -18,7 +18,7 @@ const COLUNAS = [
 export function PainelPonte() {
   const { data, isPending, error } = useDados();
   const [ticker, setTicker] = useState<string | null>(null);
-  const [periodo, setPeriodo] = useState<Periodo>('fy2025');
+  const [periodo, setPeriodo] = useState<Periodo>('anual');
 
   const empresa = useMemo(
     () => data?.empresas.find((e) => e.ticker === (ticker ?? data.empresas[0]?.ticker)),
@@ -66,6 +66,7 @@ export function PainelPonte() {
               valor={periodo}
               onChange={setPeriodo}
               rotuloTrimestre={empresa.q_recente.trimestre}
+              rotuloAno={`FY${empresa.anual.ano}`}
             />
           </div>
         </div>

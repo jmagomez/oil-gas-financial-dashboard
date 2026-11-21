@@ -53,7 +53,7 @@ const METRICAS: readonly Metrica[] = [
 
 export function PainelEficiencia() {
   const { data, isPending, error } = useDados();
-  const [periodo, setPeriodo] = useState<Periodo>('fy2025');
+  const [periodo, setPeriodo] = useState<Periodo>('anual');
 
   const comProxy = useMemo(
     () =>
@@ -88,6 +88,12 @@ export function PainelEficiencia() {
     [data],
   );
 
+  /** Idem para o ano fiscal: na virada, cada empresa fecha o ano numa data. */
+  const rotuloAno = useMemo(() => {
+    const anos = [...new Set((data?.empresas ?? []).map((e) => e.anual.ano))];
+    return anos.length === 1 ? `FY${anos[0]}` : 'ano fiscal';
+  }, [data]);
+
   if (isPending) return <Skeleton className="h-96 w-full" />;
   if (error || !data) {
     return (
@@ -105,7 +111,12 @@ export function PainelEficiencia() {
       <Card>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <CardTitle>Eficiência operacional</CardTitle>
-          <SeletorPeriodo valor={periodo} onChange={setPeriodo} rotuloTrimestre="trimestre" />
+          <SeletorPeriodo
+            valor={periodo}
+            onChange={setPeriodo}
+            rotuloTrimestre="trimestre"
+            rotuloAno={rotuloAno}
+          />
         </div>
         <CardNote className="mt-1">
           Indicadores que normalizam as empresas pelo tamanho da operação — a leitura que separa

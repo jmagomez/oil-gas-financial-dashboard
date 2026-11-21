@@ -36,6 +36,7 @@ DEFINICOES (R$ milhoes, antes da conversao)
                      Yahoo a ausencia continua sendo "nao sei" -- la uma linha
                      renomeada some sem aviso.)
     patrimonio       2.03     Patrimonio liquido consolidado
+    nao_controladores 2.03.xx participacao dos nao controladores (entra no EV)
     ativos           1        Ativo total
 
 ATENCAO AO EBITDA. A definicao acima NAO e a do agregador que alimentava a
@@ -213,6 +214,7 @@ def trimestre_brl(ls, p: str) -> dict[str, float | None]:
         ),
         "patrimonio": _busca(ls, "BPP", _fim(p), conta="2.03"),
         "ativos": _busca(ls, "BPA", _fim(p), conta="1"),
+        "nao_controladores": _busca(ls, "BPP", _fim(p), desc=r"nao controlador", prefixo="2.03."),
     }
     if r["capex"] is not None:
         r["capex"] = abs(r["capex"])
@@ -243,7 +245,7 @@ def trimestre_brl(ls, p: str) -> dict[str, float | None]:
 # Conversao para US$ e formato do pipeline
 # ---------------------------------------------------------------------------
 FLUXOS = ("receita", "lucro_liquido", "ebitda", "fco", "capex", "dividendos", "recompras")
-ESTOQUES = ("divida_total", "caixa", "patrimonio", "ativos")
+ESTOQUES = ("divida_total", "caixa", "patrimonio", "ativos", "nao_controladores")
 
 
 def converte(brl: dict[str, float | None], taxas: dict[str, Any]) -> dict[str, float | None]:
@@ -263,6 +265,22 @@ def ultimo_periodo(ls) -> str | None:
         return None
     fim = date.fromisoformat(fins[-1])
     return f"{fim.year}-Q{(fim.month - 1) // 3 + 1}"
+
+
+def linhas_financiamento(ls, p: str) -> list[str]:
+    """Contas de nivel 2 da DFC de financiamento (6.03.xx) no acumulado do ano.
+
+    Trilha de auditoria para a regra "sem linha de recompra, recompra zero":
+    quem le o relatorio do run ve QUAIS linhas existiam e confere que nenhuma e
+    recompra com outro nome, em vez de confiar no regex.
+    """
+    fim, ini = _fim(p), f"{p[:4]}-01-01"
+    return sorted({
+        f"{i['conta']} {i['desc']}"
+        for i in ls
+        if i["demo"] == "DFC_MI" and i["fim"] == fim and i["ini"] == ini
+        and i["conta"].startswith("6.03.") and i["conta"].count(".") == 2
+    })
 
 
 def monta_bruto(ls, periodo: str | None = None, cotacoes=None) -> dict[str, Any] | None:
@@ -309,6 +327,7 @@ def monta_bruto(ls, periodo: str | None = None, cotacoes=None) -> dict[str, Any]
         "anteriores": anteriores,
         "moeda": "USD",
         "fonte": FONTE,
+        "dfc_financiamento": linhas_financiamento(ls, periodo),
         "conversao": {
             "moeda_origem": "BRL",
             "ptax_media": taxas["media"],

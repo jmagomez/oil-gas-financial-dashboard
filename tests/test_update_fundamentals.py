@@ -721,7 +721,7 @@ def _com_historico(dados):
 def test_preenche_distribuicoes_em_trimestres_ja_curados(dados):
     xom = _com_historico(dados)
     rel = uf.Relatorio()
-    tocados = uf.preenche_distribuicoes(dados, _bruto_com_anteriores(), rel)
+    tocados = uf.preenche_lacunas(dados, _bruto_com_anteriores(), rel)
     assert tocados == {"XOM"}
     assert xom["q_recente"]["dividendos_pagos"] == 4_290
     assert xom["q_recente"]["recompras"] == 5_100
@@ -734,14 +734,14 @@ def test_preenche_distribuicoes_em_trimestres_ja_curados(dados):
 def test_preenchimento_nunca_sobrescreve_valor_existente(dados):
     """O 9.999 do 1T26 e curado: a fonte dizer 4.270 nao o troca -- vira so silencio."""
     xom = _com_historico(dados)
-    uf.preenche_distribuicoes(dados, _bruto_com_anteriores(), uf.Relatorio())
+    uf.preenche_lacunas(dados, _bruto_com_anteriores(), uf.Relatorio())
     assert xom["historico"][1]["dividendos_pagos"] == 9_999
 
 
 def test_preenchimento_ignora_fonte_fora_de_usd(dados):
     xom = _com_historico(dados)
     rel = uf.Relatorio()
-    assert uf.preenche_distribuicoes(dados, _bruto_com_anteriores(moeda="BRL"), rel) == set()
+    assert uf.preenche_lacunas(dados, _bruto_com_anteriores(moeda="BRL"), rel) == set()
     assert "dividendos_pagos" not in xom["q_recente"] or xom["q_recente"]["dividendos_pagos"] is None
 
 
@@ -750,7 +750,7 @@ def test_preenchimento_rejeita_valor_fora_de_faixa(dados):
     coletado = _bruto_com_anteriores()
     coletado["XOM"]["linhas"]["dividendos"] = -400_000  # unidade errada
     rel = uf.Relatorio()
-    uf.preenche_distribuicoes(dados, coletado, rel)
+    uf.preenche_lacunas(dados, coletado, rel)
     assert any(r["campo"] == "dividendos_pagos" and "fora da faixa" in r["motivo"] for r in rel.rejeicoes)
 
 
@@ -763,7 +763,7 @@ def test_preenchimento_reescreve_so_as_linhas_da_empresa_tocada(dados):
     trimestre = next(e for e in dados["empresas"] if e["ticker"] == "XOM")["q_recente"]["trimestre"]
     fim = uf.fim_do_trimestre(trimestre)
     coletado = {"XOM": {"fim": fim, "linhas": {"dividendos": -4_000, "recompras": -3_000}, "moeda": "USD"}}
-    tocados = uf.preenche_distribuicoes(dados, coletado, rel)
+    tocados = uf.preenche_lacunas(dados, coletado, rel)
     assert tocados == {"XOM"}
     novo = uf.reescreve_json(bruto, dados, tocados, date(2026, 11, 21))
     xom = next(e for e in json.loads(novo)["empresas"] if e["ticker"] == "XOM")
@@ -771,3 +771,51 @@ def test_preenchimento_reescreve_so_as_linhas_da_empresa_tocada(dados):
     difs = [ln for ln in difflib.unified_diff(bruto.splitlines(), novo.splitlines(), lineterm="", n=0)
             if ln.startswith(("-", "+")) and not ln.startswith(("---", "+++"))]
     assert all("CVX" not in ln and "PBR" not in ln for ln in difs)
+
+
+# ---------------------------------------------------------------------------
+# Divida liquida e nao controladores: mesma definicao, completados por periodo
+# ---------------------------------------------------------------------------
+def test_nao_controladores_saem_do_balanco():
+    bloco = uf.monta_trimestre(_bruto({"nao_controladores": 17_420}))
+    assert bloco["nao_controladores"] == 17_420
+
+
+def test_divida_liquida_e_bruta_menos_caixa_e_aplicacoes_de_curto_prazo():
+    L = {"divida_total": 70_000.0, "caixa": 30_000.0, "investimentos_curto": 1_000.0}
+    assert uf._divida_liquida(L) == 39_000.0
+    assert uf._divida_liquida({"caixa": 30_000.0}) is None  # sem divida, nao ha conta
+
+
+def test_lacuna_de_divida_liquida_e_preenchida_pelo_periodo_exato(dados):
+    """O 1T26 anulado por curadoria (definicao/sinal errados) volta pela fonte, na definicao unica."""
+    xom = _com_historico(dados)
+    coletado = _bruto_com_anteriores()
+    coletado["XOM"]["anteriores"][0]["linhas"].update(
+        {"divida_total": 42_000.0, "caixa": 3_000.0, "investimentos_curto": None, "nao_controladores": 7_100.0}
+    )
+    rel = uf.Relatorio()
+    uf.preenche_lacunas(dados, coletado, rel)
+    q1 = xom["historico"][1]
+    assert (q1["divida_liquida"], q1["nao_controladores"]) == (39_000, 7_100)
+    assert "divida_liquida" not in xom["historico"][0]  # 4T25 sem balanco na fonte: fica vazio
+
+
+def test_lacuna_de_divida_nao_sobrescreve_o_curado(dados):
+    xom = _com_historico(dados)
+    xom["historico"][1]["divida_liquida"] = 1
+    coletado = _bruto_com_anteriores()
+    coletado["XOM"]["anteriores"][0]["linhas"].update({"divida_total": 42_000.0, "caixa": 3_000.0})
+    uf.preenche_lacunas(dados, coletado, uf.Relatorio())
+    assert xom["historico"][1]["divida_liquida"] == 1
+
+
+def test_promover_trimestre_preserva_a_proveniencia_curada(dados):
+    """A origem das recompras curadas a mao nao pode sumir quando o trimestre vira."""
+    pbr = next(e for e in dados["empresas"] if e["ticker"] == "PBR")
+    pbr.setdefault("proveniencia", {})["recompras"] = {"fonte": "curadoria"}
+    saida, rel = uf.aplica_fundamentos(dados, {"PBR": _bruto_cvm()}, hoje=date(2026, 11, 14))
+    assert [n["ticker"] for n in rel.novos] == ["PBR"]
+    prov = next(e for e in saida["empresas"] if e["ticker"] == "PBR")["proveniencia"]
+    assert prov["recompras"] == {"fonte": "curadoria"}
+    assert "CVM" in prov["fundamentos"]["fonte"]

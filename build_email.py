@@ -40,7 +40,7 @@ CAMPOS = [
     ("market_cap", "Market cap<br><span style='font-weight:400;color:#888'>US$ mi</span>", 0, "mercado"),
     ("pe", "P/E", 2, "mercado"),
     ("dividend_yield_pct", "Div. yield<br><span style='font-weight:400;color:#888'>%</span>", 2, "mercado"),
-    ("fcf_yield_pct", "FCF yield<br><span style='font-weight:400;color:#888'>% · FY2025</span>", 2, "derivado"),
+    ("fcf_yield_pct", "FCF yield<br><span style='font-weight:400;color:#888'>% · último ano fiscal</span>", 2, "derivado"),
 ]
 
 # Colunas em que a mediana do grupo ajuda a julgar o valor individual.
@@ -61,7 +61,7 @@ def num(v, casas=2):
 def valor_do_campo(empresa, chave, origem):
     if origem == "mercado":
         return empresa["mercado"].get(chave)
-    return empresa["fy2025"]["derivados"].get(chave)
+    return empresa["anual"]["derivados"].get(chave)
 
 
 def var_por_ticker(relatorio):

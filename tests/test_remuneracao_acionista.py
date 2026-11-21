@@ -27,7 +27,7 @@ def _empresa(ticker="SHEL", market_cap=264_000, yield_mercado=1.64, **kw):
     q.pop("periodo")
     return {
         "ticker": ticker, "nome": ticker, "pais": "X",
-        "fy2025": dict(_tri("FY2025", div=8_000, rec=14_000, fco=48_000)),
+        "anual": dict(_tri("FY2025", div=8_000, rec=14_000, fco=48_000), ano=2025),
         "q_recente": q,
         "mercado": {"market_cap": market_cap, "pe": 9.0, "dividend_yield_pct": yield_mercado, "preco_acao": 93.58},
         "historico": [_tri("2025-Q4", **kw), _tri("2026-Q1", **kw), _tri("2026-Q2", **kw)],
@@ -68,7 +68,7 @@ def test_sem_janela_completa_nao_inventa_e_volta_para_a_estimativa_declarada():
 
 
 def test_ano_fiscal_nao_ganha_yield_de_caixa_sem_dado_anual():
-    d = _deriva(_empresa())["empresas"][0]["fy2025"]["derivados"]
+    d = _deriva(_empresa())["empresas"][0]["anual"]["derivados"]
     assert d["shareholder_yield_pct"] is None
     assert d["base_dividendo"] == "estimado_yield_mercado"
 
@@ -115,3 +115,19 @@ def test_validacao_acusa_yield_de_mercado_com_a_razao_do_ads():
 def test_validacao_fica_quieta_quando_mercado_e_caixa_concordam():
     xom = _empresa("XOM", market_cap=652_000, yield_mercado=2.65, div=4_300, rec=5_000)
     assert not [p for p in bd.validate(_deriva(xom)) if "razão de ADR" in p]
+
+
+# ---------------------------------------------------------------------------
+# Concentracao de recompras (Equinor: fatia do Estado recomprada de uma vez)
+# ---------------------------------------------------------------------------
+def test_concentracao_e_o_maior_trimestre_sobre_os_12_meses():
+    e = _empresa()
+    e["historico"][0]["recompras"] = 10_500  # 2025-Q4 vira o pico
+    d = _deriva(e)["empresas"][0]["q_recente"]["derivados"]
+    # janela 4T25..3T26: 10.500 + 3 x 3.500 = 21.000; o pico e metade
+    assert d["concentracao_recompras_pct"] == 50
+
+
+def test_concentracao_sem_recompra_fica_nula():
+    d = _deriva(_empresa(rec=0))["empresas"][0]["q_recente"]["derivados"]
+    assert d["concentracao_recompras_pct"] is None
