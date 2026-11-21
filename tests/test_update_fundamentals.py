@@ -819,3 +819,19 @@ def test_promover_trimestre_preserva_a_proveniencia_curada(dados):
     prov = next(e for e in saida["empresas"] if e["ticker"] == "PBR")["proveniencia"]
     assert prov["recompras"] == {"fonte": "curadoria"}
     assert "CVM" in prov["fundamentos"]["fonte"]
+
+
+def test_balanco_atrasado_nao_entra_com_o_rotulo_do_trimestre_novo():
+    """DRE do 3T publicada e balanco ainda no 2T: o saldo do 2T nao pode virar o do 3T."""
+    income = _df({"Total Revenue": [110_000e6, 100_000e6], "Net Income": [15_000e6, 14_000e6]},
+                 [pd.Timestamp("2026-09-30"), pd.Timestamp("2026-06-30")])
+    cash = _df({"Operating Cash Flow": [25_000e6, 23_000e6], "Capital Expenditure": [-6_000e6, -6_500e6]},
+               [pd.Timestamp("2026-09-30"), pd.Timestamp("2026-06-30")])
+    balance = _df({"Total Debt": [42_368e6], "Cash And Cash Equivalents": [10_588e6], "Minority Interest": [6_731e6]},
+                  [pd.Timestamp("2026-06-30")])
+    bruto = uf.coleta_bruto(income, cash, balance)
+    assert bruto["linhas"]["divida_total"] is None
+    assert bruto["linhas"]["nao_controladores"] is None
+    assert bruto["linhas"]["fco"] == pytest.approx(25_000)
+    # O 2T continua com o saldo certo, na coluna certa.
+    assert bruto["anteriores"][0]["linhas"]["divida_total"] == pytest.approx(42_368)
