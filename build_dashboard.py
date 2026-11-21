@@ -28,6 +28,8 @@ import re
 import sys
 from pathlib import Path
 
+import brent
+
 BASE = Path(__file__).resolve().parent
 JSON_PATH = BASE / "indicadores_oleo_gas.json"
 TEMPLATE_PATH = BASE / "dashboard_template.html"
@@ -39,9 +41,9 @@ DADOS_OUT_PATH = BASE / "dashboard_data.json"
 # O trimestre é derivado do rótulo (ver `dias_do_trimestre`): Q1 tem 90 dias
 # (91 em ano bissexto), Q2 91, Q3 e Q4 92. Um valor fixo de 90 distorceria
 # receita/EBITDA por boe em ~2% assim que o período virasse Q2 ou Q3.
-DIAS_PERIODO = {"fy2025": 365, "q_recente": 90}
+DIAS_PERIODO = {"anual": 365, "q_recente": 90}
 # Fator de anualização das métricas de fluxo.
-FATOR_ANUAL = {"fy2025": 1, "q_recente": 4}
+FATOR_ANUAL = {"anual": 1, "q_recente": 4}
 
 
 def dias_do_trimestre(rotulo: str) -> int:
@@ -113,6 +115,46 @@ def descreve_trimestres(tr: dict) -> str:
     return "trimestre mais recente de cada empresa: " + "; ".join(partes)
 
 
+def rotulo_ano(empresa) -> str:
+    """Rotulo FY2025 a partir de `anual.ano` -- o ano e da empresa, como o trimestre."""
+    return f"FY{empresa['anual']['ano']}"
+
+
+def anos_fiscais(empresas) -> dict:
+    """O ano fiscal do payload, derivado das empresas -- nunca armazenado.
+
+    Mesmo desenho de `trimestres_recentes` e pelo mesmo motivo. O ano estava
+    escrito em ~40 lugares (a chave `fy2025` no JSON, no schema do app, no
+    template, no e-mail e no CSV, e o texto de periodo anual em `referencia`). Em
+    fevereiro de 2027 a primeira empresa a fechar o FY2026 teria de ir para uma
+    chave nova que nenhum consumidor conhece, ou ficar parada no FY2025 com o
+    rotulo certo e o dado velho. Agora a chave e `anual`, o ano vai dentro
+    (`anual.ano`) e cada consumidor rotula pela empresa.
+    """
+    por_empresa = {e["ticker"]: e["anual"]["ano"] for e in empresas}
+    distintos = sorted(set(por_empresa.values()))
+    return {
+        "por_empresa": por_empresa,
+        "distintos": distintos,
+        "empresas_por_ano": {a: sorted(k for k, v in por_empresa.items() if v == a) for a in distintos},
+        "uniforme": len(distintos) == 1,
+        "mais_recente": distintos[-1] if distintos else None,
+    }
+
+
+def ano_fiscal_defasado(empresa) -> bool:
+    """O ano fiscal ja deveria ter virado: ha o 4T do ano seguinte e o bloco anual nao o tem.
+
+    `update_fundamentals.promove_ano_fiscal` vira o ano sozinho quando o 4T
+    chega e os quatro trimestres estao no arquivo. Se mesmo assim o bloco ficou
+    para tras (trimestre faltando no historico, por exemplo), o build avisa em
+    vez de comparar o trimestre de 2027 com o ano de 2025 calado.
+    """
+    ano_q, tri = ordem_trimestre(empresa["q_recente"]["trimestre"])
+    ultimo_fechado = ano_q if tri == 4 else ano_q - 1
+    return ultimo_fechado > empresa["anual"]["ano"]
+
+
 def dias_do_ano(rotulo: str) -> int:
     m = re.search(r"(\d{4})", str(rotulo or ""))
     return 366 if (m and calendar.isleap(int(m.group(1)))) else 365
@@ -130,6 +172,7 @@ CSV_HEADER = [
     "receita_por_boe_usd", "ebitda_por_boe_usd", "ev_musd", "ev_ebitda_x", "ev_por_boed_usd",
     "fcf_yield_pct", "cobertura_dividendo_x",
     "dividend_yield_caixa_pct", "shareholder_yield_pct", "distribuicao_fco_pct",
+    "concentracao_recompras_pct", "brent_medio_usd",
     # Sinaliza que a produção da linha é proxy do trimestre, e não do período.
     "producao_proxy",
     # Produção de OUTRO trimestre: existe, mas não é a do período da linha.
@@ -194,11 +237,29 @@ def calcular_ttm(empresa):
     prods = [x.get("producao_kboed") for x in janela]
     out["producao_kboed"] = None if any(p is None for p in prods) else sum(prods) / 4
     out["janela"] = [x.get("periodo") or x.get("trimestre") for x in janela]
+    # Maior trimestre de recompra da janela: e o que diz se o shareholder yield
+    # de 12 meses se repete ou e um pico (ver `concentracao_recompras_pct`).
+    recs = [x.get("recompras") for x in janela]
+    out["recompras_maior_trimestre"] = None if any(r is None for r in recs) else max(recs)
     return out
 
 
+def saldo_nao_controladores(empresa, period_key):
+    """Saldo de nao controladores do periodo; no ano fiscal, o do 4T daquele ano."""
+    if period_key == "q_recente":
+        return empresa["q_recente"].get("nao_controladores")
+    v = empresa["anual"].get("nao_controladores")
+    if v is not None:
+        return v
+    alvo = f"{empresa['anual']['ano']}-Q4"
+    return next(
+        (h.get("nao_controladores") for h in (empresa.get("historico") or []) if h.get("periodo") == alvo),
+        None,
+    )
+
+
 def derivar_periodo(empresa, period_key, ttm=None):
-    """Indicadores derivados de um período (fy2025 ou q_recente).
+    """Indicadores derivados de um período (anual ou q_recente).
 
     No trimestre, os indicadores que dividem fluxo por estoque ou por market cap
     (ND/EBITDA, FCF yield, cobertura de dividendo) usam o TTM quando ele existe
@@ -210,7 +271,7 @@ def derivar_periodo(empresa, period_key, ttm=None):
     if period_key == "q_recente":
         dias = dias_do_trimestre(p.get("trimestre"))
     else:
-        dias = dias_do_ano(p.get("periodo") or "2025")
+        dias = dias_do_ano(str(p["ano"]))
     fator = FATOR_ANUAL[period_key]
 
     receita = p.get("receita")
@@ -271,7 +332,12 @@ def derivar_periodo(empresa, period_key, ttm=None):
     # Barris/dia (para EV por boe/d).
     boed = None if prod is None else prod * 1000.0
 
-    ev = None if (market_cap is None or nd is None) else market_cap + nd
+    # EV = market cap + divida liquida + nao controladores. O EBITDA e
+    # consolidado a 100%: sem a fatia dos minoritarios no numerador, o multiplo
+    # subestima quem tem subsidiaria relevante com socio -- na BP, US$ 17,4 bi
+    # (16% do market cap) em 30/09/2026. No ano fiscal o saldo e o do 4T.
+    nci = saldo_nao_controladores(empresa, period_key)
+    ev = None if (market_cap is None or nd is None) else market_cap + nd + (nci or 0)
     # Remuneracao ao acionista EM CAIXA, nos 12 meses (so no trimestre, e so
     # com a janela TTM completa). Totais da companhia sobre o market cap da
     # companhia: nao ha razao de ADR na conta -- ao contrario do dividend yield
@@ -284,6 +350,19 @@ def derivar_periodo(empresa, period_key, ttm=None):
         if div_12m is not None and rec_12m is not None:
             dist_12m = div_12m + rec_12m
     fco_12m = ttm.get("fluxo_caixa_operacional") if usa_ttm else None
+    # Quanto das recompras de 12 meses saiu num trimestre so. Na Equinor, a
+    # recompra da fatia do Estado noruegues (aprovada na assembleia de maio)
+    # sai de uma vez: na serie do Yahoo, 4.712 no 3T25 e 3.137 no 3T26, contra
+    # 83 a 389 nos outros trimestres. O TTM e a medida certa -- tem exatamente um
+    # resgate do Estado por janela --, mas o leitor precisa saber que o yield de
+    # 12 meses NAO se repete trimestre a trimestre.
+    concentracao = None
+    if usa_ttm and rec_12m and ttm.get("recompras_maior_trimestre") is not None:
+        concentracao = ttm["recompras_maior_trimestre"] / rec_12m * 100.0
+    # Brent medio do MESMO periodo do dado: o trimestre da empresa, ou o ano.
+    preco_brent = (
+        brent.media_trimestre(p.get("trimestre")) if period_key == "q_recente" else brent.media_ano(p["ano"])
+    )
 
     # Base do dividendo para a cobertura: o PAGO quando existe; senao a
     # estimativa market cap x yield de mercado -- e o payload diz qual foi.
@@ -324,6 +403,9 @@ def derivar_periodo(empresa, period_key, ttm=None):
         "producao_usada_kboed": prod,
         "dias_periodo": dias,
         "ev": arred(ev, 0),
+        # Se o EV acima inclui nao controladores. Falso = saldo ausente na fonte,
+        # e o EV daquela empresa esta subestimado na mesma medida.
+        "ev_inclui_nao_controladores": nci is not None,
         # EV / EBITDA calculado aqui, e nao lido do Yahoo. O Yahoo publica um
         # `enterpriseToEbitda` cujo denominador nao e o nosso EBITDA e cujo
         # numerador nao e o nosso EV -- e as duas definicoes conviviam sob o
@@ -339,6 +421,11 @@ def derivar_periodo(empresa, period_key, ttm=None):
         # Retorno de caixa implícito sobre o valor de mercado.
         "fcf_yield_pct": arred(pct(fcf_anual, market_cap)),
         "dividendos_estimados": arred(dividendos, 0),
+        # % das recompras de 12 meses concentrada no maior trimestre da janela.
+        "concentracao_recompras_pct": arred(concentracao, 0),
+        # Brent medio do periodo (EIA). Contexto de preco: sem ele, margem de
+        # 2026 contra 2025 parece desempenho e e, em boa parte, petroleo.
+        "brent_medio_usd": preco_brent,
         "base_dividendo": base_dividendo,
         # Dividendos PAGOS em 12 meses / market cap. Imune a razao de ADR.
         "dividend_yield_caixa_pct": arred(pct(div_12m, market_cap)),
@@ -405,7 +492,7 @@ def derivar_empresa(empresa):
     lucro e FCF tinham o cálculo idêntico e nenhum consumidor, e os dois deltas
     contra o ano fiscal também não chegavam nem à tela nem ao CSV.
     """
-    anual = empresa["fy2025"].get("ebitda")
+    anual = empresa["anual"].get("ebitda")
     trimestral = empresa["q_recente"].get("ebitda")
     if anual in (None, 0) or trimestral is None:
         return {"run_rate_ebitda_pct": None}
@@ -441,8 +528,8 @@ def consolidar_margem(p):
 # Eixos do radar de perfil. maior_melhor=False inverte a normalização.
 EIXOS_PERFIL = [
     ("Rentabilidade", lambda e: e["q_recente"]["derivados"]["margem_ebitda_pct"], True),
-    ("Geração de caixa", lambda e: e["fy2025"]["derivados"]["conversao_fcf_pct"], True),
-    ("Solidez", lambda e: e["fy2025"]["derivados"]["nd_ebitda_x"], False),
+    ("Geração de caixa", lambda e: e["anual"]["derivados"]["conversao_fcf_pct"], True),
+    ("Solidez", lambda e: e["anual"]["derivados"]["nd_ebitda_x"], False),
     ("Valuation", lambda e: e["q_recente"]["derivados"]["ev_ebitda_x"], False),
     ("Retorno ao acionista", lambda e: e["mercado"]["dividend_yield_pct"], True),
     ("Escala", lambda e: e["q_recente"]["producao_kboed"], True),
@@ -505,7 +592,7 @@ def enriquecer(data):
     for e in data["empresas"]:
         ttm = calcular_ttm(e)
         e["ttm"] = ttm
-        for period_key in ("fy2025", "q_recente"):
+        for period_key in ("anual", "q_recente"):
             e[period_key]["derivados"] = derivar_periodo(e, period_key, ttm)
             consolidar_margem(e[period_key])
         e["derivados"] = derivar_empresa(e)
@@ -514,6 +601,17 @@ def enriquecer(data):
     calcular_perfil(data["empresas"])
     data["meta_build"] = {
         "trimestre_recente": trimestres_recentes(data["empresas"]),
+        "ano_fiscal": anos_fiscais(data["empresas"]),
+        "brent": {
+            "fonte": brent.FONTE,
+            "por_trimestre": {
+                t: brent.media_trimestre(t)
+                for t in sorted({e["q_recente"]["trimestre"] for e in data["empresas"]}
+                                | {"Q{1} {0}".format(*h["periodo"].split("-Q"))
+                                   for e in data["empresas"] for h in (e.get("historico") or [])},
+                                key=ordem_trimestre)
+            },
+        },
         "base_retorno_acionista": dict(
             zip(("chave", "descricao"), base_retorno_acionista(data["empresas"])[:2], strict=True)
         ),
@@ -533,6 +631,49 @@ def enriquecer(data):
 # --------------------------------------------------------------------------- #
 # Validação
 # --------------------------------------------------------------------------- #
+# Salto de sinal da divida liquida entre trimestres consecutivos so e
+# plausivel perto de zero. Acima disto, e definicao ou sinal trocado -- o caso
+# real: TotalEnergies com +32.907 no 4T25, -34.142 no 1T26 e +30.991 no 2T26.
+LIMIAR_SALTO_SINAL_DIVIDA = 5_000  # US$ mi, nos dois lados
+
+
+def valida_divida_liquida(empresas) -> list[str]:
+    """Avisos de divida liquida incoerente na serie e no ano fiscal.
+
+    Duas checagens, as duas sobre erro de CURADORIA que nenhuma faixa pega:
+
+    * troca de sinal grande entre trimestres consecutivos (net cash x net debt
+      com sinal invertido -- convencao de agregador que publica "Net Cash (Debt)");
+    * ano fiscal divergindo do saldo do 4T do mesmo ano: o saldo de fim de ano
+      E o do 4T. Diferenca so existe se as duas vieram de definicoes diferentes
+      (a BP tinha 22.200 no FY2025, o numero dela, sem arrendamentos; o 4T25 da
+      serie, 35.815, com).
+    """
+    avisos: list[str] = []
+    for e in empresas:
+        serie = [(h.get("periodo"), h.get("divida_liquida")) for h in (e.get("historico") or [])]
+        serie.append((e["q_recente"].get("trimestre"), e["q_recente"].get("divida_liquida")))
+        serie = [(p, v) for p, v in serie if v is not None]
+        for (p0, v0), (p1, v1) in zip(serie, serie[1:], strict=False):
+            if v0 * v1 < 0 and min(abs(v0), abs(v1)) > LIMIAR_SALTO_SINAL_DIVIDA:
+                avisos.append(
+                    f"{e['ticker']}: divida liquida troca de sinal de {p0} ({v0:,.0f}) para {p1} ({v1:,.0f})"
+                    " -- convencao de sinal ou definicao trocada".replace(",", ".")
+                )
+        q4 = next(
+            (h.get("divida_liquida") for h in (e.get("historico") or [])
+             if h.get("periodo") == f"{e['anual']['ano']}-Q4"),
+            None,
+        )
+        fy = e["anual"].get("divida_liquida")
+        if q4 is not None and fy is not None and abs(fy - q4) > max(1.0, 0.02 * abs(q4)):
+            avisos.append(
+                f"{e['ticker']}: divida liquida do FY{e['anual']['ano']} ({fy:,.0f}) difere do 4T "
+                f"({q4:,.0f}) -- duas definicoes no mesmo saldo de fim de ano".replace(",", ".")
+            )
+    return avisos
+
+
 def validate(data):
     """Checagens básicas de sanidade antes de publicar."""
     problems = []
@@ -551,6 +692,19 @@ def validate(data):
                     f"{e['ticker']}: dividend yield de mercado {mercado:.2f}% vs {caixa:.2f}% do caixa pago "
                     f"em 12 meses (razão {razao:.2f}x) — suspeita de razão de ADR na fonte de mercado"
                 )
+    af = anos_fiscais(data["empresas"])
+    if not af["uniforme"]:
+        problems.append(
+            "anos fiscais diferentes na coluna do ano: "
+            + "; ".join(f"FY{a} = {', '.join(ts)}" for a, ts in af["empresas_por_ano"].items())
+        )
+    for e in data["empresas"]:
+        if ano_fiscal_defasado(e):
+            problems.append(
+                f"{e['ticker']}: ano fiscal FY{e['anual']['ano']} defasado -- ja ha {e['q_recente']['trimestre']}"
+                " e o ano seguinte nao foi promovido (falta trimestre no histórico?)"
+            )
+    problems.extend(valida_divida_liquida(data["empresas"]))
     tr = trimestres_recentes(data["empresas"])
     if not tr["uniforme"]:
         problems.append(
@@ -558,7 +712,7 @@ def validate(data):
             + "; ".join(f"{t} = {', '.join(ts)}" for t, ts in tr["empresas_por_trimestre"].items())
         )
     for e in data["empresas"]:
-        for period_key in ("fy2025", "q_recente"):
+        for period_key in ("anual", "q_recente"):
             p = e[period_key]
             if p["receita"] and p["lucro_liquido"] is not None:
                 if abs(p["lucro_liquido"]) > p["receita"]:
@@ -645,7 +799,7 @@ def build_dados(data):
 def build_csv(data):
     rows = []
     for e in data["empresas"]:
-        for period_key, label in (("fy2025", "FY2025"), ("q_recente", e["q_recente"]["trimestre"])):
+        for period_key, label in (("anual", rotulo_ano(e)), ("q_recente", e["q_recente"]["trimestre"])):
             p = e[period_key]
             d = p["derivados"]
             rows.append([
@@ -662,6 +816,7 @@ def build_csv(data):
                 d["ev_por_boed_usd"],
                 d["fcf_yield_pct"], d["cobertura_dividendo_x"],
                 d["dividend_yield_caixa_pct"], d["shareholder_yield_pct"], d["distribuicao_fco_pct"],
+                d["concentracao_recompras_pct"], d["brent_medio_usd"],
                 "sim" if d["producao_proxy"] else "nao",
                 "sim" if d["producao_defasada"] else "nao",
             ])
