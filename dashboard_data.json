@@ -84,6 +84,8 @@
     "fluxo_caixa_operacional": 25650,
     "fcf": 18472,
     "capex": -7178,
+    "dividendos_pagos": 4264,
+    "recompras": 5103,
     "divida_liquida": 22097,
     "divida_patrimonio_pct": 12.9,
     "roe_pct": 15.28,
@@ -114,13 +116,13 @@
      "ev_ebitda_x": 7.98,
      "ev_por_boed_usd": 150074.0,
      "fcf_yield_pct": 6.58,
-     "dividendos_estimados": 16903.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 2.54
+     "dividendos_estimados": 17263,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 2.65,
+     "shareholder_yield_pct": 5.78,
+     "distribuicao_fco_pct": 53.48,
+     "recompras_12m": 20489,
+     "cobertura_dividendo_x": 2.49
     },
     "margem_liquida_fonte_pct": 13.95
    },
@@ -158,6 +160,8 @@
      "fluxo_caixa_operacional": 14788,
      "fcf": 6061,
      "capex": -8727,
+     "dividendos_pagos": 4242,
+     "recompras": 5126,
      "divida_liquida": 28222,
      "producao_kboed": 4769,
      "derivados": {
@@ -177,6 +181,8 @@
      "fluxo_caixa_operacional": 12679,
      "fcf": 5229,
      "capex": -7450,
+     "dividendos_pagos": 4366,
+     "recompras": 5379,
      "divida_liquida": 32856,
      "producao_kboed": 4988,
      "derivados": {
@@ -196,6 +202,8 @@
      "fluxo_caixa_operacional": 8710,
      "fcf": 2240,
      "capex": -6470,
+     "dividendos_pagos": 4334,
+     "recompras": 4868,
      "divida_liquida": 39230,
      "producao_kboed": 4590,
      "derivados": {
@@ -215,6 +223,8 @@
      "fluxo_caixa_operacional": 23555,
      "fcf": 17028,
      "capex": -6527,
+     "dividendos_pagos": 4299,
+     "recompras": 5139,
      "divida_liquida": 31780,
      "producao_kboed": 4514,
      "derivados": {
@@ -265,8 +275,8 @@
     "fluxo_caixa_operacional": 70594,
     "fcf": 42969,
     "capex": -27625,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 17263,
+    "recompras": 20489,
     "producao_kboed": 4647.0,
     "janela": [
      "2025-Q4",
@@ -283,7 +293,7 @@
     "Geração de caixa": 80.4,
     "Solidez": 42.0,
     "Valuation": 0.0,
-    "Retorno ao acionista": 25.7,
+    "Retorno ao acionista": 0.0,
     "Escala": 100.0
    }
   },
@@ -343,6 +353,8 @@
     "fluxo_caixa_operacional": 16014,
     "fcf": 12003,
     "capex": -4011,
+    "dividendos_pagos": 3482,
+    "recompras": 2502,
     "divida_liquida": 20730,
     "divida_patrimonio_pct": 17.3,
     "roe_pct": 13.88,
@@ -373,13 +385,13 @@
      "ev_ebitda_x": 6.74,
      "ev_por_boed_usd": 107365.0,
      "fcf_yield_pct": 8.38,
-     "dividendos_estimados": 13864.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 2.46
+     "dividendos_estimados": 13916,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 3.42,
+     "shareholder_yield_pct": 6.15,
+     "distribuicao_fco_pct": 48.11,
+     "recompras_12m": 11075,
+     "cobertura_dividendo_x": 2.45
     },
     "margem_liquida_fonte_pct": 15.21
    },
@@ -417,6 +429,8 @@
      "fluxo_caixa_operacional": 9385,
      "fcf": 4941,
      "capex": -4444,
+     "dividendos_pagos": 3429,
+     "recompras": 2566,
      "divida_liquida": 33817,
      "producao_kboed": 4086,
      "derivados": {
@@ -436,6 +450,8 @@
      "fluxo_caixa_operacional": 10789,
      "fcf": 5525,
      "capex": -5264,
+     "dividendos_pagos": 3404,
+     "recompras": 2998,
      "divida_liquida": 34461,
      "producao_kboed": 4045,
      "derivados": {
@@ -455,6 +471,8 @@
      "fluxo_caixa_operacional": 2510,
      "fcf": -1550,
      "capex": -4060,
+     "dividendos_pagos": 3526,
+     "recompras": 2572,
      "divida_liquida": 40100,
      "producao_kboed": 3860,
      "derivados": {
@@ -474,6 +492,8 @@
      "fluxo_caixa_operacional": 22633,
      "fcf": 18095,
      "capex": -4538,
+     "dividendos_pagos": 3504,
+     "recompras": 3003,
      "divida_liquida": 28545,
      "producao_kboed": 4070,
      "derivados": {
@@ -524,8 +544,8 @@
     "fluxo_caixa_operacional": 51946,
     "fcf": 34073,
     "capex": -17873,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 13916,
+    "recompras": 11075,
     "producao_kboed": 3988.75,
     "janela": [
      "2025-Q4",
@@ -542,7 +562,7 @@
     "Geração de caixa": 100.0,
     "Solidez": 26.4,
     "Valuation": 20.5,
-    "Retorno ao acionista": 47.8,
+    "Retorno ao acionista": 19.5,
     "Escala": 77.9
    }
   },
@@ -602,6 +622,8 @@
     "fluxo_caixa_operacional": 21043,
     "fcf": 13465,
     "capex": -7578,
+    "dividendos_pagos": 2152,
+    "recompras": 3183,
     "divida_liquida": 39650,
     "divida_patrimonio_pct": 38.3,
     "roe_pct": 16.48,
@@ -632,13 +654,13 @@
      "ev_ebitda_x": 3.93,
      "ev_por_boed_usd": 118021.0,
      "fcf_yield_pct": 14.14,
-     "dividendos_estimados": 4332.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 8.62
+     "dividendos_estimados": 8485,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 3.21,
+     "shareholder_yield_pct": 8.05,
+     "distribuicao_fco_pct": 36.7,
+     "recompras_12m": 12791,
+     "cobertura_dividendo_x": 4.4
     },
     "margem_liquida_fonte_pct": 12.99
    },
@@ -676,6 +698,8 @@
      "fluxo_caixa_operacional": 12207,
      "fcf": 7650,
      "capex": -4557,
+     "dividendos_pagos": 2103,
+     "recompras": 3610,
      "divida_liquida": 40924,
      "producao_kboed": 2766,
      "derivados": {
@@ -695,6 +719,8 @@
      "fluxo_caixa_operacional": 9438,
      "fcf": 4189,
      "capex": -5249,
+     "dividendos_pagos": 2069,
+     "recompras": 3425,
      "divida_liquida": 46013,
      "producao_kboed": 2840,
      "derivados": {
@@ -714,6 +740,8 @@
      "fluxo_caixa_operacional": 6062,
      "fcf": 2305,
      "capex": -3757,
+     "dividendos_pagos": 2100,
+     "recompras": 3182,
      "divida_liquida": 52606,
      "producao_kboed": 2752,
      "derivados": {
@@ -733,6 +761,8 @@
      "fluxo_caixa_operacional": 21432,
      "fcf": 17401,
      "capex": -4031,
+     "dividendos_pagos": 2164,
+     "recompras": 3001,
      "divida_liquida": 41702,
      "producao_kboed": 2455,
      "derivados": {
@@ -782,8 +812,8 @@
     "fluxo_caixa_operacional": 57975,
     "fcf": 37360,
     "capex": -20615,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 8485,
+    "recompras": 12791,
     "producao_kboed": 2655.25,
     "janela": [
      "2025-Q4",
@@ -800,7 +830,7 @@
     "Geração de caixa": 99.2,
     "Solidez": 29.6,
     "Valuation": 66.8,
-    "Retorno ao acionista": 0.0,
+    "Retorno ao acionista": 14.2,
     "Escala": 17.5
    }
   },
@@ -860,6 +890,7 @@
     "fluxo_caixa_operacional": 14829,
     "fcf": 11865,
     "capex": -2964,
+    "dividendos_pagos": 1345,
     "divida_liquida": 26563,
     "divida_patrimonio_pct": 112.0,
     "roe_pct": 14.52,
@@ -890,13 +921,13 @@
      "ev_ebitda_x": 3.11,
      "ev_por_boed_usd": 61564.0,
      "fcf_yield_pct": 21.25,
-     "dividendos_estimados": 5186.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
+     "dividendos_estimados": 5201,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 4.72,
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 4.51
+     "cobertura_dividendo_x": 4.5
     },
     "margem_liquida_fonte_pct": 6.87
    },
@@ -934,6 +965,7 @@
      "fluxo_caixa_operacional": 7786,
      "fcf": 4615,
      "capex": -3171,
+     "dividendos_pagos": 1288,
      "divida_liquida": 39769,
      "producao_kboed": 2362,
      "derivados": {
@@ -953,6 +985,8 @@
      "fluxo_caixa_operacional": 7602,
      "fcf": 4139,
      "capex": -3463,
+     "dividendos_pagos": 1276,
+     "recompras": 826,
      "divida_liquida": 35815,
      "producao_kboed": 2344,
      "derivados": {
@@ -972,6 +1006,7 @@
      "fluxo_caixa_operacional": 2860,
      "fcf": -382,
      "capex": -3242,
+     "dividendos_pagos": 1278,
      "divida_liquida": 25300,
      "producao_kboed": 2344,
      "derivados": {
@@ -991,6 +1026,7 @@
      "fluxo_caixa_operacional": 10858,
      "fcf": 7771,
      "capex": -3087,
+     "dividendos_pagos": 1302,
      "divida_liquida": 35468,
      "producao_kboed": 2201,
      "derivados": {
@@ -1040,7 +1076,7 @@
     "fluxo_caixa_operacional": 36149,
     "fcf": 23393,
     "capex": -12756,
-    "dividendos_pagos": null,
+    "dividendos_pagos": 5201,
     "recompras": null,
     "producao_kboed": 2277.25,
     "janela": [
@@ -1058,7 +1094,7 @@
     "Geração de caixa": 81.3,
     "Solidez": 32.4,
     "Valuation": 80.4,
-    "Retorno ao acionista": 83.0,
+    "Retorno ao acionista": 52.5,
     "Escala": 2.3
    }
   },
@@ -1118,6 +1154,8 @@
     "fluxo_caixa_operacional": 7547,
     "fcf": 4675,
     "capex": -2872,
+    "dividendos_pagos": 938,
+    "recompras": 3137,
     "divida_liquida": 5667,
     "divida_patrimonio_pct": 66.0,
     "roe_pct": 26.28,
@@ -1148,13 +1186,13 @@
      "ev_ebitda_x": 1.92,
      "ev_por_boed_usd": 45545.0,
      "fcf_yield_pct": 12.19,
-     "dividendos_estimados": 3654.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 3.1
+     "dividendos_estimados": 3747,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 4.03,
+     "shareholder_yield_pct": 8.2,
+     "distribuicao_fco_pct": 31.34,
+     "recompras_12m": 3880,
+     "cobertura_dividendo_x": 3.02
     },
     "margem_liquida_fonte_pct": 7.7
    },
@@ -1192,6 +1230,8 @@
      "fluxo_caixa_operacional": 6346,
      "fcf": 2926,
      "capex": -3420,
+     "dividendos_pagos": 938,
+     "recompras": 4712,
      "divida_liquida": 8564,
      "producao_kboed": 2130,
      "derivados": {
@@ -1211,6 +1251,8 @@
      "fluxo_caixa_operacional": 2106,
      "fcf": -2040,
      "capex": -4146,
+     "dividendos_pagos": 918,
+     "recompras": 389,
      "divida_liquida": 11887,
      "producao_kboed": 2198,
      "derivados": {
@@ -1230,6 +1272,8 @@
      "fluxo_caixa_operacional": 5213,
      "fcf": 2097,
      "capex": -3116,
+     "dividendos_pagos": 920,
+     "recompras": 271,
      "divida_liquida": -4209,
      "producao_kboed": 2313,
      "derivados": {
@@ -1249,6 +1293,8 @@
      "fluxo_caixa_operacional": 9470,
      "fcf": 6598,
      "capex": -2872,
+     "dividendos_pagos": 971,
+     "recompras": 83,
      "divida_liquida": 8693,
      "producao_kboed": 2165,
      "derivados": {
@@ -1298,8 +1344,8 @@
     "fluxo_caixa_operacional": 24336,
     "fcf": 11330,
     "capex": -13006,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 3747,
+    "recompras": 3880,
     "producao_kboed": 2210.5,
     "janela": [
      "2025-Q4",
@@ -1316,7 +1362,7 @@
     "Geração de caixa": 0.0,
     "Solidez": 76.4,
     "Valuation": 100.0,
-    "Retorno ao acionista": 61.9,
+    "Retorno ao acionista": 35.0,
     "Escala": 0.0
    }
   },
@@ -1376,6 +1422,8 @@
     "fluxo_caixa_operacional": 15390,
     "fcf": 10827,
     "capex": -4563,
+    "dividendos_pagos": 2155,
+    "recompras": 1507,
     "divida_liquida": 25188,
     "divida_patrimonio_pct": 47.5,
     "roe_pct": 16.89,
@@ -1406,13 +1454,13 @@
      "ev_ebitda_x": 3.89,
      "ev_por_boed_usd": 85620.0,
      "fcf_yield_pct": 12.06,
-     "dividendos_estimados": 8791.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 2.56
+     "dividendos_estimados": 8532,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 4.57,
+     "shareholder_yield_pct": 7.41,
+     "distribuicao_fco_pct": 34.51,
+     "recompras_12m": 5299,
+     "cobertura_dividendo_x": 2.64
     },
     "margem_liquida_fonte_pct": 13.36
    },
@@ -1450,6 +1498,8 @@
      "fluxo_caixa_operacional": 8349,
      "fcf": 4537,
      "capex": -3812,
+     "dividendos_pagos": 2216,
+     "recompras": 2349,
      "divida_liquida": 35073,
      "producao_kboed": 2508,
      "derivados": {
@@ -1469,6 +1519,8 @@
      "fluxo_caixa_operacional": 10471,
      "fcf": 6318,
      "capex": -4153,
+     "dividendos_pagos": 2160,
+     "recompras": 1506,
      "divida_liquida": 32907,
      "producao_kboed": 2545,
      "derivados": {
@@ -1488,6 +1540,8 @@
      "fluxo_caixa_operacional": 3361,
      "fcf": -1260,
      "capex": -4621,
+     "dividendos_pagos": 2123,
+     "recompras": 775,
      "divida_liquida": -34142,
      "producao_kboed": 2553,
      "derivados": {
@@ -1507,6 +1561,8 @@
      "fluxo_caixa_operacional": 10858,
      "fcf": 6626,
      "capex": -4232,
+     "dividendos_pagos": 2094,
+     "recompras": 1511,
      "divida_liquida": 30991,
      "producao_kboed": 2395,
      "derivados": {
@@ -1556,8 +1612,8 @@
     "fluxo_caixa_operacional": 40080,
     "fcf": 22511,
     "capex": -17569,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 8532,
+    "recompras": 5299,
     "producao_kboed": 2491.75,
     "janela": [
      "2025-Q4",
@@ -1574,7 +1630,7 @@
     "Geração de caixa": 47.4,
     "Solidez": 100.0,
     "Valuation": 67.5,
-    "Retorno ao acionista": 83.0,
+    "Retorno ao acionista": 48.7,
     "Escala": 13.2
    }
   },
@@ -1634,6 +1690,8 @@
     "fluxo_caixa_operacional": 12028,
     "fcf": 6626,
     "capex": -5402,
+    "dividendos_pagos": 1573,
+    "recompras": 0,
     "divida_liquida": 57880,
     "divida_patrimonio_pct": 71.7,
     "roe_pct": 27.89,
@@ -1664,13 +1722,13 @@
      "ev_ebitda_x": 2.88,
      "ev_por_boed_usd": 45858.0,
      "fcf_yield_pct": 21.11,
-     "dividendos_estimados": 5509.0,
-     "base_dividendo": "estimado_yield_mercado",
-     "dividend_yield_caixa_pct": null,
-     "shareholder_yield_pct": null,
-     "distribuicao_fco_pct": null,
-     "recompras_12m": null,
-     "cobertura_dividendo_x": 3.95
+     "dividendos_estimados": 6796,
+     "base_dividendo": "caixa_12m",
+     "dividend_yield_caixa_pct": 6.59,
+     "shareholder_yield_pct": 6.59,
+     "distribuicao_fco_pct": 15.86,
+     "recompras_12m": 0,
+     "cobertura_dividendo_x": 3.21
     },
     "margem_liquida_fonte_pct": 23.47
    },
@@ -1708,6 +1766,8 @@
      "fluxo_caixa_operacional": 9856,
      "fcf": 4969,
      "capex": -4887,
+     "dividendos_pagos": 2014,
+     "recompras": 0,
      "divida_liquida": 59053,
      "producao_kboed": 3140,
      "derivados": {
@@ -1727,6 +1787,8 @@
      "fluxo_caixa_operacional": 10162,
      "fcf": 3574,
      "capex": -6588,
+     "dividendos_pagos": 1498,
+     "recompras": 0,
      "divida_liquida": 60596,
      "producao_kboed": 3081,
      "derivados": {
@@ -1746,6 +1808,8 @@
      "fluxo_caixa_operacional": 8370,
      "fcf": 3850,
      "capex": -4520,
+     "dividendos_pagos": 2213,
+     "recompras": 0,
      "divida_liquida": 61680,
      "producao_kboed": 3230,
      "derivados": {
@@ -1765,6 +1829,8 @@
      "fluxo_caixa_operacional": 12300,
      "fcf": 7734,
      "capex": -4566,
+     "dividendos_pagos": 1512,
+     "recompras": 0,
      "divida_liquida": 60420,
      "producao_kboed": 3340,
      "derivados": {
@@ -1823,8 +1889,8 @@
     "fluxo_caixa_operacional": 42860,
     "fcf": 21784,
     "capex": -21076,
-    "dividendos_pagos": null,
-    "recompras": null,
+    "dividendos_pagos": 6796,
+    "recompras": 0,
     "producao_kboed": 3290.75,
     "janela": [
      "2025-Q4",
@@ -1876,8 +1942,8 @@
    "mais_antigo": "Q3 2026"
   },
   "base_retorno_acionista": {
-   "chave": "dividend_yield_mercado",
-   "descricao": "dividend yield de mercado (Yahoo) -- sujeito a razao de ADR"
+   "chave": "dividend_yield_caixa",
+   "descricao": "dividendos pagos em 12 meses / market cap"
   },
   "eixos_perfil": [
    "Rentabilidade",
