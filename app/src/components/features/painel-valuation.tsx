@@ -26,14 +26,21 @@ export function PainelValuation() {
     [data],
   );
 
-  /** Dividend yield x FCF yield. Acima da diagonal, o caixa cobre o dividendo. */
+  /**
+   * Dividend yield x FCF yield. Acima da diagonal, o caixa cobre o dividendo.
+   *
+   * Os DOIS eixos em 12 meses ate o trimestre mais recente, sobre o mesmo
+   * market cap. Antes o X era o yield de mercado (com a razao de ADR da Shell
+   * embutida, 2x menor) e o Y era o FCF do ano fiscal: periodos diferentes no
+   * mesmo grafico de cobertura. O yield de mercado so entra se faltar o de caixa.
+   */
   const yields = useMemo(
     () =>
       (data?.empresas ?? [])
         .map((e) => ({
           rotulo: e.ticker,
-          x: e.mercado.dividend_yield_pct,
-          y: e.fy2025.derivados.fcf_yield_pct,
+          x: e.q_recente.derivados.dividend_yield_caixa_pct ?? e.mercado.dividend_yield_pct,
+          y: e.q_recente.derivados.fcf_yield_pct,
         }))
         .filter((p): p is { rotulo: string; x: number; y: number } => p.x !== null && p.y !== null),
     [data],
@@ -105,7 +112,7 @@ export function PainelValuation() {
 
         <ChartContainer
           titulo="Dividend yield contra FCF yield"
-          unidade="% · acima da diagonal, o caixa livre cobre o dividendo"
+          unidade="% · 12 meses · acima da diagonal, o caixa livre cobre o dividendo pago"
           descricao={`Dispersão de dividend yield contra FCF yield: ${yields
             .map((p) => `${p.rotulo} paga ${percentual(p.x)} e gera ${percentual(p.y)}`)
             .join('; ')}`}
