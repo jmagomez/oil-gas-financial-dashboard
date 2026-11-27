@@ -16,7 +16,7 @@
    "Correção de curadoria (11/2026): Equinor e TotalEnergies apareciam em caixa líquido no FY2025 (−11.888 e −31.499) e no 1T26 (−4.209 e −34.142). Era sinal trocado — convenção 'Net Cash (Debt)' de agregador; a TotalEnergies reporta gearing de 15% no fim de 2025, e a série do Yahoo tem +32.907 no 4T25 e +30.991 no 2T26. O FY passou ao saldo do 4T25 e o 1T26 de seis empresas (curado à mão, com definições misturadas: o da BP era o número dela, 25.300) foi anulado para a coleta repreencher na definição única. O build agora acusa troca de sinal grande entre trimestres.",
    "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
    "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
-   "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 26/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
+   "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 27/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
    "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
    "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
    "Produção da Equinor em FY2025: 2.137 mboe/d, do release do 4T25 e ano de 2025 da própria Equinor (total equity liquids and gas production). Até 11/2026 a fonte padronizada não trazia o número e os indicadores por boe do ano usavam a produção do trimestre como proxy.",
@@ -26,7 +26,7 @@
    "Preço realizado de líquidos (US$/bbl), 3T26, do release de cada empresa — e as definições NÃO são iguais, o que está em proveniencia.preco_realizado de cada uma: BP, Chevron, Equinor e TotalEnergies publicam líquidos (petróleo + NGL); a Shell só por segmento (usamos o Upstream); a ExxonMobil só petróleo, sem NGL (média EUA/fora ponderada pela produção); a Petrobras não publica (o E&P vende ao refino em paridade com o Brent) e fica nula. Captura = realizado ÷ Brent médio do mesmo trimestre. Leia a captura dentro de cada empresa ao longo do tempo, não como ranking entre elas: NGL a ~40% do Brent derruba a média de quem o inclui. O campo não é carregado para o trimestre seguinte: ao sair um balanço novo ele fica vazio até a curadoria."
   ],
   "versao_dados": "1.2",
-  "atualizado_em": "2026-11-26",
+  "atualizado_em": "2026-11-27",
   "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
  },
  "empresas": [
@@ -651,12 +651,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2800,
      "dias_periodo": 365,
-     "ev": 312331,
+     "ev": 312231,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 5.91,
-     "ev_por_boed_usd": 111547.0,
-     "fcf_yield_pct": 9.01,
-     "dividendos_estimados": 4379.0,
+     "ev_ebitda_x": 5.9,
+     "ev_por_boed_usd": 111511.0,
+     "fcf_yield_pct": 9.02,
+     "dividendos_estimados": 4377.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -708,10 +708,10 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2574,
      "dias_periodo": 92,
-     "ev": 306119,
+     "ev": 306019,
      "ev_inclui_nao_controladores": true,
      "ev_ebitda_x": 3.96,
-     "ev_por_boed_usd": 118927.0,
+     "ev_por_boed_usd": 118889.0,
      "fcf_yield_pct": 14.08,
      "dividendos_estimados": 8485,
      "concentracao_recompras_pct": 27.0,
@@ -727,7 +727,7 @@
     "margem_liquida_fonte_pct": 12.99
    },
    "mercado": {
-    "market_cap": 265391,
+    "market_cap": 265291,
     "pe": 8.17,
     "dividend_yield_pct": 1.65,
     "preco_acao": 94.13
@@ -1018,7 +1018,7 @@
    },
    "mercado": {
     "market_cap": 110753,
-    "pe": 20.87,
+    "pe": 20.98,
     "dividend_yield_pct": 4.71,
     "preco_acao": 43.0
    },
