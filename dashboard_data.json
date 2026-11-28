@@ -16,7 +16,7 @@
    "Correção de curadoria (11/2026): Equinor e TotalEnergies apareciam em caixa líquido no FY2025 (−11.888 e −31.499) e no 1T26 (−4.209 e −34.142). Era sinal trocado — convenção 'Net Cash (Debt)' de agregador; a TotalEnergies reporta gearing de 15% no fim de 2025, e a série do Yahoo tem +32.907 no 4T25 e +30.991 no 2T26. O FY passou ao saldo do 4T25 e o 1T26 de seis empresas (curado à mão, com definições misturadas: o da BP era o número dela, 25.300) foi anulado para a coleta repreencher na definição única. O build agora acusa troca de sinal grande entre trimestres.",
    "ROE/ROA marcados como 'calculado' foram derivados (lucro líquido / patrimônio ou ativos médios) a partir de dados padronizados, não são números oficiais divulgados pelas empresas.",
    "Dividend yield da Petrobras: 5,34% confirmado em fonte independente (stockanalysis.com, base trailing) em nova verificação. Outras fontes divergem bastante (Digrin 6,01% forward; Stock Events 5,83%; Morningstar 9,34% trailing) por diferenças de metodologia (forward vs. trailing, classe de ação PBR vs. PBR.A) e pela política de dividendos variável da Petrobras (inclui proventos extraordinários). Tratar como uma faixa de referência (~5% a ~9%), não um número único preciso.",
-   "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 27/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
+   "Market Cap, P/E, Dividend Yield e Preço são 'snapshot' de mercado em 28/11/2026, iguais para as colunas do ano fiscal e do trimestre. O EV/EBITDA NÃO é snapshot: é derivado (EV ÷ EBITDA de 12 meses), combina o market cap desse snapshot com a dívida líquida e o EBITDA de cada período, e por isso difere entre as duas colunas.",
    "Indicadores derivados (margem EBITDA, ND/EBITDA, conversão de FCF, capex/FCO, receita e EBITDA por boe, EV, EV por boe/d, FCF yield, cobertura de dividendos pelo FCF e run-rate trimestral) são calculados por build_dashboard.py a partir dos campos primários — não são números reportados pelas empresas. Fórmulas no README.",
    "Métricas de fluxo do trimestre podem ser anualizadas (x4) no dashboard para comparação com o ano fiscal. É uma simplificação: ignora sazonalidade de preços, paradas de manutenção e variação de capital de giro.",
    "Produção da Equinor em FY2025: 2.137 mboe/d, do release do 4T25 e ano de 2025 da própria Equinor (total equity liquids and gas production). Até 11/2026 a fonte padronizada não trazia o número e os indicadores por boe do ano usavam a produção do trimestre como proxy.",
@@ -26,7 +26,7 @@
    "Preço realizado de líquidos (US$/bbl), 3T26, do release de cada empresa — e as definições NÃO são iguais, o que está em proveniencia.preco_realizado de cada uma: BP, Chevron, Equinor e TotalEnergies publicam líquidos (petróleo + NGL); a Shell só por segmento (usamos o Upstream); a ExxonMobil só petróleo, sem NGL (média EUA/fora ponderada pela produção); a Petrobras não publica (o E&P vende ao refino em paridade com o Brent) e fica nula. Captura = realizado ÷ Brent médio do mesmo trimestre. Leia a captura dentro de cada empresa ao longo do tempo, não como ranking entre elas: NGL a ~40% do Brent derruba a média de quem o inclui. O campo não é carregado para o trimestre seguinte: ao sair um balanço novo ele fica vazio até a curadoria."
   ],
   "versao_dados": "1.2",
-  "atualizado_em": "2026-11-27",
+  "atualizado_em": "2026-11-28",
   "schema_historico": "Cada empresa aceita uma lista opcional 'historico' com um objeto por período anual: {\"periodo\":\"FY2021\",\"receita\":0,\"lucro_liquido\":0,\"ebitda\":0,\"fluxo_caixa_operacional\":0,\"fcf\":0,\"capex\":0,\"divida_liquida\":0,\"producao_kboed\":0}. Campos ausentes viram null. Quando ao menos uma empresa tiver histórico preenchido, a seção 'Séries históricas' do dashboard aparece automaticamente."
  },
  "empresas": [
@@ -64,12 +64,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 4740,
      "dias_periodo": 365,
-     "ev": 684940,
+     "ev": 693506,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 11.51,
-     "ev_por_boed_usd": 144502.0,
-     "fcf_yield_pct": 3.66,
-     "dividendos_estimados": 16766.0,
+     "ev_ebitda_x": 11.65,
+     "ev_por_boed_usd": 146309.0,
+     "fcf_yield_pct": 3.61,
+     "dividendos_estimados": 17054.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -78,7 +78,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 1.41
+     "cobertura_dividendo_x": 1.38
     },
     "margem_liquida_fonte_pct": 9.19
    },
@@ -121,18 +121,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 4496,
      "dias_periodo": 92,
-     "ev": 673672,
+     "ev": 682238,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 7.97,
-     "ev_por_boed_usd": 149838.0,
-     "fcf_yield_pct": 6.66,
+     "ev_ebitda_x": 8.07,
+     "ev_por_boed_usd": 151743.0,
+     "fcf_yield_pct": 6.58,
      "dividendos_estimados": 17263,
      "concentracao_recompras_pct": 26.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 88.0,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 2.68,
-     "shareholder_yield_pct": 5.85,
+     "dividend_yield_caixa_pct": 2.64,
+     "shareholder_yield_pct": 5.78,
      "distribuicao_fco_pct": 53.48,
      "recompras_12m": 20489,
      "cobertura_dividendo_x": 2.49
@@ -140,10 +140,10 @@
     "margem_liquida_fonte_pct": 13.95
    },
    "mercado": {
-    "market_cap": 644844,
-    "pe": 16.26,
-    "dividend_yield_pct": 2.6,
-    "preco_acao": 158.08
+    "market_cap": 653410,
+    "pe": 16.48,
+    "dividend_yield_pct": 2.61,
+    "preco_acao": 160.18
    },
    "historico": [
     {
@@ -360,12 +360,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 3720,
      "dias_periodo": 365,
-     "ev": 451804,
+     "ev": 454731,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 12.38,
-     "ev_por_boed_usd": 121453.0,
-     "fcf_yield_pct": 4.03,
-     "dividendos_estimados": 13913.0,
+     "ev_ebitda_x": 12.46,
+     "ev_por_boed_usd": 122240.0,
+     "fcf_yield_pct": 4.0,
+     "dividendos_estimados": 13846.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -374,7 +374,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 1.19
+     "cobertura_dividendo_x": 1.2
     },
     "margem_liquida_fonte_pct": 6.77
    },
@@ -417,18 +417,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 3980,
      "dias_periodo": 92,
-     "ev": 437997,
+     "ev": 440924,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 6.91,
-     "ev_por_boed_usd": 110049.0,
-     "fcf_yield_pct": 8.28,
+     "ev_ebitda_x": 6.95,
+     "ev_por_boed_usd": 110785.0,
+     "fcf_yield_pct": 8.22,
      "dividendos_estimados": 13916,
      "concentracao_recompras_pct": 27.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 65.0,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 3.38,
-     "shareholder_yield_pct": 6.07,
+     "dividend_yield_caixa_pct": 3.36,
+     "shareholder_yield_pct": 6.03,
      "distribuicao_fco_pct": 48.11,
      "recompras_12m": 11075,
      "cobertura_dividendo_x": 2.45
@@ -436,10 +436,10 @@
     "margem_liquida_fonte_pct": 15.21
    },
    "mercado": {
-    "market_cap": 411617,
-    "pe": 15.49,
-    "dividend_yield_pct": 3.38,
-    "preco_acao": 210.95
+    "market_cap": 414544,
+    "pe": 15.6,
+    "dividend_yield_pct": 3.34,
+    "preco_acao": 212.45
    },
    "historico": [
     {
@@ -612,8 +612,8 @@
     "Rentabilidade": 38.0,
     "Geração de caixa": 100.0,
     "Solidez": 51.9,
-    "Valuation": 17.5,
-    "Retorno ao acionista": 8.9,
+    "Valuation": 18.2,
+    "Retorno ao acionista": 9.8,
     "Escala": 77.9
    }
   },
@@ -651,12 +651,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2800,
      "dias_periodo": 365,
-     "ev": 312231,
+     "ev": 315907,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 5.9,
-     "ev_por_boed_usd": 111511.0,
-     "fcf_yield_pct": 9.02,
-     "dividendos_estimados": 4377.0,
+     "ev_ebitda_x": 5.97,
+     "ev_por_boed_usd": 112824.0,
+     "fcf_yield_pct": 8.89,
+     "dividendos_estimados": 4411.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -665,7 +665,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 5.46
+     "cobertura_dividendo_x": 5.42
     },
     "margem_liquida_fonte_pct": 6.79
    },
@@ -708,18 +708,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2574,
      "dias_periodo": 92,
-     "ev": 306019,
+     "ev": 309695,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 3.96,
-     "ev_por_boed_usd": 118889.0,
-     "fcf_yield_pct": 14.08,
+     "ev_ebitda_x": 4.01,
+     "ev_por_boed_usd": 120317.0,
+     "fcf_yield_pct": 13.89,
      "dividendos_estimados": 8485,
      "concentracao_recompras_pct": 27.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 87.0,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 3.2,
-     "shareholder_yield_pct": 8.02,
+     "dividend_yield_caixa_pct": 3.15,
+     "shareholder_yield_pct": 7.91,
      "distribuicao_fco_pct": 36.7,
      "recompras_12m": 12791,
      "cobertura_dividendo_x": 4.4
@@ -727,10 +727,10 @@
     "margem_liquida_fonte_pct": 12.99
    },
    "mercado": {
-    "market_cap": 265291,
-    "pe": 8.17,
-    "dividend_yield_pct": 1.65,
-    "preco_acao": 94.13
+    "market_cap": 268967,
+    "pe": 8.29,
+    "dividend_yield_pct": 1.64,
+    "preco_acao": 95.47
    },
    "historico": [
     {
@@ -902,8 +902,8 @@
     "Rentabilidade": 21.8,
     "Geração de caixa": 99.2,
     "Solidez": 57.3,
-    "Valuation": 66.1,
-    "Retorno ao acionista": 87.5,
+    "Valuation": 65.8,
+    "Retorno ao acionista": 83.9,
     "Escala": 17.5
    }
   },
@@ -941,12 +941,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2310,
      "dias_periodo": 365,
-     "ev": 167516,
+     "ev": 168160,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 5.93,
-     "ev_por_boed_usd": 72518.0,
-     "fcf_yield_pct": 10.18,
-     "dividendos_estimados": 5216.0,
+     "ev_ebitda_x": 5.96,
+     "ev_por_boed_usd": 72797.0,
+     "fcf_yield_pct": 10.12,
+     "dividendos_estimados": 5247.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -955,7 +955,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 2.16
+     "cobertura_dividendo_x": 2.15
     },
     "margem_liquida_fonte_pct": 0.68
    },
@@ -998,18 +998,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2220,
      "dias_periodo": 92,
-     "ev": 154736,
+     "ev": 155380,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 3.52,
-     "ev_por_boed_usd": 69701.0,
-     "fcf_yield_pct": 21.12,
+     "ev_ebitda_x": 3.54,
+     "ev_por_boed_usd": 69991.0,
+     "fcf_yield_pct": 21.0,
      "dividendos_estimados": 5201,
      "concentracao_recompras_pct": 60.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 80.0,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 4.7,
-     "shareholder_yield_pct": 5.95,
+     "dividend_yield_caixa_pct": 4.67,
+     "shareholder_yield_pct": 5.91,
      "distribuicao_fco_pct": 18.23,
      "recompras_12m": 1388,
      "cobertura_dividendo_x": 4.5
@@ -1017,10 +1017,10 @@
     "margem_liquida_fonte_pct": 6.87
    },
    "mercado": {
-    "market_cap": 110753,
-    "pe": 20.98,
+    "market_cap": 111397,
+    "pe": 21.1,
     "dividend_yield_pct": 4.71,
-    "preco_acao": 43.0
+    "preco_acao": 43.25
    },
    "historico": [
     {
@@ -1197,8 +1197,8 @@
     "Rentabilidade": 0.0,
     "Geração de caixa": 81.3,
     "Solidez": 26.7,
-    "Valuation": 73.3,
-    "Retorno ao acionista": 4.0,
+    "Valuation": 73.4,
+    "Retorno ao acionista": 5.1,
     "Escala": 2.3
    }
   },
@@ -1236,12 +1236,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2137,
      "dias_periodo": 365,
-     "ev": 103495,
+     "ev": 103590,
      "ev_inclui_nao_controladores": true,
      "ev_ebitda_x": 2.74,
-     "ev_por_boed_usd": 48430.0,
-     "fcf_yield_pct": 6.53,
-     "dividendos_estimados": 3671.0,
+     "ev_por_boed_usd": 48474.0,
+     "fcf_yield_pct": 6.52,
+     "dividendos_estimados": 3693.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -1250,7 +1250,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 1.63
+     "cobertura_dividendo_x": 1.62
     },
     "margem_liquida_fonte_pct": 4.75
    },
@@ -1293,18 +1293,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2166,
      "dias_periodo": 92,
-     "ev": 97282,
+     "ev": 97377,
      "ev_inclui_nao_controladores": true,
      "ev_ebitda_x": 1.9,
-     "ev_por_boed_usd": 44913.0,
-     "fcf_yield_pct": 12.38,
+     "ev_por_boed_usd": 44957.0,
+     "fcf_yield_pct": 12.37,
      "dividendos_estimados": 3747,
      "concentracao_recompras_pct": 81.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 96.0,
      "base_dividendo": "caixa_12m",
      "dividend_yield_caixa_pct": 4.09,
-     "shareholder_yield_pct": 8.33,
+     "shareholder_yield_pct": 8.32,
      "distribuicao_fco_pct": 31.34,
      "recompras_12m": 3880,
      "cobertura_dividendo_x": 3.02
@@ -1312,10 +1312,10 @@
     "margem_liquida_fonte_pct": 7.7
    },
    "mercado": {
-    "market_cap": 91534,
-    "pe": 8.03,
-    "dividend_yield_pct": 4.01,
-    "preco_acao": 38.71
+    "market_cap": 91629,
+    "pe": 8.04,
+    "dividend_yield_pct": 4.03,
+    "preco_acao": 38.75
    },
    "historico": [
     {
@@ -1531,12 +1531,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2530,
      "dias_periodo": 365,
-     "ev": 223038,
+     "ev": 223564,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 6.41,
-     "ev_por_boed_usd": 88157.0,
-     "fcf_yield_pct": 5.54,
-     "dividendos_estimados": 8943.0,
+     "ev_ebitda_x": 6.42,
+     "ev_por_boed_usd": 88365.0,
+     "fcf_yield_pct": 5.53,
+     "dividendos_estimados": 8931.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -1588,18 +1588,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2474,
      "dias_periodo": 92,
-     "ev": 216947,
+     "ev": 217473,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 3.99,
-     "ev_por_boed_usd": 87691.0,
-     "fcf_yield_pct": 12.01,
+     "ev_ebitda_x": 4.0,
+     "ev_por_boed_usd": 87903.0,
+     "fcf_yield_pct": 11.97,
      "dividendos_estimados": 8532,
      "concentracao_recompras_pct": 29.0,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": 90.0,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 4.55,
-     "shareholder_yield_pct": 7.38,
+     "dividend_yield_caixa_pct": 4.54,
+     "shareholder_yield_pct": 7.36,
      "distribuicao_fco_pct": 34.51,
      "recompras_12m": 5299,
      "cobertura_dividendo_x": 2.64
@@ -1607,10 +1607,10 @@
     "margem_liquida_fonte_pct": 13.36
    },
    "mercado": {
-    "market_cap": 187491,
-    "pe": 8.54,
-    "dividend_yield_pct": 4.77,
-    "preco_acao": 85.59
+    "market_cap": 188017,
+    "pe": 8.57,
+    "dividend_yield_pct": 4.75,
+    "preco_acao": 85.83
    },
    "historico": [
     {
@@ -1782,8 +1782,8 @@
     "Rentabilidade": 33.7,
     "Geração de caixa": 47.4,
     "Solidez": 51.1,
-    "Valuation": 65.6,
-    "Retorno ao acionista": 61.7,
+    "Valuation": 66.0,
+    "Retorno ao acionista": 62.2,
     "Escala": 13.2
    }
   },
@@ -1821,12 +1821,12 @@
      "producao_defasada": false,
      "producao_usada_kboed": 2990,
      "dias_periodo": 365,
-     "ev": 164355,
+     "ev": 169446,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 4.41,
-     "ev_por_boed_usd": 54968.0,
-     "fcf_yield_pct": 15.88,
-     "dividendos_estimados": 5523.0,
+     "ev_ebitda_x": 4.54,
+     "ev_por_boed_usd": 56671.0,
+     "fcf_yield_pct": 15.13,
+     "dividendos_estimados": 5795.0,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 69.1,
      "captura_brent_pct": null,
@@ -1835,7 +1835,7 @@
      "shareholder_yield_pct": null,
      "distribuicao_fco_pct": null,
      "recompras_12m": null,
-     "cobertura_dividendo_x": 2.97
+     "cobertura_dividendo_x": 2.83
     },
     "margem_liquida_fonte_pct": 22.13
    },
@@ -1878,18 +1878,18 @@
      "producao_defasada": false,
      "producao_usada_kboed": 3512,
      "dias_periodo": 92,
-     "ev": 161492,
+     "ev": 166583,
      "ev_inclui_nao_controladores": true,
-     "ev_ebitda_x": 2.88,
-     "ev_por_boed_usd": 45983.0,
-     "fcf_yield_pct": 21.06,
+     "ev_ebitda_x": 2.98,
+     "ev_por_boed_usd": 47433.0,
+     "fcf_yield_pct": 20.07,
      "dividendos_estimados": 6796,
      "concentracao_recompras_pct": null,
      "brent_medio_usd": 96.33,
      "captura_brent_pct": null,
      "base_dividendo": "caixa_12m",
-     "dividend_yield_caixa_pct": 6.57,
-     "shareholder_yield_pct": 6.57,
+     "dividend_yield_caixa_pct": 6.26,
+     "shareholder_yield_pct": 6.26,
      "distribuicao_fco_pct": 15.86,
      "recompras_12m": 0,
      "cobertura_dividendo_x": 3.21
@@ -1897,10 +1897,10 @@
     "margem_liquida_fonte_pct": 23.47
    },
    "mercado": {
-    "market_cap": 103432,
-    "pe": 3.84,
+    "market_cap": 108523,
+    "pe": 4.03,
     "dividend_yield_pct": 5.34,
-    "preco_acao": 16.05
+    "preco_acao": 16.84
    },
    "historico": [
     {
@@ -2083,8 +2083,8 @@
     "Rentabilidade": 100.0,
     "Geração de caixa": 95.1,
     "Solidez": 0.0,
-    "Valuation": 83.9,
-    "Retorno ao acionista": 29.0,
+    "Valuation": 82.5,
+    "Retorno ao acionista": 18.9,
     "Escala": 57.8
    }
   }
